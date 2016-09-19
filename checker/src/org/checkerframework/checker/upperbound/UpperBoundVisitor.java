@@ -14,7 +14,7 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
  */
 public class UpperBoundVisitor extends BaseTypeVisitor<UpperBoundAnnotatedTypeFactory> {
 
-    private static final /*@CompilerMessageKey*/ String UPPER_BOUND = "array.access.unsafe.high";
+    private static final String UPPER_BOUND = "array.access.unsafe.high";
 
     public UpperBoundVisitor(BaseTypeChecker checker) {
         super(checker);
@@ -38,17 +38,24 @@ public class UpperBoundVisitor extends BaseTypeVisitor<UpperBoundAnnotatedTypeFa
         // This is actually not a very generalizable way of keeping track of arrays...
         String arrName = arrTree.toString();
         AnnotatedTypeMirror indexType = atypeFactory.getAnnotatedType(indexTree);
+
+        // Need to be able to check these as part of the conditional below.
+        // We need the max because we want to know whether the index is
+        // less than the minimum length of the array. If it could be any
+        // of several values, we want the highest one.
+        Integer valMax = atypeFactory.valMaxFromExpressionTree(indexTree);
+        Integer minLen = atypeFactory.minLenFromExpressionTree(arrTree);
+
         // Is indexType LTL of a set containing arrName?
         if (indexType.hasAnnotation(LessThanLength.class)
                 && (UpperBoundUtils.hasValue(indexType, arrName))) {
             // If so, this is safe - get out of here.
             return super.visitArrayAccess(tree, type);
-        } else if (false) {
-            // Check if the MinLen Checker knows about this array.
+        } else if (valMax != null && minLen != null && valMax < minLen) {
             return super.visitArrayAccess(tree, type);
         } else {
             // Unsafe, since neither the Upper bound or MinLen checks succeeded.
-            checker.report(Result.warning(UPPER_BOUND, indexType.toString(), arrName), index);
+            checker.report(Result.warning(UPPER_BOUND, indexType.toString(), arrName), indexTree);
             return super.visitArrayAccess(tree, type);
         }
     }
