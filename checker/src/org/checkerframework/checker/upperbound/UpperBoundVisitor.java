@@ -1,13 +1,22 @@
 package org.checkerframework.checker.upperbound;
 
 import com.sun.source.tree.ArrayAccessTree;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
-import org.checkerframework.checker.compilermsgs.qual.CompilerMessageKey;
-import org.checkerframework.checker.upperbound.qual.*;
+import com.sun.source.util.TreePath;
+import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.checker.upperbound.qual.LessThanLength;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
+import org.checkerframework.dataflow.analysis.FlowExpressions;
+import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.util.FlowExpressionParseUtil;
+import org.checkerframework.framework.util.FlowExpressionParseUtil.FlowExpressionContext;
+import org.checkerframework.framework.util.FlowExpressionParseUtil.FlowExpressionParseException;
+import org.checkerframework.javacutil.InternalUtils;
+import org.checkerframework.javacutil.TreeUtils;
 
 /**
  *  Warns about array accesses that could be too high.
@@ -36,7 +45,8 @@ public class UpperBoundVisitor extends BaseTypeVisitor<UpperBoundAnnotatedTypeFa
     public Void visitArrayAccess(ArrayAccessTree tree, Void type) {
         ExpressionTree indexTree = tree.getIndex();
         ExpressionTree arrTree = tree.getExpression();
-        String arrName = arrTree.toString();
+
+        Receiver arrName = FlowExpressions.internalReprOf(checker.getAnnotationProvider(), arrTree);
         AnnotatedTypeMirror indexType = atypeFactory.getAnnotatedType(indexTree);
 
         // Need to be able to check these as part of the conditional below.
@@ -48,7 +58,8 @@ public class UpperBoundVisitor extends BaseTypeVisitor<UpperBoundAnnotatedTypeFa
 
         // Is indexType LTL of a set containing arrName?
         if (indexType.hasAnnotation(LessThanLength.class)
-                && (UpperBoundUtils.hasValue(indexType, arrName))) {
+                && (hasValue(indexType, indexTree, arrName))) {
+
             // If so, this is safe - get out of here.
             return super.visitArrayAccess(tree, type);
         } else if (valMax != null && minLen != null && valMax < minLen) {
@@ -58,5 +69,34 @@ public class UpperBoundVisitor extends BaseTypeVisitor<UpperBoundAnnotatedTypeFa
             checker.report(Result.warning(UPPER_BOUND, indexType.toString(), arrName), indexTree);
             return super.visitArrayAccess(tree, type);
         }
+    }
+
+    private boolean hasValue(
+            AnnotatedTypeMirror indexType, ExpressionTree indexTree, Receiver arrName) {
+        TreePath path = atypeFactory.getPath(indexTree);
+        ClassTree classTree = TreeUtils.enclosingClass(path);
+        assert classTree != null;
+        Receiver r = new FlowExpressions.ThisReference(InternalUtils.typeOf(classTree));
+        FlowExpressionContext contxt = new FlowExpressionContext(r, null, checker.getContext());
+        for (AnnotationMirror anno : indexType.getAnnotations()) {
+            String[] expressions = UpperBoundUtils.getValue(anno);
+            if (expressions == null) {
+                continue;
+            }
+            for (String expression : expressions) {
+                try {
+                    Receiver parsedExpression =
+                            FlowExpressionParseUtil.parse(expression, contxt, path, true);
+                    if (parsedExpression.equals(arrName)) {
+                        return true;
+                    }
+                } catch (FlowExpressionParseException e) {
+                    // An annotation on an index might not parse if the expression references
+                    // something out of scope.  No need to report the error.
+                    // checker.report(e.getResult(), indexTree);
+                }
+            }
+        }
+        return false;
     }
 }

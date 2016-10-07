@@ -900,7 +900,8 @@ public class FlowExpressionParseUtil {
          * Creates context for parsing a flow expression.
          * @param receiver used to replace "this" in a flow expression and used to resolve
          *                 identifiers in the flow expression with an implicit "this"
-         * @param arguments used to replace parameter references, e.g. #1, in flow expressions
+         * @param arguments used to replace parameter references, e.g. #1, in flow expressions,
+         *                  null if no arguments
          * @param checkerContext used to create {@link FlowExpressions.Receiver}s
          */
         public FlowExpressionContext(
