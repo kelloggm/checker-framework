@@ -4,37 +4,48 @@ import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.NewArrayTree;
-import com.sun.source.tree.Tree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.util.TreePath;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import org.checkerframework.checker.minlen.MinLenAnnotatedTypeFactory;
 import org.checkerframework.checker.minlen.MinLenChecker;
-import org.checkerframework.checker.minlen.qual.*;
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.minlen.qual.MinLen;
+import org.checkerframework.checker.upperbound.qual.LessThanLength;
+import org.checkerframework.checker.upperbound.qual.LessThanOrEqualToLength;
+import org.checkerframework.checker.upperbound.qual.UpperBoundBottom;
+import org.checkerframework.checker.upperbound.qual.UpperBoundUnknown;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueChecker;
 import org.checkerframework.common.value.qual.IntVal;
+import org.checkerframework.dataflow.analysis.FlowExpressions;
+import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
+import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.type.visitor.AnnotatedTypeScanner;
 import org.checkerframework.framework.util.AnnotationBuilder;
+import org.checkerframework.framework.util.FlowExpressionParseUtil;
+import org.checkerframework.framework.util.FlowExpressionParseUtil.FlowExpressionContext;
+import org.checkerframework.framework.util.FlowExpressionParseUtil.FlowExpressionParseException;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 
 /**
@@ -332,9 +343,172 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
+    public Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> methodFromUse(
+            MethodInvocationTree tree) {
+        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> pair = super.methodFromUse(tree);
+        viewPointAdaptExecutable(tree, tree.getMethodSelect(), pair, tree.getArguments());
+        return pair;
+    }
+
+    @Override
+    public Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> constructorFromUse(
+            NewClassTree tree) {
+        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> pair =
+                super.constructorFromUse(tree);
+
+        viewPointAdaptExecutable(tree, tree.getEnclosingExpression(), pair, tree.getArguments());
+        return pair;
+    }
+
+    private void viewPointAdaptExecutable(
+            ExpressionTree tree,
+            ExpressionTree receiverTree,
+            Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> pair,
+            List<? extends ExpressionTree> args) {
+        Receiver receiver = FlowExpressions.internalReprOf(this, receiverTree);
+        List<Receiver> argReceivers = new ArrayList<>(args.size());
+        for (ExpressionTree argTree : args) {
+            argReceivers.add(FlowExpressions.internalReprOf(this, argTree));
+        }
+        FlowExpressionContext context =
+                new FlowExpressionContext(receiver, argReceivers, this.getContext());
+        ViewPointTypeAnnotator viewPointTypeAnnotator =
+                new ViewPointTypeAnnotator(context, getPath(tree), false);
+        Result error = viewPointTypeAnnotator.visit(pair.first);
+        if (error != null) {
+            checker.report(error, tree);
+        }
+        for (AnnotatedTypeMirror atm : pair.second) {
+            error = viewPointTypeAnnotator.visit(atm);
+            if (error != null) {
+                checker.report(error, tree);
+            }
+        }
+    }
+
+    /**
+     * View points adapts all {@link LessThanLength} and {@link LessThanOrEqualToLength}
+     * annotation in a visited type.
+     */
+    // TODO: Generalize for other checkers with annotations with Java expressions
+    private class ViewPointTypeAnnotator extends AnnotatedTypeScanner<Result, Void> {
+
+        private final FlowExpressionContext context;
+        /** Whether or not the expression might contain a variable declared in local scope*/
+        private final TreePath localScope;
+        private final boolean useLocalScope;
+
+        /**
+         *
+         * @param context used to resolve expressions
+         * @param localScope local scope (require even if useLocalScope is false)
+         * @param useLocalScope whether or not the expression might contain a variable declared in local scope
+         */
+        public ViewPointTypeAnnotator(
+                FlowExpressionContext context, TreePath localScope, boolean useLocalScope) {
+            this.context = context;
+            this.localScope = localScope;
+            this.useLocalScope = useLocalScope;
+        }
+
+        @Override
+        protected Result scan(AnnotatedTypeMirror type, Void aVoid) {
+            if (type == null) {
+                return null;
+            }
+            List<AnnotationMirror> newAnnos = new ArrayList<>();
+            for (AnnotationMirror anno : type.getAnnotations()) {
+                String annotationName;
+                if (AnnotationUtils.areSameByClass(anno, LessThanLength.class)) {
+                    annotationName = "LessThanLength";
+                } else if (AnnotationUtils.areSameByClass(anno, LessThanOrEqualToLength.class)) {
+                    annotationName = "LessThanOrEqualToLength";
+                } else {
+                    continue;
+                }
+                List<String> expressionStrings =
+                        AnnotationUtils.getElementValueArray(anno, "value", String.class, true);
+                Pair<List<String>, Result> pair = viewPointAdapt(expressionStrings);
+                List<String> vpdStrings = pair.first;
+                if (vpdStrings != null) {
+                    newAnnos.add(
+                            createAnnotation(annotationName, vpdStrings.toArray(new String[0])));
+                } else {
+                    return pair.second;
+                }
+            }
+
+            type.replaceAnnotations(newAnnos);
+            return super.scan(type, aVoid);
+        }
+
+        private Pair<List<String>, Result> viewPointAdapt(List<String> expressionStrings) {
+            List<String> vpdExpressions = new ArrayList<>();
+            for (String expression : expressionStrings) {
+                try {
+                    Receiver result =
+                            FlowExpressionParseUtil.parse(
+                                    expression, context, localScope, useLocalScope);
+                    vpdExpressions.add(result.toString());
+                } catch (FlowExpressionParseException e) {
+                    return Pair.of(null, e.getResult());
+                }
+            }
+            return Pair.of(vpdExpressions, null);
+        }
+    }
+
+    /**
+     * View points adapts field accesses.
+     */
+    class FieldViewPointAdapter extends TreeAnnotator {
+        public FieldViewPointAdapter(AnnotatedTypeFactory atypeFactory) {
+            super(atypeFactory);
+        }
+
+        @Override
+        public Void visitMemberSelect(
+                MemberSelectTree node, AnnotatedTypeMirror annotatedTypeMirror) {
+            if (TreeUtils.isClassLiteral(node)) {
+                return super.visitMemberSelect(node, annotatedTypeMirror);
+            }
+            Element ele = TreeUtils.elementFromUse(node);
+            if (ele.getKind() == ElementKind.FIELD) {
+                Receiver receiver =
+                        FlowExpressions.internalReprOf(atypeFactory, node.getExpression());
+                FlowExpressionContext context =
+                        new FlowExpressionContext(receiver, null, atypeFactory.getContext());
+
+                ViewPointTypeAnnotator viewPointTypeAnnotator =
+                        new ViewPointTypeAnnotator(context, getPath(node), true);
+
+                /*
+                  The expression to be view point adapted could contain local variables:
+                  class Test {
+                      int field;
+                      Object getElementAtField(Object[] array) {
+                          if( field < array.length) {
+                               // field is @LessThanLength("array")
+                              return array[field];
+                           }
+                      }
+                */
+                Result error = viewPointTypeAnnotator.visit(annotatedTypeMirror);
+                if (error != null) {
+                    checker.report(error, node);
+                }
+            }
+
+            return super.visitMemberSelect(node, annotatedTypeMirror);
+        }
+    }
+
+    @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new UpperBoundTreeAnnotator(this), new PropagationTreeAnnotator(this));
+                new UpperBoundTreeAnnotator(this),
+                new PropagationTreeAnnotator(this),
+                new FieldViewPointAdapter(this));
     }
 
     protected class UpperBoundTreeAnnotator extends TreeAnnotator {
