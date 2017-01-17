@@ -1,5 +1,4 @@
 import java.io.PrintWriter;
-import org.checkerframework.checker.lowerbound.qual.*;
 
 public class AnnotatedJDKTest {
 

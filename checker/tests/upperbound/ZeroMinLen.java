@@ -4,7 +4,7 @@
 // @skip-test until the issue is fixed
 
 import org.checkerframework.checker.index.qual.IndexFor;
-import org.checkerframework.checker.minlen.qual.MinLen;
+import org.checkerframework.checker.index.qual.MinLen;
 
 public class ZeroMinLen {
 

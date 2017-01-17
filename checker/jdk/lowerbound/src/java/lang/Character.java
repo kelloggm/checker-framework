@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

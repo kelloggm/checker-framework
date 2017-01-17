@@ -2,6 +2,7 @@ package tests;
 
 import java.io.File;
 import java.util.List;
+import org.checkerframework.checker.index.lowerbound.LowerBoundChecker;
 import org.checkerframework.framework.test.CheckerFrameworkPerDirectoryTest;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -9,11 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class LowerBoundTest extends CheckerFrameworkPerDirectoryTest {
 
     public LowerBoundTest(List<File> testFiles) {
-        super(
-                testFiles,
-                org.checkerframework.checker.lowerbound.LowerBoundChecker.class,
-                "lowerbound",
-                "-Anomsgtext");
+        super(testFiles, LowerBoundChecker.class, "lowerbound", "-Anomsgtext");
     }
 
     @Parameters

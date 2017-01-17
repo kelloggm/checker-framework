@@ -1,5 +1,5 @@
 import java.util.Random;
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.NonNegative;
 
 public class RandomTest {
     void test() {

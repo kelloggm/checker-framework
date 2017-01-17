@@ -1,4 +1,6 @@
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.Positive;
 
 public class TransferDivide {
 

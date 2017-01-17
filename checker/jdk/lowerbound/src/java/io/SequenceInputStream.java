@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

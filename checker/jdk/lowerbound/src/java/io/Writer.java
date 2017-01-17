@@ -25,7 +25,7 @@
 
 package java.io;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * Abstract class for writing to character streams.  The only methods that a

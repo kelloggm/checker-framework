@@ -38,7 +38,7 @@ import java.util.Locale;
 
 import sun.misc.LRUCache;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

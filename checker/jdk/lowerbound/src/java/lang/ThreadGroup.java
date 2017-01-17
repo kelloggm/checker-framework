@@ -29,7 +29,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import sun.misc.VM;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

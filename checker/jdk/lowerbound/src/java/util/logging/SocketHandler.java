@@ -29,7 +29,7 @@ package java.util.logging;
 import java.io.*;
 import java.net.*;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

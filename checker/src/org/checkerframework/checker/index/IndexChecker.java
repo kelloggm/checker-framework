@@ -1,6 +1,6 @@
 package org.checkerframework.checker.index;
 
-import org.checkerframework.checker.lowerbound.LowerBoundChecker;
+import org.checkerframework.checker.index.lowerbound.LowerBoundChecker;
 import org.checkerframework.framework.source.SuppressWarningsKeys;
 
 /**

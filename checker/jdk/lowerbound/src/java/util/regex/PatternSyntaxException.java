@@ -27,7 +27,7 @@ package java.util.regex;
 
 import sun.security.action.GetPropertyAction;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

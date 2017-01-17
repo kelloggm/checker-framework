@@ -28,7 +28,7 @@ package java.util;
 import java.util.Map.Entry;
 import sun.misc.SharedSecrets;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

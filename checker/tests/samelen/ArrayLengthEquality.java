@@ -1,4 +1,4 @@
-import org.checkerframework.checker.samelen.qual.*;
+import org.checkerframework.checker.index.qual.SameLen;
 
 class ArrayLengthEquality {
     void test(int[] a, int[] b) {

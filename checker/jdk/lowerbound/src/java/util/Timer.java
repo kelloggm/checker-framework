@@ -27,7 +27,7 @@ package java.util;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

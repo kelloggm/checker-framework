@@ -46,7 +46,7 @@ import sun.util.calendar.CalendarUtils;
 import sun.util.calendar.BaseCalendar;
 import sun.util.calendar.Gregorian;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

@@ -1,6 +1,6 @@
 package java.lang;
 
-import org.checkerframework.checker.lowerbound.qual.NonNegative;
+import org.checkerframework.checker.index.qual.NonNegative;
 
 public class Thread implements Runnable {
   public enum State {

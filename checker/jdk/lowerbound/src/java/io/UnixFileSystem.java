@@ -28,7 +28,7 @@ package java.io;
 import java.security.AccessController;
 import sun.security.action.GetPropertyAction;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

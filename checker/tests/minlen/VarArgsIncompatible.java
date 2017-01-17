@@ -1,4 +1,4 @@
-import org.checkerframework.checker.minlen.qual.*;
+
 
 public class VarArgsIncompatible {
 

@@ -27,7 +27,7 @@ package java.util;
 
 import java.lang.reflect.*;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

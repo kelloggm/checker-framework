@@ -1,4 +1,4 @@
-import org.checkerframework.checker.minlen.qual.*;
+
 import org.checkerframework.common.value.qual.*;
 
 class EnumValues {

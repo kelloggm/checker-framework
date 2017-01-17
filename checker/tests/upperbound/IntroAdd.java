@@ -1,4 +1,5 @@
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
+import org.checkerframework.checker.index.qual.LTLengthOf;
 
 public class IntroAdd {
     void test(int[] arr) {

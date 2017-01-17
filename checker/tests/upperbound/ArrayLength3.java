@@ -1,12 +1,10 @@
 // Test case for issue #14:
 // https://github.com/kelloggm/checker-framework/issues/14
-
-import org.checkerframework.checker.minlen.qual.*;
-import org.checkerframework.checker.upperbound.qual.*;
-import org.checkerframework.common.value.qual.*;
+import org.checkerframework.checker.index.qual.LTLengthOf;
+import org.checkerframework.common.value.qual.ArrayLen;
 
 public class ArrayLength3 {
-    String getFirst(String /*@ArrayLen(2)*/[] sa) {
+    String getFirst(String @ArrayLen(2) [] sa) {
         return sa[0];
     }
 

@@ -1,4 +1,4 @@
-import org.checkerframework.checker.samelen.qual.*;
+import org.checkerframework.checker.index.qual.SameLen;
 
 // Check that creating an array with the length of another
 // makes both @SameLen of each other.

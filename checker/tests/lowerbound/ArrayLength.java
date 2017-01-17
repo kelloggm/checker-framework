@@ -1,5 +1,4 @@
 import java.util.Date;
-import org.checkerframework.checker.lowerbound.qual.*;
 
 @SuppressWarnings("array.access.unsafe.high")
 public class ArrayLength {

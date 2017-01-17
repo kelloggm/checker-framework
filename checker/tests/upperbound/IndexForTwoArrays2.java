@@ -1,7 +1,5 @@
 // Test case for issue #34: https://github.com/kelloggm/checker-framework/issues/34
 
-import org.checkerframework.checker.upperbound.qual.*;
-
 class IndexForTwoArrays2 {
 
     public boolean equals(int[] da1, int[] da2) {

@@ -27,7 +27,7 @@ package java.lang.management;
 
 import java.util.Map;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

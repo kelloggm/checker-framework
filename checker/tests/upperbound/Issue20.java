@@ -1,4 +1,5 @@
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
+import org.checkerframework.checker.index.qual.LTLengthOf;
 
 class Issue20 {
     // An issue with LUB that results in losing information when unifying.

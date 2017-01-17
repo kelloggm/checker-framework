@@ -1,4 +1,4 @@
-import org.checkerframework.checker.minlen.qual.*;
+import org.checkerframework.checker.index.qual.MinLen;
 
 class NotEqualTransfer {
     void neq_check(int[] a) {

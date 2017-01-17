@@ -1,7 +1,7 @@
 import org.checkerframework.checker.index.qual.IndexFor;
-import org.checkerframework.checker.upperbound.qual.LTEqLengthOf;
-import org.checkerframework.checker.upperbound.qual.LTLengthOf;
-import org.checkerframework.checker.upperbound.qual.LTOMLengthOf;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
+import org.checkerframework.checker.index.qual.LTLengthOf;
+import org.checkerframework.checker.index.qual.LTOMLengthOf;
 
 // @skip-test until we bring list support back
 

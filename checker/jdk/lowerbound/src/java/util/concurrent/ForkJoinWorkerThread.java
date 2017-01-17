@@ -38,7 +38,7 @@ package java.util.concurrent;
 import java.util.Collection;
 import java.util.concurrent.RejectedExecutionException;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

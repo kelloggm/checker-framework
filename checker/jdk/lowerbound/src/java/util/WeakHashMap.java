@@ -27,7 +27,7 @@ package java.util;
 import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

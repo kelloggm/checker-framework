@@ -30,7 +30,7 @@ import java.io.*;
 import sun.security.util.ManifestEntryVerifier;
 import sun.misc.JarIndex;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

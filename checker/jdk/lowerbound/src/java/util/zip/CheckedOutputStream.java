@@ -29,7 +29,7 @@ import java.io.FilterOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

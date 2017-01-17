@@ -38,7 +38,7 @@ import static java.io.ObjectStreamClass.processQueue;
 import java.io.SerialCallbackContext;
 import sun.reflect.misc.ReflectUtil;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

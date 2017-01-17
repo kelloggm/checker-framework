@@ -37,7 +37,7 @@ package java.util.concurrent;
 import java.util.concurrent.locks.*;
 import java.util.concurrent.atomic.*;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 import sun.misc.Unsafe;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

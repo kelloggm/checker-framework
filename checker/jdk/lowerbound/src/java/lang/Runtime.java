@@ -30,7 +30,7 @@ import java.util.StringTokenizer;
 import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

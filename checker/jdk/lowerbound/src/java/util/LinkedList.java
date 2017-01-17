@@ -25,7 +25,7 @@
 
 package java.util;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * Doubly-linked list implementation of the {@code List} and {@code Deque}

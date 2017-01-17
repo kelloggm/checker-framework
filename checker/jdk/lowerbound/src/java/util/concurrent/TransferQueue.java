@@ -35,7 +35,7 @@
 
 package java.util.concurrent;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * A {@link BlockingQueue} in which producers may wait for consumers

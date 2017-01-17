@@ -49,7 +49,7 @@ import sun.util.calendar.Gregorian;
 import sun.util.calendar.JulianCalendar;
 import sun.util.calendar.ZoneInfo;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

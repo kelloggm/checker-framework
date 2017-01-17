@@ -44,7 +44,7 @@ import sun.util.logging.PlatformLogger;
 import sun.util.resources.LocaleData;
 import sun.util.resources.OpenListResourceBundle;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 

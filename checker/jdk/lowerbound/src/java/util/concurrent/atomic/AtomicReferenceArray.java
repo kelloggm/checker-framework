@@ -39,7 +39,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import sun.misc.Unsafe;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

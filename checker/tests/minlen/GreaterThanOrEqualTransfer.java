@@ -1,4 +1,4 @@
-import org.checkerframework.checker.minlen.qual.*;
+import org.checkerframework.checker.index.qual.MinLen;
 
 class GreaterThanOrEqualTransfer {
     void gte_check(int[] a) {

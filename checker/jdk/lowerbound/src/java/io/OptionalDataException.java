@@ -24,7 +24,7 @@
  */
 package java.io;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * Exception indicating the failure of an object read operation due to

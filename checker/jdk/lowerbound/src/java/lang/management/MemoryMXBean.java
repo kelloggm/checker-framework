@@ -27,7 +27,7 @@ package java.lang.management;
 
 import javax.management.openmbean.CompositeData;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

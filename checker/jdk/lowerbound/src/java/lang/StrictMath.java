@@ -28,7 +28,7 @@ import java.util.Random;
 import sun.misc.FpUtils;
 import sun.misc.DoubleConsts;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

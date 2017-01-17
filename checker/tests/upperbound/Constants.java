@@ -1,4 +1,4 @@
-import org.checkerframework.checker.minlen.qual.MinLen;
+import org.checkerframework.checker.index.qual.MinLen;
 
 class Constants {
 

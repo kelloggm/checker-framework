@@ -1,8 +1,8 @@
 // Test case for issue #62:
 // https://github.com/kelloggm/checker-framework/issues/62
 
-import org.checkerframework.checker.minlen.qual.*;
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
+import org.checkerframework.checker.index.qual.MinLen;
 
 public class RefineLTE2 {
 

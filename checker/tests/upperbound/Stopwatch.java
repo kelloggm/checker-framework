@@ -1,10 +1,7 @@
 package plume;
 
 import java.text.DecimalFormat;
-import org.checkerframework.checker.index.qual.*;
-import org.checkerframework.checker.initialization.qual.*;
-import org.checkerframework.checker.lowerbound.qual.*;
-import org.checkerframework.checker.nullness.qual.*;
+import org.checkerframework.checker.index.qual.IndexFor;
 
 public final class Stopwatch {
     private static final DecimalFormat[] timeFormat = {
@@ -15,7 +12,7 @@ public final class Stopwatch {
         new DecimalFormat("#.#"),
     };
 
-    public DecimalFormat format(/*@IndexFor("Stopwatch.timeFormat")*/ int digits) {
+    public DecimalFormat format(@IndexFor("Stopwatch.timeFormat") int digits) {
         return Stopwatch.timeFormat[digits];
     }
 }

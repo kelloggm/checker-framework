@@ -1,4 +1,4 @@
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
 
 class ArrayLength {
     void test() {

@@ -1,4 +1,4 @@
-import org.checkerframework.checker.samelen.qual.*;
+import org.checkerframework.checker.index.qual.SameLen;
 
 // This test checks whether the SameLen type system works as expected.
 

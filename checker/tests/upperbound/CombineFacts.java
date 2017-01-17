@@ -1,4 +1,4 @@
-import org.checkerframework.checker.upperbound.qual.*;
+import org.checkerframework.checker.index.qual.LTLengthOf;
 
 class CombineFacts {
     void test(int[] a1) {

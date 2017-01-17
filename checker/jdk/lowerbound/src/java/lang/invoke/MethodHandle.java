@@ -34,7 +34,7 @@ import static java.lang.invoke.MethodHandleStatics.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**

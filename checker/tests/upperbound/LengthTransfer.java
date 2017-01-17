@@ -1,5 +1,3 @@
-import org.checkerframework.checker.minlen.qual.*;
-
 class LengthTransfer {
     void exceptional_control_flow(int[] a) {
         if (a.length == 0) {

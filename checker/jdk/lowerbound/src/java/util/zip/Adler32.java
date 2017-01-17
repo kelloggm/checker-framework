@@ -28,7 +28,7 @@ package java.util.zip;
 import java.nio.ByteBuffer;
 import sun.nio.ch.DirectBuffer;
 
-import org.checkerframework.checker.lowerbound.qual.*;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
