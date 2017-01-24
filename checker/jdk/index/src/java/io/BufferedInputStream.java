@@ -128,7 +128,7 @@ class BufferedInputStream extends FilterInputStream {
      * @see     java.io.BufferedInputStream#mark(int)
      * @see     java.io.BufferedInputStream#pos
      */
-    protected @IndexOrLow("buf") int markpos = -1;
+    protected int markpos = -1;
 
     /**
      * The maximum read ahead allowed after a call to the

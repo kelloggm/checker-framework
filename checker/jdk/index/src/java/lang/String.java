@@ -1482,7 +1482,7 @@ public final class String
      *          character sequence represented by this object, or
      *          <code>-1</code> if the character does not occur.
      */
-    public @IndexOrLow("this") int indexOf(int ch) {
+    public @GTENegativeOne @LTLengthOf("this") int indexOf(int ch) {
         return indexOf(ch, 0);
     }
 
@@ -1525,7 +1525,7 @@ public final class String
      *          than or equal to <code>fromIndex</code>, or <code>-1</code>
      *          if the character does not occur.
      */
-    public @IndexOrLow("this") int indexOf(int ch, int fromIndex) {
+    public @GTENegativeOne @LTLengthOf("this") int indexOf(int ch, int fromIndex) {
         final int max = value.length;
         if (fromIndex < 0) {
             fromIndex = 0;
