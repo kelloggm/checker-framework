@@ -100,7 +100,7 @@ public class BufferedWriter extends Writer {
      *
      * @exception  IllegalArgumentException  If sz is <= 0
      */
-    public BufferedWriter(Writer out, @NonNegative int sz) {
+    public BufferedWriter(Writer out, int sz) {
         super(out);
         if (sz <= 0)
             throw new IllegalArgumentException("Buffer size <= 0");
@@ -173,7 +173,7 @@ public class BufferedWriter extends Writer {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public void write(char cbuf[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public void write(char cbuf[], @NonNegative int off, @IndexOrHigh("#1" int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||
@@ -219,7 +219,7 @@ public class BufferedWriter extends Writer {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public void write(String s, int off, int len) throws IOException {
+     public void write(String s, @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
 

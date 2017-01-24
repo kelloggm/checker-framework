@@ -82,7 +82,7 @@ class BufferedInputStream extends FilterInputStream {
      * </code>contain buffered input data obtained
      * from the underlying  input stream.
      */
-    protected int count;
+    protected @IndexOrHigh("buf") int count;
 
     /**
      * The current position in the buffer. This is the index of the next
@@ -99,7 +99,7 @@ class BufferedInputStream extends FilterInputStream {
      *
      * @see     java.io.BufferedInputStream#buf
      */
-    protected int pos;
+    protected @IndexFor("buf") int pos;
 
     /**
      * The value of the <code>pos</code> field at the time the last
@@ -128,7 +128,7 @@ class BufferedInputStream extends FilterInputStream {
      * @see     java.io.BufferedInputStream#mark(int)
      * @see     java.io.BufferedInputStream#pos
      */
-    protected int markpos = -1;
+    protected @IndexOrLow("buf") int markpos = -1;
 
     /**
      * The maximum read ahead allowed after a call to the
@@ -142,7 +142,7 @@ class BufferedInputStream extends FilterInputStream {
      * @see     java.io.BufferedInputStream#mark(int)
      * @see     java.io.BufferedInputStream#reset()
      */
-    protected int marklimit;
+    protected @GTENegativeOne int marklimit;
 
     /**
      * Check to make sure that underlying input stream has not been
@@ -252,7 +252,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          or an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public synchronized int read() throws IOException {
+    public @GTENegativeOne synchronized int read() throws IOException {
         if (pos >= count) {
             fill();
             if (pos >= count)
@@ -265,7 +265,7 @@ class BufferedInputStream extends FilterInputStream {
      * Read characters into a portion of an array, reading from the underlying
      * stream at most once if necessary.
      */
-    private int read1(byte[] b, int off, int len) throws IOException {
+    private @GTENegativeOne int read1(byte[] b, @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
         int avail = count - pos;
         if (avail <= 0) {
             /* If the requested length is at least as large as the buffer, and
@@ -322,7 +322,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized @NonNegative int read(byte b[], @NonNegative int off, @NonNegative int len)
+    public synchronized @GTENegativeOne int read(byte b[], @NonNegative int off, @IndexOrHigh("#1") int len)
         throws IOException
     {
         getBufIfOpen(); // Check for closed stream

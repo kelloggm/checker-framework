@@ -160,7 +160,12 @@ public class LowerBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
                 new LowerBoundTreeAnnotator(this),
-                new PropagationTreeAnnotator(this),
+                new PropagationTreeAnnotator(this) {
+                    @Override
+                    public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
+                        return null;
+                    }
+                },
                 new ImplicitsTreeAnnotator(this));
     }
 

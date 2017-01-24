@@ -234,7 +234,7 @@ public final class String
      *
      * @since  1.5
      */
-    public String(int[] codePoints, @NonNegative int offset, @NonNegative int count) {
+    public String(int[] codePoints, @NonNegative int offset, @IndexOrHigh("#1") int count) {
         if (offset < 0) {
             throw new StringIndexOutOfBoundsException(offset);
         }
@@ -313,7 +313,7 @@ public final class String
      * @see  #String(byte[])
      */
     @Deprecated
-    public String(byte ascii[], int hibyte, @NonNegative int offset, @NonNegative int count) {
+    public String(byte ascii[], int hibyte, @IndexFor("#1") int offset, @IndexOrHigh("#1") int count) {
         checkBounds(ascii, offset, count);
         char value[] = new char[count];
 
@@ -873,7 +873,7 @@ public final class String
      *          </ul>
      */
     @Deprecated
-    public void getBytes(@NonNegative int srcBegin, @NonNegative int srcEnd, byte dst[], @NonNegative int dstBegin) {
+    public void getBytes(@IndexFor("this.value") int srcBegin, @IndexFor("this.value") int srcEnd, byte dst[], @IndexFor("#3") int dstBegin) {
         if (srcBegin < 0) {
             throw new StringIndexOutOfBoundsException(srcBegin);
         }

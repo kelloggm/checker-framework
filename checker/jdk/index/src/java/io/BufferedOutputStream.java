@@ -50,7 +50,7 @@ class BufferedOutputStream extends FilterOutputStream {
      * <tt>buf[0]</tt> through <tt>buf[count-1]</tt> contain valid
      * byte data.
      */
-    protected int count;
+    protected @IndexOrHigh("buf") int count;
 
     /**
      * Creates a new buffered output stream to write data to the
@@ -116,7 +116,7 @@ class BufferedOutputStream extends FilterOutputStream {
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
-    public synchronized void write(byte b[], int off, int len) throws IOException {
+    public synchronized void write(byte b[], @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
         if (len >= buf.length) {
             /* If the request length exceeds the size of the output buffer,
                flush the output buffer and then write the data directly.

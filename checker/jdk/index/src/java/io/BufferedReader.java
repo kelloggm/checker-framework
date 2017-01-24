@@ -93,7 +93,7 @@ public class BufferedReader extends Reader {
      *
      * @exception  IllegalArgumentException  If sz is <= 0
      */
-    public BufferedReader(Reader in, @NonNegative int sz) {
+    public BufferedReader(Reader in, int sz) {
         super(in);
         if (sz <= 0)
             throw new IllegalArgumentException("Buffer size <= 0");
@@ -269,7 +269,7 @@ public class BufferedReader extends Reader {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read(char cbuf[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public int read(char cbuf[], @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||
@@ -483,7 +483,7 @@ public class BufferedReader extends Reader {
      * @exception  IllegalArgumentException  If readAheadLimit is < 0
      * @exception  IOException  If an I/O error occurs
      */
-    public void mark(@NonNegative int readAheadLimit) throws IOException {
+    public void mark(int readAheadLimit) throws IOException {
         if (readAheadLimit < 0) {
             throw new IllegalArgumentException("Read-ahead limit < 0");
         }

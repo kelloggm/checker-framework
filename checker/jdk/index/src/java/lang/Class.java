@@ -2673,11 +2673,11 @@ public final
             }
         }
 
-        @NonNegative int length() {
+        @IndexOrHigh("methods") int length() {
             return length;
         }
 
-        Method get(@NonNegative int i) {
+        Method get(@IndexFor("methods") int i) {
             return methods[i];
         }
 

@@ -161,7 +161,7 @@ public abstract class InputStream implements Closeable {
      * <code>b.length - off</code>
      * @see        java.io.InputStream#read()
      */
-    public @GTENegativeOne int read(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public @GTENegativeOne int read(byte b[], @LessThanLength("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         if (b == null) {
             throw new NullPointerException();
         } else if (off < 0 || len < 0 || len > b.length - off) {
