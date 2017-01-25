@@ -190,7 +190,7 @@ class BufferedInputStream extends FilterInputStream {
      * @param   size   the buffer size.
      * @exception IllegalArgumentException if size <= 0.
      */
-    public BufferedInputStream(InputStream in, @NonNegative int size) {
+    public BufferedInputStream(InputStream in, int size) {
         super(in);
         if (size <= 0) {
             throw new IllegalArgumentException("Buffer size <= 0");
@@ -322,7 +322,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized @GTENegativeOne int read(byte b[], @NonNegative int off, @IndexOrHigh("#1") int len)
+    public synchronized @GTENegativeOne int read(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len)
         throws IOException
     {
         getBufIfOpen(); // Check for closed stream

@@ -173,7 +173,7 @@ public class BufferedWriter extends Writer {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public void write(char cbuf[], @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
+    public void write(char cbuf[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||
@@ -219,7 +219,7 @@ public class BufferedWriter extends Writer {
      *
      * @exception  IOException  If an I/O error occurs
      */
-     public void write(String s, @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
+     public void write(String s, @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
 

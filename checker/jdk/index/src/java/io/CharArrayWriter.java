@@ -67,7 +67,7 @@ class CharArrayWriter extends Writer {
      * @param initialSize  an int specifying the initial buffer size.
      * @exception IllegalArgumentException if initialSize is negative
      */
-    public CharArrayWriter(@NonNegative int initialSize) {
+    public CharArrayWriter(int initialSize) {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative initial size: "
                                                + initialSize);
@@ -78,7 +78,7 @@ class CharArrayWriter extends Writer {
     /**
      * Writes a character to the buffer.
      */
-    public void write(@NonNegative int c) {
+    public void write(int c) {
         synchronized (lock) {
             int newcount = count + 1;
             if (newcount > buf.length) {
@@ -95,7 +95,7 @@ class CharArrayWriter extends Writer {
      * @param off       the start offset in the data
      * @param len       the number of chars that are written
      */
-    public void write(char c[], @NonNegative int off, @NonNegative int len) {
+    public void write(char c[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) {
         if ((off < 0) || (off > c.length) || (len < 0) ||
             ((off + len) > c.length) || ((off + len) < 0)) {
             throw new IndexOutOfBoundsException();
@@ -118,7 +118,7 @@ class CharArrayWriter extends Writer {
      * @param  off  Offset from which to start reading characters
      * @param  len  Number of characters to be written
      */
-    public void write(String str,@NonNegative int off, @NonNegative int len) {
+    public void write(String str,@IndexFor("#1") int off, @IndexOrHigh("#1") int len) {
         synchronized (lock) {
             int newcount = count + len;
             if (newcount > buf.length) {
@@ -243,7 +243,7 @@ class CharArrayWriter extends Writer {
      *
      * @return an array of chars copied from the input data.
      */
-    public char toCharArray()[] {
+    public char toCharArray() @SameLen("this") [] {
         synchronized (lock) {
             return Arrays.copyOf(buf, count);
         }
@@ -254,7 +254,7 @@ class CharArrayWriter extends Writer {
      *
      * @return an int representing the current size of the buffer.
      */
-    public @NonNegative int size() {
+    public @IndexOrHigh("this") int size() {
         return count;
     }
 
@@ -262,7 +262,7 @@ class CharArrayWriter extends Writer {
      * Converts input data to a string.
      * @return the string.
      */
-    public String toString() {
+    public @SameLen("this") String toString() {
         synchronized (lock) {
             return new String(buf, 0, count);
         }

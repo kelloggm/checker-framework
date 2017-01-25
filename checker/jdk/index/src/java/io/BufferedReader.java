@@ -269,7 +269,7 @@ public class BufferedReader extends Reader {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read(char cbuf[], @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
+    public @GTENegativeOne int read(char cbuf[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||

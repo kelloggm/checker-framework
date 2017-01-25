@@ -148,7 +148,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      * @see        java.io.FilterInputStream#in
      * @see        java.io.InputStream#read(byte[], int, int)
      */
-    public final @GTENegativeOne int read(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public final @GTENegativeOne int read(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         return in.read(b, off, len);
     }
 
@@ -190,7 +190,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public final void readFully(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public final void readFully(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
         if (len < 0)
             throw new IndexOutOfBoundsException();
         int n = 0;
@@ -216,7 +216,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      *             the contained input stream does not support
      *             reading after close, or another I/O error occurs.
      */
-    public final int skipBytes(int n) throws IOException {
+    public final @NonNegative int skipBytes(int n) throws IOException {
         int total = 0;
         int cur = 0;
 

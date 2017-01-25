@@ -419,7 +419,7 @@ public final class Console implements Flushable
             return in.ready();
         }
 
-        public int read(char cbuf[], @NonNegative int offset, @NonNegative int length)
+        public int read(char cbuf[], @IndexFor("#1") int offset, @IndexOrHigh("#1") int length)
             throws IOException
         {
             int off = offset;

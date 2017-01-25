@@ -71,7 +71,7 @@ class BufferedOutputStream extends FilterOutputStream {
      * @param   size   the buffer size.
      * @exception IllegalArgumentException if size &lt;= 0.
      */
-    public BufferedOutputStream(OutputStream out, @NonNegative int size) {
+    public BufferedOutputStream(OutputStream out, int size) {
         super(out);
         if (size <= 0) {
             throw new IllegalArgumentException("Buffer size <= 0");
