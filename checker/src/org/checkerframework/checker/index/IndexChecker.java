@@ -1,6 +1,6 @@
 package org.checkerframework.checker.index;
 
-import org.checkerframework.checker.index.lowerbound.LowerBoundChecker;
+import org.checkerframework.checker.index.upperbound.UpperBoundChecker;
 import org.checkerframework.framework.source.SuppressWarningsKeys;
 
 /**
@@ -10,15 +10,13 @@ import org.checkerframework.framework.source.SuppressWarningsKeys;
  * @checker_framework.manual #index-checker Index Checker
  */
 @SuppressWarningsKeys("index")
-public class IndexChecker extends LowerBoundChecker {
+public class IndexChecker extends UpperBoundChecker {
     // Ideally, the Index Checker would be an AggregateChecker that ran the Lower and Upper Bound
     // Checkers.  However, both checkers use annotations from the ValueChecker and the
     // MinLenChecker. So in order for these subcheckers to only be run once, the IndexChecker
-    // is a subclass of the LowerBoundChecker.  If isIndexChecker() returns true, then the
-    // LowerBoundChecker runs the UpperBoundChecker as a subchecker.
+    // is a subclass of the UpperBoundChecker, which runs the LowerBoundChecker as a subchecker
+    // anyway.
 
-    @Override
-    protected boolean isIndexChecker() {
-        return true;
-    }
+    // TODO: we should discuss what's actually going on here, because at this point the Index Checker
+    // now exists only for the name, I think.
 }
