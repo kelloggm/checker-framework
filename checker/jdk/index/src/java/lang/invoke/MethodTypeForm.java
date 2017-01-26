@@ -1,36 +1,32 @@
 /*
  * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang.invoke;
 
 import sun.invoke.util.Wrapper;
 import static java.lang.invoke.MethodHandleStatics.*;
-import static java.lang.invoke.MethodHandleNatives.Constants.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * Shared information for a group of method types, which differ
@@ -45,70 +41,31 @@ import org.checkerframework.checker.index.qual.*;
  * No more than half of these are likely to be loaded at once.
  * @author John Rose
  */
-final class MethodTypeForm {
+class MethodTypeForm {
     final int[] argToSlotTable, slotToArgTable;
     final long argCounts;               // packed slot & value counts
     final long primCounts;              // packed prim & double counts
     final int vmslots;                  // total number of parameter slots
+    private Object vmlayout;            // vm-specific information for calls
     final MethodType erasedType;        // the canonical erasure
-    final MethodType basicType;         // the canonical erasure, with primitives simplified
+
+    /*lazy*/ MethodType primsAsBoxes;   // replace prims by wrappers
+    /*lazy*/ MethodType primArgsAsBoxes; // wrap args only; make raw return
+    /*lazy*/ MethodType primsAsInts;    // replace prims by int/long
+    /*lazy*/ MethodType primsAsLongs;   // replace prims by long
+    /*lazy*/ MethodType primsAtEnd;     // reorder primitives to the end
 
     // Cached adapter information:
-    /*lazy*/ MethodHandle genericInvoker; // JVM hook for inexact invoke
-    /*lazy*/ MethodHandle basicInvoker;   // cached instance of MH.invokeBasic
-    /*lazy*/ MethodHandle namedFunctionInvoker; // cached helper for LF.NamedFunction
-
-    // Cached lambda form information, for basic types only:
-    final LambdaForm[] lambdaForms;
-    // Indexes into lambdaForms:
-    static final int
-            LF_INVVIRTUAL     =  0,  // DMH invokeVirtual
-            LF_INVSTATIC      =  1,
-            LF_INVSPECIAL     =  2,
-            LF_NEWINVSPECIAL  =  3,
-            LF_INVINTERFACE   =  4,
-            LF_INVSTATIC_INIT =  5,  // DMH invokeStatic with <clinit> barrier
-            LF_INTERPRET      =  6,  // LF interpreter
-            LF_COUNTER        =  7,  // CMH wrapper
-            LF_REINVOKE       =  8,  // other wrapper
-            LF_EX_LINKER      =  9,  // invokeExact_MT
-            LF_EX_INVOKER     = 10,  // invokeExact MH
-            LF_GEN_LINKER     = 11,
-            LF_GEN_INVOKER    = 12,
-            LF_CS_LINKER      = 13,  // linkToCallSite_CS
-            LF_LIMIT          = 14;
+    /*lazy*/ ToGeneric   toGeneric;     // convert cs. with prims to w/o
+    /*lazy*/ FromGeneric fromGeneric;   // convert cs. w/o prims to with
+    /*lazy*/ SpreadGeneric[] spreadGeneric; // expand one argument to many
+    /*lazy*/ FilterGeneric filterGeneric; // convert argument(s) on the fly
+    /*lazy*/ MethodHandle genericInvoker; // hook for inexact invoke
 
     public MethodType erasedType() {
         return erasedType;
     }
 
-    public MethodType basicType() {
-        return basicType;
-    }
-
-    public LambdaForm cachedLambdaForm(@NonNegative int which) {
-        return lambdaForms[which];
-    }
-
-    public LambdaForm setCachedLambdaForm(@NonNegative int which, LambdaForm form) {
-        // Should we perform some sort of CAS, to avoid racy duplication?
-        return lambdaForms[which] = form;
-    }
-
-    public MethodHandle basicInvoker() {
-        assert(erasedType == basicType) : "erasedType: " + erasedType + " != basicType: " + basicType;  // primitives must be flattened also
-        MethodHandle invoker = basicInvoker;
-        if (invoker != null)  return invoker;
-        // invoker = basicType.invokers().makeBasicInvoker();
-        basicInvoker = invoker;
-        return invoker;
-    }
-
-    /**
-     * Build an MTF for a given type, which must have all references erased to Object.
-     * This MTF will stand for that type and all un-erased variations.
-     * Eagerly compute some basic properties of the type, common to all variations.
-     */
     protected MethodTypeForm(MethodType erasedType) {
         this.erasedType = erasedType;
 
@@ -122,40 +79,25 @@ final class MethodTypeForm {
 
         // Walk the argument types, looking for primitives.
         int pac = 0, lac = 0, prc = 0, lrc = 0;
-        Class<?>[] epts = ptypes;
-        Class<?>[] bpts = epts;
+        Class<?> epts[] = ptypes;
         for (int i = 0; i < epts.length; i++) {
             Class<?> pt = epts[i];
             if (pt != Object.class) {
+                assert(pt.isPrimitive());
                 ++pac;
-                Wrapper w = Wrapper.forPrimitiveType(pt);
-                if (w.isDoubleWord())  ++lac;
-                if (w.isSubwordOrInt() && pt != int.class) {
-                    if (bpts == epts)
-                        bpts = bpts.clone();
-                    bpts[i] = int.class;
-                }
+                if (hasTwoArgSlots(pt))  ++lac;
             }
         }
         pslotCount += lac;                  // #slots = #args + #longs
         Class<?> rt = erasedType.returnType();
-        Class<?> bt = rt;
         if (rt != Object.class) {
             ++prc;          // even void.class counts as a prim here
-            Wrapper w = Wrapper.forPrimitiveType(rt);
-            if (w.isDoubleWord())  ++lrc;
-            if (w.isSubwordOrInt() && rt != int.class)
-                bt = int.class;
+            if (hasTwoArgSlots(rt))  ++lrc;
             // adjust #slots, #args
             if (rt == void.class)
                 rtypeCount = rslotCount = 0;
             else
                 rslotCount += lrc;
-        }
-        if (epts == bpts && bt == rt) {
-            this.basicType = erasedType;
-        } else {
-            this.basicType = MethodType.makeImpl(bt, bpts, true);
         }
         if (lac != 0) {
             int slot = ptypeCount + lac;
@@ -164,8 +106,7 @@ final class MethodTypeForm {
             argToSlotTab[0] = slot;  // argument "-1" is past end of slots
             for (int i = 0; i < epts.length; i++) {
                 Class<?> pt = epts[i];
-                Wrapper w = Wrapper.forBasicType(pt);
-                if (w.isDoubleWord())  --slot;
+                if (hasTwoArgSlots(pt))  --slot;
                 --slot;
                 slotToArgTab[slot] = i+1; // "+1" see argSlotToParameter note
                 argToSlotTab[1+i]  = slot;
@@ -193,11 +134,162 @@ final class MethodTypeForm {
         // send a few bits down to the JVM:
         this.vmslots = parameterSlotCount();
 
-        if (basicType == erasedType) {
-            lambdaForms = new LambdaForm[LF_LIMIT];
-        } else {
-            lambdaForms = null;  // could be basicType.form().lambdaForms;
+        // short circuit some no-op canonicalizations:
+        if (!hasPrimitives()) {
+            primsAsBoxes = erasedType;
+            primArgsAsBoxes = erasedType;
+            primsAsInts  = erasedType;
+            primsAsLongs = erasedType;
+            primsAtEnd   = erasedType;
         }
+    }
+
+    /** Turn all primitive types to corresponding wrapper types.
+     */
+    public MethodType primsAsBoxes() {
+        MethodType ct = primsAsBoxes;
+        if (ct != null)  return ct;
+        MethodType t = erasedType;
+        ct = canonicalize(erasedType, WRAP, WRAP);
+        if (ct == null)  ct = t;  // no prims to box
+        return primsAsBoxes = ct;
+    }
+
+    /** Turn all primitive argument types to corresponding wrapper types.
+     *  Subword and void return types are promoted to int.
+     */
+    public MethodType primArgsAsBoxes() {
+        MethodType ct = primArgsAsBoxes;
+        if (ct != null)  return ct;
+        MethodType t = erasedType;
+        ct = canonicalize(erasedType, RAW_RETURN, WRAP);
+        if (ct == null)  ct = t;  // no prims to box
+        return primArgsAsBoxes = ct;
+    }
+
+    /** Turn all primitive types to either int or long.
+     *  Floating point return types are not changed, because
+     *  they may require special calling sequences.
+     *  A void return value is turned to int.
+     */
+    public MethodType primsAsInts() {
+        MethodType ct = primsAsInts;
+        if (ct != null)  return ct;
+        MethodType t = erasedType;
+        ct = canonicalize(t, RAW_RETURN, INTS);
+        if (ct == null)  ct = t;  // no prims to int-ify
+        return primsAsInts = ct;
+    }
+
+    /** Turn all primitive types to either int or long.
+     *  Floating point return types are not changed, because
+     *  they may require special calling sequences.
+     *  A void return value is turned to int.
+     */
+    public MethodType primsAsLongs() {
+        MethodType ct = primsAsLongs;
+        if (ct != null)  return ct;
+        MethodType t = erasedType;
+        ct = canonicalize(t, RAW_RETURN, LONGS);
+        if (ct == null)  ct = t;  // no prims to int-ify
+        return primsAsLongs = ct;
+    }
+
+    /** Stably sort parameters into 3 buckets: ref, int, long. */
+    public MethodType primsAtEnd() {
+        MethodType ct = primsAtEnd;
+        if (ct != null)  return ct;
+        MethodType t = erasedType;
+
+        int pac = primitiveParameterCount();
+        if (pac == 0)
+            return primsAtEnd = t;
+
+        int argc = parameterCount();
+        int lac = longPrimitiveParameterCount();
+        if (pac == argc && (lac == 0 || lac == argc))
+            return primsAtEnd = t;
+
+        // known to have a mix of 2 or 3 of ref, int, long
+        int[] reorder = primsAtEndOrder(t);
+        ct = reorderParameters(t, reorder, null);
+        //System.out.println("t="+t+" / reorder="+java.util.Arrays.toString(reorder)+" => "+ct);
+        return primsAtEnd = ct;
+    }
+
+    /** Compute a new ordering of parameters so that all references
+     *  are before all ints or longs, and all ints are before all longs.
+     *  For this ordering, doubles count as longs, and all other primitive
+     *  values count as ints.
+     *  As a special case, if the parameters are already in the specified
+     *  order, this method returns a null reference, rather than an array
+     *  specifying a null permutation.
+     *  <p>
+     *  For example, the type {@code (int,boolean,int,Object,String)void}
+     *  produces the order {@code {3,4,0,1,2}}, the type
+     *  {@code (long,int,String)void} produces {@code {2,1,2}}, and
+     *  the type {@code (Object,int)Object} produces {@code null}.
+     */
+    public static int[] primsAtEndOrder(MethodType mt) {
+        MethodTypeForm form = mt.form();
+        if (form.primsAtEnd == form.erasedType)
+            // quick check shows no reordering is necessary
+            return null;
+
+        int argc = form.parameterCount();
+        int[] paramOrder = new int[argc];
+
+        // 3-way bucket sort:
+        int pac = form.primitiveParameterCount();
+        int lac = form.longPrimitiveParameterCount();
+        int rfill = 0, ifill = argc - pac, lfill = argc - lac;
+
+        Class<?>[] ptypes = mt.ptypes();
+        boolean changed = false;
+        for (int i = 0; i < ptypes.length; i++) {
+            Class<?> pt = ptypes[i];
+            int ord;
+            if (!pt.isPrimitive())             ord = rfill++;
+            else if (!hasTwoArgSlots(pt))      ord = ifill++;
+            else                               ord = lfill++;
+            if (ord != i)  changed = true;
+            assert(paramOrder[ord] == 0);
+            paramOrder[ord] = i;
+        }
+        assert(rfill == argc - pac && ifill == argc - lac && lfill == argc);
+        if (!changed) {
+            form.primsAtEnd = form.erasedType;
+            return null;
+        }
+        return paramOrder;
+    }
+
+    /** Put the existing parameters of mt into a new order, given by newParamOrder.
+     *  The third argument is logically appended to mt.parameterArray,
+     *  so that elements of newParamOrder can index either pre-existing or
+     *  new parameter types.
+     */
+    public static MethodType reorderParameters(MethodType mt, int[] newParamOrder, Class<?>[] moreParams) {
+        if (newParamOrder == null)  return mt;  // no-op reordering
+        Class<?>[] ptypes = mt.ptypes();
+        Class<?>[] ntypes = new Class<?>[newParamOrder.length];
+        int maxParam = ptypes.length + (moreParams == null ? 0 : moreParams.length);
+        boolean changed = (ntypes.length != ptypes.length);
+        for (int i = 0; i < newParamOrder.length; i++) {
+            int param = newParamOrder[i];
+            if (param != i)  changed = true;
+            Class<?> nt;
+            if (param < ptypes.length)   nt = ptypes[param];
+            else if (param == maxParam)  nt = mt.returnType();
+            else                         nt = moreParams[param - ptypes.length];
+            ntypes[i] = nt;
+        }
+        if (!changed)  return mt;
+        return MethodType.makeImpl(mt.returnType(), ntypes, true);
+    }
+
+    private static boolean hasTwoArgSlots(Class<?> type) {
+        return type == long.class || type == double.class;
     }
 
     private static long pack(int a, int b, int c, int d) {
@@ -210,45 +302,45 @@ final class MethodTypeForm {
         return (char)(packed >> ((3-word) * 16));
     }
 
-    public @NonNegative int parameterCount() {                      // # outgoing values
+    public int parameterCount() {                      // # outgoing values
         return unpack(argCounts, 3);
     }
-    public @NonNegative int parameterSlotCount() {                  // # outgoing interpreter slots
+    public int parameterSlotCount() {                  // # outgoing interpreter slots
         return unpack(argCounts, 2);
     }
-    public @NonNegative int returnCount() {                         // = 0 (V), or 1
+    public int returnCount() {                         // = 0 (V), or 1
         return unpack(argCounts, 1);
     }
-    public @NonNegative int returnSlotCount() {                     // = 0 (V), 2 (J/D), or 1
+    public int returnSlotCount() {                     // = 0 (V), 2 (J/D), or 1
         return unpack(argCounts, 0);
     }
-    public @NonNegative int primitiveParameterCount() {
+    public int primitiveParameterCount() {
         return unpack(primCounts, 3);
     }
-    public @NonNegative int longPrimitiveParameterCount() {
+    public int longPrimitiveParameterCount() {
         return unpack(primCounts, 2);
     }
-    public @NonNegative int primitiveReturnCount() {                // = 0 (obj), or 1
+    public int primitiveReturnCount() {                // = 0 (obj), or 1
         return unpack(primCounts, 1);
     }
-    public @NonNegative int longPrimitiveReturnCount() {            // = 1 (J/D), or 0
+    public int longPrimitiveReturnCount() {            // = 1 (J/D), or 0
         return unpack(primCounts, 0);
     }
     public boolean hasPrimitives() {
         return primCounts != 0;
     }
-    public boolean hasNonVoidPrimitives() {
-        if (primCounts == 0)  return false;
-        if (primitiveParameterCount() != 0)  return true;
-        return (primitiveReturnCount() != 0 && returnCount() != 0);
-    }
+//    public boolean hasNonVoidPrimitives() {
+//        if (primCounts == 0)  return false;
+//        if (primitiveParameterCount() != 0)  return true;
+//        return (primitiveReturnCount() != 0 && returnCount() != 0);
+//    }
     public boolean hasLongPrimitives() {
         return (longPrimitiveParameterCount() | longPrimitiveReturnCount()) != 0;
     }
-    public int parameterToArgSlot(@GTENegativeOne int i) {
+    public int parameterToArgSlot(int i) {
         return argToSlotTable[1+i];
     }
-    public int argSlotToParameter(@NonNegative int argSlot) {
+    public int argSlotToParameter(int argSlot) {
         // Note:  Empty slots are represented by zero in this table.
         // Valid arguments slots contain incremented entries, so as to be non-zero.
         // We return -1 the caller to mean an empty slot.
@@ -365,6 +457,18 @@ final class MethodTypeForm {
             }
         }
         return cs;
+    }
+
+    /*non-public*/ void notifyGenericMethodType() {
+        if (genericInvoker != null)  return;
+        try {
+            // Trigger adapter creation.
+            genericInvoker = InvokeGeneric.generalInvokerOf(erasedType);
+        } catch (Exception ex) {
+            Error err = new InternalError("Exception while resolving inexact invoke");
+            err.initCause(ex);
+            throw err;
+        }
     }
 
     @Override

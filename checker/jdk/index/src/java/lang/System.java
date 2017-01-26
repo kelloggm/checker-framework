@@ -1,31 +1,30 @@
 /*
- * Copyright (c) 1994, 2014, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 1994, 2011, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package java.lang;
 
 import java.io.*;
-import java.security.AccessControlContext;
 import java.util.Properties;
 import java.util.PropertyPermission;
 import java.util.StringTokenizer;
@@ -35,13 +34,9 @@ import java.security.AllPermission;
 import java.nio.channels.Channel;
 import java.nio.channels.spi.SelectorProvider;
 import sun.nio.ch.Interruptible;
-import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 import sun.reflect.annotation.AnnotationType;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * The <code>System</code> class contains several useful class fields
@@ -490,9 +485,9 @@ public final class System {
      * @exception  NullPointerException if either <code>src</code> or
      *               <code>dest</code> is <code>null</code>.
      */
-    public static native void arraycopy(Object src,  @NonNegative int  srcPos,
-                                        Object dest, @NonNegative int destPos,
-                                        @NonNegative int length);
+    public static native void arraycopy(Object src,  int  srcPos,
+                                        Object dest, int destPos,
+                                        int length);
 
     /**
      * Returns the same hash code for the given object as
@@ -1060,9 +1055,8 @@ public final class System {
      * @see        java.lang.Runtime#load(java.lang.String)
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
-    @CallerSensitive
     public static void load(String filename) {
-        Runtime.getRuntime().load0(Reflection.getCallerClass(), filename);
+        Runtime.getRuntime().load0(getCallerClass(), filename);
     }
 
     /**
@@ -1086,9 +1080,8 @@ public final class System {
      * @see        java.lang.Runtime#loadLibrary(java.lang.String)
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
-    @CallerSensitive
     public static void loadLibrary(String libname) {
-        Runtime.getRuntime().loadLibrary0(Reflection.getCallerClass(), libname);
+        Runtime.getRuntime().loadLibrary0(getCallerClass(), libname);
     }
 
     /**
@@ -1160,35 +1153,31 @@ public final class System {
         // classes are used.
         sun.misc.VM.initializeOSEnvironment();
 
+        // Subsystems that are invoked during initialization can invoke
+        // sun.misc.VM.isBooted() in order to avoid doing things that should
+        // wait until the application class loader has been set up.
+        sun.misc.VM.booted();
+
         // The main thread is not added to its thread group in the same
         // way as other threads; we must do it ourselves here.
         Thread current = Thread.currentThread();
         current.getThreadGroup().add(current);
 
         // register shared secrets
-        //setJavaLangAccess();
-
-        // Subsystems that are invoked during initialization can invoke
-        // sun.misc.VM.isBooted() in order to avoid doing things that should
-        // wait until the application class loader has been set up.
-        // IMPORTANT: Ensure that this remains the last initialization action!
-        sun.misc.VM.booted();
+        setJavaLangAccess();
     }
 
-/*    private static void setJavaLangAccess() {
+    private static void setJavaLangAccess() {
         // Allow privileged classes outside of java.lang
         sun.misc.SharedSecrets.setJavaLangAccess(new sun.misc.JavaLangAccess(){
             public sun.reflect.ConstantPool getConstantPool(Class klass) {
                 return klass.getConstantPool();
             }
-            public boolean casAnnotationType(Class<?> klass, AnnotationType oldType, AnnotationType newType) {
-                return klass.casAnnotationType(oldType, newType);
+            public void setAnnotationType(Class klass, AnnotationType type) {
+                klass.setAnnotationType(type);
             }
             public AnnotationType getAnnotationType(Class klass) {
                 return klass.getAnnotationType();
-            }
-            public byte[] getRawClassAnnotations(Class<?> klass) {
-                return klass.getRawAnnotations();
             }
             public <E extends Enum<E>>
                     E[] getEnumConstantsShared(Class<E> klass) {
@@ -1206,15 +1195,12 @@ public final class System {
             public StackTraceElement getStackTraceElement(Throwable t, int i) {
                 return t.getStackTraceElement(i);
             }
-            public int getStringHash32(String string) {
-                return string.hash32();
-            }
-            public Thread newThreadWithAcc(Runnable target, AccessControlContext acc) {
-                return new Thread(target, acc);
-            }
-            public void invokeFinalize(Object o) throws Throwable {
-                o.finalize();
-            }
         });
-    }*/
+    }
+
+    /* returns the class of the caller. */
+    static Class<?> getCallerClass() {
+        // NOTE use of more generic Reflection.getCallerClass()
+        return Reflection.getCallerClass(3);
+    }
 }

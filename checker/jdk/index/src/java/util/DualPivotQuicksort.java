@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class implements the Dual-Pivot Quicksort algorithm by
@@ -107,7 +104,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(int[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(int[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -201,7 +198,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(int[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(int[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays
@@ -547,7 +544,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(long[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(long[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -641,7 +638,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(long[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(long[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays
@@ -987,7 +984,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(short[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(short[] a, int left, int right) {
         // Use counting sort on large arrays
         if (right - left > COUNTING_SORT_THRESHOLD_FOR_SHORT_OR_CHAR) {
             int[] count = new int[NUM_SHORT_VALUES];
@@ -1019,7 +1016,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    private static void doSort(short[] a, @NonNegative int left, @NonNegative int right) {
+    private static void doSort(short[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -1113,7 +1110,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(short[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(short[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays
@@ -1459,7 +1456,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(char[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(char[] a, int left, int right) {
         // Use counting sort on large arrays
         if (right - left > COUNTING_SORT_THRESHOLD_FOR_SHORT_OR_CHAR) {
             int[] count = new int[NUM_CHAR_VALUES];
@@ -1491,7 +1488,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    private static void doSort(char[] a, @NonNegative int left, @NonNegative int right) {
+    private static void doSort(char[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -1585,7 +1582,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(char[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(char[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays
@@ -1934,7 +1931,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(byte[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(byte[] a, int left, int right) {
         // Use counting sort on large arrays
         if (right - left > COUNTING_SORT_THRESHOLD_FOR_BYTE) {
             int[] count = new int[NUM_BYTE_VALUES];
@@ -1981,7 +1978,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(float[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(float[] a, int left, int right) {
         /*
          * Phase 1: Move NaNs to the end of the array.
          */
@@ -2068,7 +2065,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    private static void doSort(float[] a, @NonNegative int left, @NonNegative int right) {
+    private static void doSort(float[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -2162,7 +2159,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(float[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(float[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays
@@ -2508,7 +2505,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    public static void sort(double[] a, @NonNegative int left, @NonNegative int right) {
+    public static void sort(double[] a, int left, int right) {
         /*
          * Phase 1: Move NaNs to the end of the array.
          */
@@ -2595,7 +2592,7 @@ final class DualPivotQuicksort {
      * @param left the index of the first element, inclusive, to be sorted
      * @param right the index of the last element, inclusive, to be sorted
      */
-    private static void doSort(double[] a, @NonNegative int left, @NonNegative int right) {
+    private static void doSort(double[] a, int left, int right) {
         // Use Quicksort on small arrays
         if (right - left < QUICKSORT_THRESHOLD) {
             sort(a, left, right, true);
@@ -2689,7 +2686,7 @@ final class DualPivotQuicksort {
      * @param right the index of the last element, inclusive, to be sorted
      * @param leftmost indicates if this part is the leftmost in the range
      */
-    private static void sort(double[] a, @NonNegative int left, @NonNegative int right, boolean leftmost) {
+    private static void sort(double[] a, int left, int right, boolean leftmost) {
         int length = right - left + 1;
 
         // Use insertion sort on tiny arrays

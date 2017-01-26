@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -41,9 +41,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * An optionally-bounded {@linkplain BlockingDeque blocking deque} based on
@@ -177,7 +174,7 @@ public class LinkedBlockingDeque<E>
      * @param capacity the capacity of this deque
      * @throws IllegalArgumentException if {@code capacity} is less than 1
      */
-    public LinkedBlockingDeque(@Positive int capacity) {
+    public LinkedBlockingDeque(int capacity) {
         if (capacity <= 0) throw new IllegalArgumentException();
         this.capacity = capacity;
     }
@@ -714,7 +711,7 @@ public class LinkedBlockingDeque<E>
      * because it may be the case that another thread is about to
      * insert or remove an element.
      */
-    public @NonNegative int remainingCapacity() {
+    public int remainingCapacity() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -730,7 +727,7 @@ public class LinkedBlockingDeque<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    public @NonNegative int drainTo(Collection<? super E> c) {
+    public int drainTo(Collection<? super E> c) {
         return drainTo(c, Integer.MAX_VALUE);
     }
 
@@ -740,7 +737,7 @@ public class LinkedBlockingDeque<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    public @NonNegative int drainTo(Collection<? super E> c, int maxElements) {
+    public int drainTo(Collection<? super E> c, int maxElements) {
         if (c == null)
             throw new NullPointerException();
         if (c == this)
@@ -801,7 +798,7 @@ public class LinkedBlockingDeque<E>
      *
      * @return the number of elements in this deque
      */
-    public @NonNegative int size() {
+    public int size() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {

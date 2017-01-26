@@ -1,36 +1,32 @@
 /*
- * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 1994, 2012, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
-import sun.misc.IoTrace;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -55,23 +51,10 @@ class FileInputStream extends InputStream
     /* File Descriptor - handle to the open file */
     private final FileDescriptor fd;
 
-    /* The path of the referenced file (null if the stream is created with a file descriptor) */
-    private final String path;
-
     private FileChannel channel = null;
 
     private final Object closeLock = new Object();
     private volatile boolean closed = false;
-
-    private static final ThreadLocal<Boolean> runningFinalize =
-        new ThreadLocal<>();
-
-    private static boolean isRunningFinalize() {
-        Boolean val;
-        if ((val = runningFinalize.get()) != null)
-            return val.booleanValue();
-        return false;
-    }
 
     /**
      * Creates a <code>FileInputStream</code> by
@@ -140,12 +123,8 @@ class FileInputStream extends InputStream
         if (name == null) {
             throw new NullPointerException();
         }
-        if (file.isInvalid()) {
-            throw new FileNotFoundException("Invalid file path");
-        }
         fd = new FileDescriptor();
-        //fd.incrementAndGetUseCount();
-        this.path = name;
+        fd.attach(this);
         open(name);
     }
 
@@ -182,14 +161,12 @@ class FileInputStream extends InputStream
             security.checkRead(fdObj);
         }
         fd = fdObj;
-        path = null;
 
         /*
          * FileDescriptor is being shared by streams.
-         * Ensure that it's GC'ed only when all the streams/channels are done
-         * using it.
+         * Register this stream with FileDescriptor tracker.
          */
-        //fd.incrementAndGetUseCount();
+        fd.attach(this);
     }
 
     /**
@@ -206,18 +183,7 @@ class FileInputStream extends InputStream
      *             file is reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public @GTENegativeOne int read() throws IOException {
-        Object traceContext = IoTrace.fileReadBegin(path);
-        int b = 0;
-        try {
-            b = read0();
-        } finally {
-            IoTrace.fileReadEnd(traceContext, b == -1 ? 0 : 1);
-        }
-        return b;
-    }
-
-    private native int read0() throws IOException;
+    public native int read() throws IOException;
 
     /**
      * Reads a subarray as a sequence of bytes.
@@ -239,15 +205,8 @@ class FileInputStream extends InputStream
      *             the file has been reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public @GTENegativeOne int read(byte b[]) throws IOException {
-        Object traceContext = IoTrace.fileReadBegin(path);
-        int bytesRead = 0;
-        try {
-            bytesRead = readBytes(b, 0, b.length);
-        } finally {
-            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
-        }
-        return bytesRead;
+    public int read(byte b[]) throws IOException {
+        return readBytes(b, 0, b.length);
     }
 
     /**
@@ -269,14 +228,7 @@ class FileInputStream extends InputStream
      * @exception  IOException  if an I/O error occurs.
      */
     public int read(byte b[], int off, int len) throws IOException {
-        Object traceContext = IoTrace.fileReadBegin(path);
-        int bytesRead = 0;
-        try {
-            bytesRead = readBytes(b, off, len);
-        } finally {
-            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
-        }
-        return bytesRead;
+        return readBytes(b, off, len);
     }
 
     /**
@@ -319,7 +271,7 @@ class FileInputStream extends InputStream
      * @exception  IOException  if this file input stream has been closed by calling
      *             {@code close} or an I/O error occurs.
      */
-    public native @NonNegative int available() throws IOException;
+    public native int available() throws IOException;
 
     /**
      * Closes this file input stream and releases any system resources
@@ -341,27 +293,13 @@ class FileInputStream extends InputStream
             closed = true;
         }
         if (channel != null) {
-            /*
-             * Decrement the FD use count associated with the channel
-             * The use count is incremented whenever a new channel
-             * is obtained from this stream.
-             */
-          //fd.decrementAndGetUseCount();
            channel.close();
         }
-
-        /*
-         * Decrement the FD use count associated with this stream
-         */
-        //int useCount = fd.decrementAndGetUseCount();
-
-        /*
-         * If FileDescriptor is still in use by another stream, the finalizer
-         * will not close it.
-         */
-/*        if ((useCount <= 0) || !isRunningFinalize()) {
-            close0();
-        }*/
+        fd.closeAll(new Closeable() {
+            public void close() throws IOException {
+               close0();
+           }
+        });
     }
 
     /**
@@ -375,7 +313,9 @@ class FileInputStream extends InputStream
      * @see        java.io.FileDescriptor
      */
     public final FileDescriptor getFD() throws IOException {
-        if (fd != null) return fd;
+        if (fd != null) {
+            return fd;
+        }
         throw new IOException();
     }
 
@@ -398,14 +338,7 @@ class FileInputStream extends InputStream
     public FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = FileChannelImpl.open(fd, path, true, false, this);
-
-                /*
-                 * Increment fd's use count. Invoking the channel's close()
-                 * method will result in decrementing the use count set for
-                 * the channel.
-                 */
-                //fd.incrementAndGetUseCount();
+                channel = FileChannelImpl.open(fd, true, false, this);
             }
             return channel;
         }
@@ -428,18 +361,12 @@ class FileInputStream extends InputStream
      */
     protected void finalize() throws IOException {
         if ((fd != null) &&  (fd != FileDescriptor.in)) {
-
-            /*
-             * Finalizer should not release the FileDescriptor if another
-             * stream is still using it. If the user directly invokes
-             * close() then the FileDescriptor is also released.
+            /* if fd is shared, the references in FileDescriptor
+             * will ensure that finalizer is only called when
+             * safe to do so. All references using the fd have
+             * become unreachable. We can call close()
              */
-            runningFinalize.set(Boolean.TRUE);
-            try {
-                close();
-            } finally {
-                runningFinalize.set(Boolean.FALSE);
-            }
+            close();
         }
     }
 }

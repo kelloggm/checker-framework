@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -53,9 +53,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * An {@link ExecutorService} for running {@link ForkJoinTask}s.
@@ -1432,7 +1429,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *         because it does not hold {@link
      *         java.lang.RuntimePermission}{@code ("modifyThread")}
      */
-    public ForkJoinPool(@Positive int parallelism) {
+    public ForkJoinPool(int parallelism) {
         this(parallelism, defaultForkJoinWorkerThreadFactory, null, false);
     }
 
@@ -1460,7 +1457,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *         because it does not hold {@link
      *         java.lang.RuntimePermission}{@code ("modifyThread")}
      */
-    public ForkJoinPool(@Positive int parallelism,
+    public ForkJoinPool(int parallelism,
                         ForkJoinWorkerThreadFactory factory,
                         Thread.UncaughtExceptionHandler handler,
                         boolean asyncMode) {
@@ -1682,7 +1679,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *
      * @return the targeted parallelism level of this pool
      */
-    public @Positive int getParallelism() {
+    public int getParallelism() {
         return parallelism;
     }
 
@@ -1694,7 +1691,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *
      * @return the number of worker threads
      */
-    public @NonNegative int getPoolSize() {
+    public int getPoolSize() {
         return parallelism + (short)(ctl >>> TC_SHIFT);
     }
 
@@ -1716,7 +1713,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *
      * @return the number of worker threads
      */
-    public @NonNegative int getRunningThreadCount() {
+    public int getRunningThreadCount() {
         int r = parallelism + (int)(ctl >> AC_SHIFT);
         return (r <= 0) ? 0 : r; // suppress momentarily negative values
     }
@@ -1728,7 +1725,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *
      * @return the number of active threads
      */
-    public @NonNegative int getActiveThreadCount() {
+    public int getActiveThreadCount() {
         int r = parallelism + (int)(ctl >> AC_SHIFT) + blockedCount;
         return (r <= 0) ? 0 : r; // suppress momentarily negative values
     }
@@ -1792,7 +1789,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      *
      * @return the number of queued submissions
      */
-    public @NonNegative int getQueuedSubmissionCount() {
+    public int getQueuedSubmissionCount() {
         return -queueBase + queueTop;
     }
 

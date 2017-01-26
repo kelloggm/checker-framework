@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1995, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util.zip;
@@ -43,9 +43,6 @@ import java.security.AccessController;
 import sun.security.action.GetPropertyAction;
 import static java.util.zip.ZipConstants64.*;
 
-import org.checkerframework.checker.index.qual.*;
-
-
 /**
  * This class is used to read entries from a zip file.
  *
@@ -57,10 +54,9 @@ import org.checkerframework.checker.index.qual.*;
  */
 public
 class ZipFile implements ZipConstants, Closeable {
-    private long jzfile;           // address of jzfile data
-    private final String name;     // zip file name
-    private final int total;       // total number of entries
-    private final boolean locsig;  // if zip file starts with LOCSIG (usually true)
+    private long jzfile;  // address of jzfile data
+    private String name;  // zip file name
+    private int total;    // total number of entries
     private volatile boolean closeRequested = false;
 
     private static final int STORED = ZipEntry.STORED;
@@ -220,7 +216,6 @@ class ZipFile implements ZipConstants, Closeable {
         sun.misc.PerfCounter.getZipFileCount().increment();
         this.name = name;
         this.total = getTotal(jzfile);
-        this.locsig = startsWithLOC(jzfile);
     }
 
     /**
@@ -534,7 +529,7 @@ class ZipFile implements ZipConstants, Closeable {
                 e.name = zc.toString(bname, bname.length);
             }
         }
-        //e.time = getEntryTime(jzentry);
+        e.time = getEntryTime(jzentry);
         e.crc = getEntryCrc(jzentry);
         e.size = getEntrySize(jzentry);
         e. csize = getEntryCSize(jzentry);
@@ -560,7 +555,7 @@ class ZipFile implements ZipConstants, Closeable {
      * @return the number of entries in the ZIP file
      * @throws IllegalStateException if the zip file has been closed
      */
-    public @NonNegative int size() {
+    public int size() {
         ensureOpen();
         return total;
     }
@@ -742,28 +737,10 @@ class ZipFile implements ZipConstants, Closeable {
         }
     }
 
-    static {
-        sun.misc.SharedSecrets.setJavaUtilZipFileAccess(
-            new sun.misc.JavaUtilZipFileAccess() {
-                public boolean startsWithLocHeader(ZipFile zip) {
-                    return zip.startsWithLocHeader();
-                }
-             }
-        );
-    }
-
-    /**
-     * Returns {@code true} if, and only if, the zip file begins with {@code
-     * LOCSIG}.
-     */
-    private boolean startsWithLocHeader() {
-        return locsig;
-    }
 
     private static native long open(String name, int mode, long lastModified,
                                     boolean usemmap) throws IOException;
     private static native int getTotal(long jzfile);
-    private static native boolean startsWithLOC(long jzfile);
     private static native int read(long jzfile, long jzentry,
                                    long pos, byte[] b, int off, int len);
 

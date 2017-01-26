@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1994, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A data input stream lets an application read primitive Java data
@@ -99,7 +96,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      * @see        java.io.FilterInputStream#in
      * @see        java.io.InputStream#read(byte[], int, int)
      */
-    public final @GTENegativeOne int read(byte b[]) throws IOException {
+    public final int read(byte b[]) throws IOException {
         return in.read(b, 0, b.length);
     }
 
@@ -148,7 +145,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      * @see        java.io.FilterInputStream#in
      * @see        java.io.InputStream#read(byte[], int, int)
      */
-    public final @GTENegativeOne int read(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
+    public final int read(byte b[], int off, int len) throws IOException {
         return in.read(b, off, len);
     }
 
@@ -190,7 +187,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public final void readFully(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) throws IOException {
+    public final void readFully(byte b[], int off, int len) throws IOException {
         if (len < 0)
             throw new IndexOutOfBoundsException();
         int n = 0;
@@ -216,7 +213,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      *             the contained input stream does not support
      *             reading after close, or another I/O error occurs.
      */
-    public final @NonNegative int skipBytes(int n) throws IOException {
+    public final int skipBytes(int n) throws IOException {
         int total = 0;
         int cur = 0;
 
@@ -287,7 +284,7 @@ class DataInputStream extends FilterInputStream implements DataInput {
      *             another I/O error occurs.
      * @see         java.io.FilterInputStream#in
      */
-    public final @NonNegative int readUnsignedByte() throws IOException {
+    public final int readUnsignedByte() throws IOException {
         int ch = in.read();
         if (ch < 0)
             throw new EOFException();

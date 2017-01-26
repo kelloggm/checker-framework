@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util.zip;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class provides support for general purpose compression using the
@@ -82,8 +79,6 @@ class Deflater {
     private int level, strategy;
     private boolean setParams;
     private boolean finish, finished;
-    private long bytesRead;
-    private long bytesWritten;
 
     /**
      * Compression method for the deflate algorithm (the only one currently
@@ -168,7 +163,7 @@ class Deflater {
      * @param level the compression level (0-9)
      * @param nowrap if true then use GZIP compatible compression
      */
-    public Deflater(@NonNegative int level, boolean nowrap) {
+    public Deflater(int level, boolean nowrap) {
         this.level = level;
         this.strategy = DEFAULT_STRATEGY;
         this.zsRef = new ZStreamRef(init(level, DEFAULT_STRATEGY, nowrap));
@@ -179,7 +174,7 @@ class Deflater {
      * Compressed data will be generated in ZLIB format.
      * @param level the compression level (0-9)
      */
-    public Deflater(@NonNegative int level) {
+    public Deflater(int level) {
         this(level, false);
     }
 
@@ -199,7 +194,7 @@ class Deflater {
      * @param len the length of the data
      * @see Deflater#needsInput
      */
-    public void setInput(byte[] b, @NonNegative int off, @NonNegative int len) {
+    public void setInput(byte[] b, int off, int len) {
         if (b== null) {
             throw new NullPointerException();
         }
@@ -235,7 +230,7 @@ class Deflater {
      * @see Inflater#inflate
      * @see Inflater#getAdler
      */
-    public void setDictionary(byte[] b, @NonNegative int off, @NonNegative int len) {
+    public void setDictionary(byte[] b, int off, int len) {
         if (b == null) {
             throw new NullPointerException();
         }
@@ -290,7 +285,7 @@ class Deflater {
      * @param level the new compression level (0-9)
      * @exception IllegalArgumentException if the compression level is invalid
      */
-    public void setLevel(@GTENegativeOne int level) {
+    public void setLevel(int level) {
         if ((level < 0 || level > 9) && level != DEFAULT_COMPRESSION) {
             throw new IllegalArgumentException("invalid compression level");
         }
@@ -351,7 +346,7 @@ class Deflater {
      * @return the actual number of bytes of compressed data written to the
      *         output buffer
      */
-    public int deflate(byte[] b, @NonNegative int off, @NonNegative int len) {
+    public int deflate(byte[] b, int off, int len) {
         return deflate(b, off, len, NO_FLUSH);
     }
 
@@ -418,7 +413,7 @@ class Deflater {
      * @throws IllegalArgumentException if the flush mode is invalid
      * @since 1.7
      */
-    public int deflate(byte[] b, @NonNegative int off, @NonNegative int len, int flush) {
+    public int deflate(byte[] b, int off, int len, int flush) {
         if (b == null) {
             throw new NullPointerException();
         }
@@ -428,13 +423,8 @@ class Deflater {
         synchronized (zsRef) {
             ensureOpen();
             if (flush == NO_FLUSH || flush == SYNC_FLUSH ||
-                flush == FULL_FLUSH) {
-                int thisLen = this.len;
-                int n = deflateBytes(zsRef.address(), b, off, len, flush);
-                bytesWritten += n;
-                bytesRead += (thisLen - this.len);
-                return n;
-            }
+                flush == FULL_FLUSH)
+                return deflateBytes(zsRef.address(), b, off, len, flush);
             throw new IllegalArgumentException();
         }
     }
@@ -459,7 +449,7 @@ class Deflater {
      *
      * @return the total number of uncompressed bytes input so far
      */
-    public @NonNegative int getTotalIn() {
+    public int getTotalIn() {
         return (int) getBytesRead();
     }
 
@@ -472,7 +462,7 @@ class Deflater {
     public long getBytesRead() {
         synchronized (zsRef) {
             ensureOpen();
-            return bytesRead;
+            return getBytesRead(zsRef.address());
         }
     }
 
@@ -485,7 +475,7 @@ class Deflater {
      *
      * @return the total number of compressed bytes output so far
      */
-    public @NonNegative int getTotalOut() {
+    public int getTotalOut() {
         return (int) getBytesWritten();
     }
 
@@ -498,7 +488,7 @@ class Deflater {
     public long getBytesWritten() {
         synchronized (zsRef) {
             ensureOpen();
-            return bytesWritten;
+            return getBytesWritten(zsRef.address());
         }
     }
 
@@ -513,7 +503,6 @@ class Deflater {
             finish = false;
             finished = false;
             off = len = 0;
-            bytesRead = bytesWritten = 0;
         }
     }
 
@@ -554,6 +543,8 @@ class Deflater {
     private native int deflateBytes(long addr, byte[] b, int off, int len,
                                     int flush);
     private native static int getAdler(long addr);
+    private native static long getBytesRead(long addr);
+    private native static long getBytesWritten(long addr);
     private native static void reset(long addr);
     private native static void end(long addr);
 }

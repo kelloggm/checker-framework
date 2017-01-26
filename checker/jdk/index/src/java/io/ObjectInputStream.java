@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
@@ -41,9 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static java.io.ObjectStreamClass.processQueue;
-import sun.reflect.misc.ReflectUtil;
-
-import org.checkerframework.checker.index.qual.*;
 
 /**
  * An ObjectInputStream deserializes primitive data and objects previously
@@ -492,12 +489,11 @@ public class ObjectInputStream
     public void defaultReadObject()
         throws IOException, ClassNotFoundException
     {
-        SerialCallbackContext ctx = curContext;
-        if (ctx == null) {
+        if (curContext == null) {
             throw new NotActiveException("not in call to readObject");
         }
-        Object curObj = ctx.getObj();
-        ObjectStreamClass curDesc = ctx.getDesc();
+        Object curObj = curContext.getObj();
+        ObjectStreamClass curDesc = curContext.getDesc();
         bin.setBlockDataMode(false);
         defaultReadFields(curObj, curDesc);
         bin.setBlockDataMode(true);
@@ -531,12 +527,11 @@ public class ObjectInputStream
     public ObjectInputStream.GetField readFields()
         throws IOException, ClassNotFoundException
     {
-        SerialCallbackContext ctx = curContext;
-        if (ctx == null) {
+        if (curContext == null) {
             throw new NotActiveException("not in call to readObject");
         }
-        Object curObj = ctx.getObj();
-        ObjectStreamClass curDesc = ctx.getDesc();
+        Object curObj = curContext.getObj();
+        ObjectStreamClass curDesc = curContext.getDesc();
         bin.setBlockDataMode(false);
         GetFieldImpl getField = new GetFieldImpl(curDesc);
         getField.readFields();
@@ -839,7 +834,7 @@ public class ObjectInputStream
      * @return  the byte read, or -1 if the end of the stream is reached.
      * @throws  IOException If an I/O error has occurred.
      */
-    public @GTENegativeOne int read() throws IOException {
+    public int read() throws IOException {
         return bin.read();
     }
 
@@ -874,7 +869,7 @@ public class ObjectInputStream
      * @throws  IOException if there are I/O errors while reading from the
      *          underlying <code>InputStream</code>
      */
-    public @NonNegative int available() throws IOException {
+    public int available() throws IOException {
         return bin.available();
     }
 
@@ -1026,7 +1021,7 @@ public class ObjectInputStream
      * @throws  EOFException If end of file is reached.
      * @throws  IOException If other I/O error has occurred.
      */
-    public void readFully(byte[] buf, @NonNegative int off, @NonNegative int len) throws IOException {
+    public void readFully(byte[] buf, int off, int len) throws IOException {
         int endoff = off + len;
         if (off < 0 || len < 0 || endoff > buf.length || endoff < 0) {
             throw new IndexOutOfBoundsException();
@@ -1041,7 +1036,7 @@ public class ObjectInputStream
      * @return  the actual number of bytes skipped.
      * @throws  IOException If an I/O error has occurred.
      */
-    public @NonNegative int skipBytes(int len) throws IOException {
+    public int skipBytes(int len) throws IOException {
         return bin.skipBytes(len);
     }
 
@@ -1524,12 +1519,6 @@ public class ObjectInputStream
         }
     }
 
-    private boolean isCustomSubclass() {
-        // Return true if this class is a custom subclass of ObjectInputStream
-        return getClass().getClassLoader()
-                    != ObjectInputStream.class.getClassLoader();
-    }
-
     /**
      * Reads in and returns class descriptor for a dynamic proxy class.  Sets
      * passHandle to proxy class descriptor's assigned handle.  If proxy class
@@ -1559,15 +1548,6 @@ public class ObjectInputStream
         try {
             if ((cl = resolveProxyClass(ifaces)) == null) {
                 resolveEx = new ClassNotFoundException("null class");
-            } else if (!Proxy.isProxyClass(cl)) {
-                throw new InvalidClassException("Not a proxy");
-            } else {
-                // ReflectUtil.checkProxyPackageAccess makes a test
-                // equivalent to isCustomSubclass so there's no need
-                // to condition this call to isCustomSubclass == true here.
-                ReflectUtil.checkProxyPackageAccess(
-                        getClass().getClassLoader(),
-                        cl.getInterfaces());
             }
         } catch (ClassNotFoundException ex) {
             resolveEx = ex;
@@ -1609,12 +1589,9 @@ public class ObjectInputStream
         Class cl = null;
         ClassNotFoundException resolveEx = null;
         bin.setBlockDataMode(true);
-        final boolean checksRequired = isCustomSubclass();
         try {
             if ((cl = resolveClass(readDesc)) == null) {
                 resolveEx = new ClassNotFoundException("null class");
-            } else if (checksRequired) {
-                ReflectUtil.checkPackageAccess(cl);
             }
         } catch (ClassNotFoundException ex) {
             resolveEx = ex;
@@ -1772,12 +1749,6 @@ public class ObjectInputStream
 
         ObjectStreamClass desc = readClassDesc(false);
         desc.checkDeserialize();
-
-        Class<?> cl = desc.forClass();
-        if (cl == String.class || cl == Class.class
-                || cl == ObjectStreamClass.class) {
-            throw new InvalidClassException("invalid class descriptor");
-        }
 
         Object obj;
         try {
@@ -1969,6 +1940,7 @@ public class ObjectInputStream
     private void defaultReadFields(Object obj, ObjectStreamClass desc)
         throws IOException
     {
+        // REMIND: is isInstance check necessary?
         Class cl = desc.forClass();
         if (cl != null && obj != null && !cl.isInstance(obj)) {
             throw new ClassCastException();
@@ -2053,9 +2025,8 @@ public class ObjectInputStream
      * This method should not be removed or its signature changed without
      * corresponding modifications to the above class.
      */
-    private static ClassLoader latestUserDefinedLoader() {
-        return sun.misc.VM.latestUserDefinedLoader();
-    }
+    // REMIND: change name to something more accurate?
+    private static native ClassLoader latestUserDefinedLoader();
 
     /**
      * Default GetField implementation.
@@ -2611,7 +2582,7 @@ public class ObjectInputStream
          * mode.
          */
 
-        public @GTENegativeOne int read() throws IOException {
+        public int read() throws IOException {
             if (blkmode) {
                 if (pos == end) {
                     refill();
@@ -2622,7 +2593,7 @@ public class ObjectInputStream
             }
         }
 
-        public @GTENegativeOne int read(byte[] b, @NonNegative int off, @NonNegative int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             return read(b, off, len, false);
         }
 
@@ -2650,7 +2621,7 @@ public class ObjectInputStream
             return len - remain;
         }
 
-        public @NonNegative int available() throws IOException {
+        public int available() throws IOException {
             if (blkmode) {
                 if ((pos == end) && (unread == 0)) {
                     int n;
@@ -2696,7 +2667,7 @@ public class ObjectInputStream
          * buffer before copying them to b (to avoid exposing a reference to
          * b).
          */
-        @GTENegativeOne int read(byte[] b, @NonNegative int off, @NonNegative int len, boolean copy) throws IOException {
+        int read(byte[] b, int off, int len, boolean copy) throws IOException {
             if (len == 0) {
                 return 0;
             } else if (blkmode) {
@@ -2733,11 +2704,11 @@ public class ObjectInputStream
             readFully(b, 0, b.length, false);
         }
 
-        public void readFully(byte[] b, @NonNegative int off, int len) throws IOException {
+        public void readFully(byte[] b, int off, int len) throws IOException {
             readFully(b, off, len, false);
         }
 
-        public void readFully(byte[] b, @NonNegative int off, int len, boolean copy)
+        public void readFully(byte[] b, int off, int len, boolean copy)
             throws IOException
         {
             while (len > 0) {
@@ -2750,7 +2721,7 @@ public class ObjectInputStream
             }
         }
 
-        public @NonNegative int skipBytes(@NonNegative int n) throws IOException {
+        public int skipBytes(int n) throws IOException {
             return din.skipBytes(n);
         }
 
@@ -2878,7 +2849,7 @@ public class ObjectInputStream
          * of primitive data values more efficiently.
          */
 
-        void readBooleans(boolean[] v, @NonNegative int off, int len) throws IOException {
+        void readBooleans(boolean[] v, int off, int len) throws IOException {
             int stop, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -2899,7 +2870,7 @@ public class ObjectInputStream
             }
         }
 
-        void readChars(char[] v, @NonNegative int off, int len) throws IOException {
+        void readChars(char[] v, int off, int len) throws IOException {
             int stop, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -2921,7 +2892,7 @@ public class ObjectInputStream
             }
         }
 
-        void readShorts(short[] v, @NonNegative int off, int len) throws IOException {
+        void readShorts(short[] v, int off, int len) throws IOException {
             int stop, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -2943,7 +2914,7 @@ public class ObjectInputStream
             }
         }
 
-        void readInts(int[] v, @NonNegative int off, int len) throws IOException {
+        void readInts(int[] v, int off, int len) throws IOException {
             int stop, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -2965,7 +2936,7 @@ public class ObjectInputStream
             }
         }
 
-        void readFloats(float[] v, @NonNegative int off, int len) throws IOException {
+        void readFloats(float[] v, int off, int len) throws IOException {
             int span, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -2985,7 +2956,7 @@ public class ObjectInputStream
             }
         }
 
-        void readLongs(long[] v, @NonNegative int off, int len) throws IOException {
+        void readLongs(long[] v, int off, int len) throws IOException {
             int stop, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {
@@ -3007,7 +2978,7 @@ public class ObjectInputStream
             }
         }
 
-        void readDoubles(double[] v, @NonNegative int off, int len) throws IOException {
+        void readDoubles(double[] v, int off, int len) throws IOException {
             int span, endoff = off + len;
             while (off < endoff) {
                 if (!blkmode) {

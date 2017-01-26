@@ -1,37 +1,32 @@
 /*
  * Copyright (c) 1995, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 
 import java.io.*;
 import java.util.StringTokenizer;
-import sun.reflect.CallerSensitive;
-import sun.reflect.Reflection;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * Every Java application has a single instance of class
@@ -635,7 +630,7 @@ public class Runtime {
      *          machine; never smaller than one
      * @since 1.4
      */
-    public native @Positive int availableProcessors();
+    public native int availableProcessors();
 
     /**
      * Returns the amount of free memory in the Java Virtual Machine.
@@ -781,9 +776,8 @@ public class Runtime {
      * @see        java.lang.SecurityException
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
-    @CallerSensitive
     public void load(String filename) {
-        load0(Reflection.getCallerClass(), filename);
+        load0(System.getCallerClass(), filename);
     }
 
     synchronized void load0(Class fromClass, String filename) {
@@ -835,9 +829,8 @@ public class Runtime {
      * @see        java.lang.SecurityException
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
-    @CallerSensitive
     public void loadLibrary(String libname) {
-        loadLibrary0(Reflection.getCallerClass(), libname);
+        loadLibrary0(System.getCallerClass(), libname);
     }
 
     synchronized void loadLibrary0(Class fromClass, String libname) {

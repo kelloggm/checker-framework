@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -34,14 +34,9 @@
  */
 
 package java.util.concurrent;
-import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.*;
 import java.util.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * An {@link ExecutorService} that executes each submitted task using
@@ -496,15 +491,10 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * policy limiting the number of threads.  Even though it is not
      * treated as an error, failure to create threads may result in
      * new tasks being rejected or existing ones remaining stuck in
-     * the queue.
-     *
-     * We go further and preserve pool invariants even in the face of
-     * errors such as OutOfMemoryError, that might be thrown while
-     * trying to create threads.  Such errors are rather common due to
-     * the need to allocate a native stack in Thread#start, and users
-     * will want to perform clean pool shutdown to clean up.  There
-     * will likely be enough memory available for the cleanup code to
-     * complete without encountering yet another OutOfMemoryError.
+     * the queue. On the other hand, no special precautions exist to
+     * handle OutOfMemoryErrors that might be thrown while trying to
+     * create threads, since there is generally no recourse from
+     * within this class.
      */
     private volatile ThreadFactory threadFactory;
 
@@ -578,13 +568,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * task execution.  This protects against interrupts that are
      * intended to wake up a worker thread waiting for a task from
      * instead interrupting a task being run.  We implement a simple
-     * non-reentrant mutual exclusion lock rather than use
-     * ReentrantLock because we do not want worker tasks to be able to
-     * reacquire the lock when they invoke pool control methods like
-     * setCorePoolSize.  Additionally, to suppress interrupts until
-     * the thread actually starts running tasks, we initialize lock
-     * state to a negative value, and clear it upon start (in
-     * runWorker).
+     * non-reentrant mutual exclusion lock rather than use ReentrantLock
+     * because we do not want worker tasks to be able to reacquire the
+     * lock when they invoke pool control methods like setCorePoolSize.
      */
     private final class Worker
         extends AbstractQueuedSynchronizer
@@ -608,7 +594,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param firstTask the first task (null if none)
          */
         Worker(Runnable firstTask) {
-            setState(-1); // inhibit interrupts until runWorker
             this.firstTask = firstTask;
             this.thread = getThreadFactory().newThread(this);
         }
@@ -624,7 +609,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         // The value 1 represents the locked state.
 
         protected boolean isHeldExclusively() {
-            return getState() != 0;
+            return getState() == 1;
         }
 
         protected boolean tryAcquire(int unused) {
@@ -645,16 +630,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         public boolean tryLock()  { return tryAcquire(1); }
         public void unlock()      { release(1); }
         public boolean isLocked() { return isHeldExclusively(); }
-
-        void interruptIfStarted() {
-            Thread t;
-            if (getState() >= 0 && (t = thread) != null && !t.isInterrupted()) {
-                try {
-                    t.interrupt();
-                } catch (SecurityException ignore) {
-                }
-            }
-        }
     }
 
     /*
@@ -753,8 +728,12 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            for (Worker w : workers)
-                w.interruptIfStarted();
+            for (Worker w : workers) {
+                try {
+                    w.thread.interrupt();
+                } catch (SecurityException ignore) {
+                }
+            }
         } finally {
             mainLock.unlock();
         }
@@ -810,6 +789,19 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     private static final boolean ONLY_ONE = true;
+
+    /**
+     * Ensures that unless the pool is stopping, the current thread
+     * does not have its interrupt set. This requires a double-check
+     * of state in case the interrupt was cleared concurrently with a
+     * shutdownNow -- if so, the interrupt is re-enabled.
+     */
+    private void clearInterruptsForTaskRun() {
+        if (runStateLessThan(ctl.get(), STOP) &&
+            Thread.interrupted() &&
+            runStateAtLeast(ctl.get(), STOP))
+            Thread.currentThread().interrupt();
+    }
 
     /*
      * Misc utilities, most of which are also exported to
@@ -870,13 +862,12 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * Checks if a new worker can be added with respect to current
      * pool state and the given bound (either core or maximum). If so,
      * the worker count is adjusted accordingly, and, if possible, a
-     * new worker is created and started, running firstTask as its
+     * new worker is created and started running firstTask as its
      * first task. This method returns false if the pool is stopped or
      * eligible to shut down. It also returns false if the thread
-     * factory fails to create a thread when asked.  If the thread
-     * creation fails, either due to the thread factory returning
-     * null, or due to an exception (typically OutOfMemoryError in
-     * Thread#start), we roll back cleanly.
+     * factory fails to create a thread when asked, which requires a
+     * backout of workerCount, and a recheck for termination, in case
+     * the existence of this worker was holding up termination.
      *
      * @param firstTask the task the new thread should run first (or
      * null if none). Workers are created with an initial first task
@@ -919,65 +910,46 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             }
         }
 
-        boolean workerStarted = false;
-        boolean workerAdded = false;
-        Worker w = null;
-        try {
-            final ReentrantLock mainLock = this.mainLock;
-            w = new Worker(firstTask);
-            final Thread t = w.thread;
-            if (t != null) {
-                mainLock.lock();
-                try {
-                    // Recheck while holding lock.
-                    // Back out on ThreadFactory failure or if
-                    // shut down before lock acquired.
-                    int c = ctl.get();
-                    int rs = runStateOf(c);
+        Worker w = new Worker(firstTask);
+        Thread t = w.thread;
 
-                    if (rs < SHUTDOWN ||
-                        (rs == SHUTDOWN && firstTask == null)) {
-                        if (t.isAlive()) // precheck that t is startable
-                            throw new IllegalThreadStateException();
-                        workers.add(w);
-                        int s = workers.size();
-                        if (s > largestPoolSize)
-                            largestPoolSize = s;
-                        workerAdded = true;
-                    }
-                } finally {
-                    mainLock.unlock();
-                }
-                if (workerAdded) {
-                    t.start();
-                    workerStarted = true;
-                }
-            }
-        } finally {
-            if (! workerStarted)
-                addWorkerFailed(w);
-        }
-        return workerStarted;
-    }
-
-    /**
-     * Rolls back the worker thread creation.
-     * - removes worker from workers, if present
-     * - decrements worker count
-     * - rechecks for termination, in case the existence of this
-     *   worker was holding up termination
-     */
-    private void addWorkerFailed(Worker w) {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            if (w != null)
-                workers.remove(w);
-            decrementWorkerCount();
-            tryTerminate();
+            // Recheck while holding lock.
+            // Back out on ThreadFactory failure or if
+            // shut down before lock acquired.
+            int c = ctl.get();
+            int rs = runStateOf(c);
+
+            if (t == null ||
+                (rs >= SHUTDOWN &&
+                 ! (rs == SHUTDOWN &&
+                    firstTask == null))) {
+                decrementWorkerCount();
+                tryTerminate();
+                return false;
+            }
+
+            workers.add(w);
+
+            int s = workers.size();
+            if (s > largestPoolSize)
+                largestPoolSize = s;
         } finally {
             mainLock.unlock();
         }
+
+        t.start();
+        // It is possible (but unlikely) for a thread to have been
+        // added to workers, but not yet started, during transition to
+        // STOP, which could result in a rare missed interrupt,
+        // because Thread.interrupt is not guaranteed to have any effect
+        // on a non-yet-started Thread (see Thread#interrupt).
+        if (runStateOf(ctl.get()) == STOP && ! t.isInterrupted())
+            t.interrupt();
+
+        return true;
     }
 
     /**
@@ -1124,25 +1096,15 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @param w the worker
      */
     final void runWorker(Worker w) {
-        Thread wt = Thread.currentThread();
         Runnable task = w.firstTask;
         w.firstTask = null;
-        w.unlock(); // allow interrupts
         boolean completedAbruptly = true;
         try {
             while (task != null || (task = getTask()) != null) {
                 w.lock();
-                // If pool is stopping, ensure thread is interrupted;
-                // if not, ensure thread is not interrupted.  This
-                // requires a recheck in second case to deal with
-                // shutdownNow race while clearing interrupt
-                if ((runStateAtLeast(ctl.get(), STOP) ||
-                     (Thread.interrupted() &&
-                      runStateAtLeast(ctl.get(), STOP))) &&
-                    !wt.isInterrupted())
-                    wt.interrupt();
+                clearInterruptsForTaskRun();
                 try {
-                    beforeExecute(wt, task);
+                    beforeExecute(w.thread, task);
                     Throwable thrown = null;
                     try {
                         task.run();
@@ -1193,8 +1155,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *         {@code maximumPoolSize < corePoolSize}
      * @throws NullPointerException if {@code workQueue} is null
      */
-    public ThreadPoolExecutor(@NonNegative int corePoolSize,
-                              @Positive int maximumPoolSize,
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,
                               BlockingQueue<Runnable> workQueue) {
@@ -1227,8 +1189,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws NullPointerException if {@code workQueue}
      *         or {@code threadFactory} is null
      */
-    public ThreadPoolExecutor(@NonNegative int corePoolSize,
-                              @Positive int maximumPoolSize,
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,
                               BlockingQueue<Runnable> workQueue,
@@ -1262,8 +1224,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws NullPointerException if {@code workQueue}
      *         or {@code handler} is null
      */
-    public ThreadPoolExecutor(@NonNegative int corePoolSize,
-                              @Positive int maximumPoolSize,
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,
                               BlockingQueue<Runnable> workQueue,
@@ -1299,8 +1261,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws NullPointerException if {@code workQueue}
      *         or {@code threadFactory} or {@code handler} is null
      */
-    public ThreadPoolExecutor(@NonNegative int corePoolSize,
-                              @Positive int maximumPoolSize,
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,
                               BlockingQueue<Runnable> workQueue,
@@ -1540,7 +1502,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      * @see #getCorePoolSize
      */
-    public void setCorePoolSize(@NonNegative int corePoolSize) {
+    public void setCorePoolSize(int corePoolSize) {
         if (corePoolSize < 0)
             throw new IllegalArgumentException();
         int delta = corePoolSize - this.corePoolSize;
@@ -1566,7 +1528,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return the core number of threads
      * @see #setCorePoolSize
      */
-    public @NonNegative int getCorePoolSize() {
+    public int getCorePoolSize() {
         return corePoolSize;
     }
 
@@ -1602,7 +1564,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @return the number of threads started
      */
-    public @NonNegative int prestartAllCoreThreads() {
+    public int prestartAllCoreThreads() {
         int n = 0;
         while (addWorker(null, true))
             ++n;
@@ -1665,7 +1627,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *         less than the {@linkplain #getCorePoolSize core pool size}
      * @see #getMaximumPoolSize
      */
-    public void setMaximumPoolSize(@Positive int maximumPoolSize) {
+    public void setMaximumPoolSize(int maximumPoolSize) {
         if (maximumPoolSize <= 0 || maximumPoolSize < corePoolSize)
             throw new IllegalArgumentException();
         this.maximumPoolSize = maximumPoolSize;
@@ -1679,7 +1641,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return the maximum allowed number of threads
      * @see #setMaximumPoolSize
      */
-    public @Positive int getMaximumPoolSize() {
+    public int getMaximumPoolSize() {
         return maximumPoolSize;
     }
 
@@ -1796,7 +1758,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @return the number of threads
      */
-    public @NonNegative int getPoolSize() {
+    public int getPoolSize() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
@@ -1815,7 +1777,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @return the number of threads
      */
-    public @NonNegative int getActiveCount() {
+    public int getActiveCount() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
@@ -1835,7 +1797,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @return the number of threads
      */
-    public @NonNegative int getLargestPoolSize() {
+    public int getLargestPoolSize() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
@@ -2102,4 +2064,3 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         }
     }
 }
-

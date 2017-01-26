@@ -1,31 +1,29 @@
 /*
  * Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
-
-import org.checkerframework.checker.index.qual.*;
 
 /**
  * An ordered collection (also known as a <i>sequence</i>).  The user of this
@@ -118,7 +116,7 @@ public interface List<E> extends Collection<E> {
      *
      * @return the number of elements in this list
      */
-    @NonNegative int size();
+    int size();
 
     /**
      * Returns <tt>true</tt> if this list contains no elements.
@@ -332,7 +330,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt; size()</tt>)
      */
-    boolean addAll(@NonNegative int index, Collection<? extends E> c);
+    boolean addAll(int index, Collection<? extends E> c);
 
     /**
      * Removes from this list all of its elements that are contained in the
@@ -434,7 +432,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    E get(@NonNegative int index);
+    E get(int index);
 
     /**
      * Replaces the element at the specified position in this list with the
@@ -454,7 +452,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    E set(@NonNegative int index, E element);
+    E set(int index, E element);
 
     /**
      * Inserts the specified element at the specified position in this list
@@ -475,7 +473,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt; size()</tt>)
      */
-    void add(@NonNegative int index, E element);
+    void add(int index, E element);
 
     /**
      * Removes the element at the specified position in this list (optional
@@ -490,7 +488,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    E remove(@NonNegative int index);
+    E remove(int index);
 
 
     // Search Operations
@@ -512,7 +510,7 @@ public interface List<E> extends Collection<E> {
      *         list does not permit null elements
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      */
-    @GTENegativeOne int indexOf(Object o);
+    int indexOf(Object o);
 
     /**
      * Returns the index of the last occurrence of the specified element
@@ -531,7 +529,7 @@ public interface List<E> extends Collection<E> {
      *         list does not permit null elements
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      */
-    @GTENegativeOne int lastIndexOf(Object o);
+    int lastIndexOf(Object o);
 
 
     // List Iterators
@@ -560,7 +558,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    ListIterator<E> listIterator(@NonNegative int index);
+    ListIterator<E> listIterator(int index);
 
     // View
 
@@ -598,5 +596,5 @@ public interface List<E> extends Collection<E> {
      *         (<tt>fromIndex &lt; 0 || toIndex &gt; size ||
      *         fromIndex &gt; toIndex</tt>)
      */
-    List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex);
+    List<E> subList(int fromIndex, int toIndex);
 }

@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 2003, 2008, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -96,7 +93,7 @@ public final class StringBuilder
      * @throws     NegativeArraySizeException  if the <code>capacity</code>
      *               argument is less than <code>0</code>.
      */
-    public StringBuilder(@NonNegative int capacity) {
+    public StringBuilder(int capacity) {
         super(capacity);
     }
 
@@ -142,8 +139,8 @@ public final class StringBuilder
             return append("null");
         int len = sb.length();
         int newcount = count + len;
-/*        if (newcount > value.length)
-            expandCapacity(newcount);*/
+        if (newcount > value.length)
+            expandCapacity(newcount);
         sb.getChars(0, len, value, count);
         count = newcount;
         return this;
@@ -190,7 +187,7 @@ public final class StringBuilder
     /**
      * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder append(CharSequence s, @NonNegative int start, @NonNegative int end) {
+    public StringBuilder append(CharSequence s, int start, int end) {
         super.append(s, start, end);
         return this;
     }
@@ -203,7 +200,7 @@ public final class StringBuilder
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder append(char[] str, @NonNegative int offset, @NonNegative int len) {
+    public StringBuilder append(char[] str, int offset, int len) {
         super.append(str, offset, len);
         return this;
     }
@@ -249,7 +246,7 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder delete(@NonNegative int start, @NonNegative int end) {
+    public StringBuilder delete(int start, int end) {
         super.delete(start, end);
         return this;
     }
@@ -257,7 +254,7 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder deleteCharAt(@NonNegative int index) {
+    public StringBuilder deleteCharAt(int index) {
         super.deleteCharAt(index);
         return this;
     }
@@ -265,7 +262,7 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder replace(@NonNegative int start, @NonNegative int end, String str) {
+    public StringBuilder replace(int start, int end, String str) {
         super.replace(start, end, str);
         return this;
     }
@@ -273,8 +270,8 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int index, char[] str, @NonNegative int offset,
-                                @NonNegative int len)
+    public StringBuilder insert(int index, char[] str, int offset,
+                                int len)
     {
         super.insert(index, str, offset, len);
         return this;
@@ -283,14 +280,14 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, Object obj) {
+    public StringBuilder insert(int offset, Object obj) {
         return insert(offset, String.valueOf(obj));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, String str) {
+    public StringBuilder insert(int offset, String str) {
         super.insert(offset, str);
         return this;
     }
@@ -298,7 +295,7 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, char[] str) {
+    public StringBuilder insert(int offset, char[] str) {
         super.insert(offset, str);
         return this;
     }
@@ -306,7 +303,7 @@ public final class StringBuilder
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int dstOffset, CharSequence s) {
+    public StringBuilder insert(int dstOffset, CharSequence s) {
         if (s == null)
             s = "null";
         if (s instanceof String)
@@ -317,8 +314,8 @@ public final class StringBuilder
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int dstOffset, CharSequence s,
-                                @NonNegative int start, @NonNegative int end)
+    public StringBuilder insert(int dstOffset, CharSequence s,
+                                int start, int end)
     {
         super.insert(dstOffset, s, start, end);
         return this;
@@ -327,7 +324,7 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, boolean b) {
+    public StringBuilder insert(int offset, boolean b) {
         super.insert(offset, b);
         return this;
     }
@@ -335,7 +332,7 @@ public final class StringBuilder
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, char c) {
+    public StringBuilder insert(int offset, char c) {
         super.insert(offset, c);
         return this;
     }
@@ -343,42 +340,42 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, int i) {
+    public StringBuilder insert(int offset, int i) {
         return insert(offset, String.valueOf(i));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, long l) {
+    public StringBuilder insert(int offset, long l) {
         return insert(offset, String.valueOf(l));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, float f) {
+    public StringBuilder insert(int offset, float f) {
         return insert(offset, String.valueOf(f));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(@NonNegative int offset, double d) {
+    public StringBuilder insert(int offset, double d) {
         return insert(offset, String.valueOf(d));
     }
 
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public @GTENegativeOne int indexOf(String str) {
+    public int indexOf(String str) {
         return indexOf(str, 0);
     }
 
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public @GTENegativeOne int indexOf(String str, int fromIndex) {
+    public int indexOf(String str, int fromIndex) {
         return String.indexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }
@@ -386,14 +383,14 @@ public final class StringBuilder
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public @GTENegativeOne int lastIndexOf(String str) {
+    public int lastIndexOf(String str) {
         return lastIndexOf(str, count);
     }
 
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public @GTENegativeOne int lastIndexOf(String str, int fromIndex) {
+    public int lastIndexOf(String str, int fromIndex) {
         return String.lastIndexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }

@@ -1,33 +1,30 @@
 /*
  * Copyright (c) 1994, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 import java.io.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class implements a hash table, which maps keys to values. Any
@@ -132,7 +129,7 @@ public class Hashtable<K,V>
     /**
      * The hash table data.
      */
-    private transient Entry<K,V>[] table;
+    private transient Entry[] table;
 
     /**
      * The total number of entries in the hash table.
@@ -167,82 +164,6 @@ public class Hashtable<K,V>
     private static final long serialVersionUID = 1421746759512286392L;
 
     /**
-     * The default threshold of map capacity above which alternative hashing is
-     * used for String keys. Alternative hashing reduces the incidence of
-     * collisions due to weak hash code calculation for String keys.
-     * <p>
-     * This value may be overridden by defining the system property
-     * {@code jdk.map.althashing.threshold}. A property value of {@code 1}
-     * forces alternative hashing to be used at all times whereas
-     * {@code -1} value ensures that alternative hashing is never used.
-     */
-    static final int ALTERNATIVE_HASHING_THRESHOLD_DEFAULT = Integer.MAX_VALUE;
-
-    /**
-     * holds values which can't be initialized until after VM is booted.
-     */
-    private static class Holder {
-
-        /**
-         * Table capacity above which to switch to use alternative hashing.
-         */
-        static final int ALTERNATIVE_HASHING_THRESHOLD;
-
-        static {
-            String altThreshold = java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction(
-                    "jdk.map.althashing.threshold"));
-
-            int threshold;
-            try {
-                threshold = (null != altThreshold)
-                        ? Integer.parseInt(altThreshold)
-                        : ALTERNATIVE_HASHING_THRESHOLD_DEFAULT;
-
-                // disable alternative hashing if -1
-                if (threshold == -1) {
-                    threshold = Integer.MAX_VALUE;
-                }
-
-                if (threshold < 0) {
-                    throw new IllegalArgumentException("value must be positive integer.");
-                }
-            } catch(IllegalArgumentException failed) {
-                throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
-            }
-
-            ALTERNATIVE_HASHING_THRESHOLD = threshold;
-        }
-    }
-
-    /**
-     * A randomizing value associated with this instance that is applied to
-     * hash code of keys to make hash collisions harder to find.
-     */
-    transient int hashSeed;
-
-    /**
-     * Initialize the hashing mask value.
-     */
-    final boolean initHashSeedAsNeeded(int capacity) {
-        boolean currentAltHashing = hashSeed != 0;
-        boolean useAltHashing = sun.misc.VM.isBooted() &&
-                (capacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
-        boolean switching = currentAltHashing ^ useAltHashing;
-/*        if (switching) {
-            hashSeed = useAltHashing
-                ? sun.misc.Hashing.randomHashSeed(this)
-                : 0;
-        }*/
-        return switching;
-    }
-
-    private int hash(Object k) {
-        // hashSeed will be zero if alternative hashing is disabled.
-        return hashSeed ^ k.hashCode();
-    }
-
-    /**
      * Constructs a new, empty hashtable with the specified initial
      * capacity and the specified load factor.
      *
@@ -251,7 +172,7 @@ public class Hashtable<K,V>
      * @exception  IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
-    public Hashtable(@NonNegative int initialCapacity, float loadFactor) {
+    public Hashtable(int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: "+
                                                initialCapacity);
@@ -262,8 +183,7 @@ public class Hashtable<K,V>
             initialCapacity = 1;
         this.loadFactor = loadFactor;
         table = new Entry[initialCapacity];
-        threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
-        initHashSeedAsNeeded(initialCapacity);
+        threshold = (int)(initialCapacity * loadFactor);
     }
 
     /**
@@ -274,7 +194,7 @@ public class Hashtable<K,V>
      * @exception IllegalArgumentException if the initial capacity is less
      *              than zero.
      */
-    public Hashtable(@NonNegative int initialCapacity) {
+    public Hashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
     }
 
@@ -305,7 +225,7 @@ public class Hashtable<K,V>
      *
      * @return  the number of keys in this hashtable.
      */
-    public synchronized @NonNegative int size() {
+    public synchronized int size() {
         return count;
     }
 
@@ -407,7 +327,7 @@ public class Hashtable<K,V>
      */
     public synchronized boolean containsKey(Object key) {
         Entry tab[] = table;
-        int hash = hash(key);
+        int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
@@ -434,7 +354,7 @@ public class Hashtable<K,V>
      */
     public synchronized V get(Object key) {
         Entry tab[] = table;
-        int hash = hash(key);
+        int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
@@ -461,7 +381,7 @@ public class Hashtable<K,V>
      */
     protected void rehash() {
         int oldCapacity = table.length;
-        Entry<K,V>[] oldMap = table;
+        Entry[] oldMap = table;
 
         // overflow-conscious code
         int newCapacity = (oldCapacity << 1) + 1;
@@ -471,12 +391,10 @@ public class Hashtable<K,V>
                 return;
             newCapacity = MAX_ARRAY_SIZE;
         }
-        Entry<K,V>[] newMap = new Entry[newCapacity];
+        Entry[] newMap = new Entry[newCapacity];
 
         modCount++;
-        threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
-        boolean rehash = initHashSeedAsNeeded(newCapacity);
-
+        threshold = (int)(newCapacity * loadFactor);
         table = newMap;
 
         for (int i = oldCapacity ; i-- > 0 ;) {
@@ -484,9 +402,6 @@ public class Hashtable<K,V>
                 Entry<K,V> e = old;
                 old = old.next;
 
-                if (rehash) {
-                    e.hash = hash(e.key);
-                }
                 int index = (e.hash & 0x7FFFFFFF) % newCapacity;
                 e.next = newMap[index];
                 newMap[index] = e;
@@ -519,7 +434,7 @@ public class Hashtable<K,V>
 
         // Makes sure the key is not already in the hashtable.
         Entry tab[] = table;
-        int hash = hash(key);
+        int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
@@ -535,7 +450,6 @@ public class Hashtable<K,V>
             rehash();
 
             tab = table;
-            hash = hash(key);
             index = (hash & 0x7FFFFFFF) % tab.length;
         }
 
@@ -557,7 +471,7 @@ public class Hashtable<K,V>
      */
     public synchronized V remove(Object key) {
         Entry tab[] = table;
-        int hash = hash(key);
+        int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         for (Entry<K,V> e = tab[index], prev = null ; e != null ; prev = e, e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
@@ -713,7 +627,7 @@ public class Hashtable<K,V>
         public Iterator<K> iterator() {
             return getIterator(KEYS);
         }
-        public @NonNegative int size() {
+        public int size() {
             return count;
         }
         public boolean contains(Object o) {
@@ -764,7 +678,7 @@ public class Hashtable<K,V>
             Map.Entry entry = (Map.Entry)o;
             Object key = entry.getKey();
             Entry[] tab = table;
-            int hash = hash(key);
+            int hash = key.hashCode();
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
             for (Entry e = tab[index]; e != null; e = e.next)
@@ -779,7 +693,7 @@ public class Hashtable<K,V>
             Map.Entry<K,V> entry = (Map.Entry<K,V>) o;
             K key = entry.getKey();
             Entry[] tab = table;
-            int hash = hash(key);
+            int hash = key.hashCode();
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
             for (Entry<K,V> e = tab[index], prev = null; e != null;
@@ -799,7 +713,7 @@ public class Hashtable<K,V>
             return false;
         }
 
-        public @NonNegative int size() {
+        public int size() {
             return count;
         }
 
@@ -834,7 +748,7 @@ public class Hashtable<K,V>
         public Iterator<V> iterator() {
             return getIterator(VALUES);
         }
-        public @NonNegative int size() {
+        public int size() {
             return count;
         }
         public boolean contains(Object o) {
@@ -913,11 +827,9 @@ public class Hashtable<K,V>
 
         loadFactor = -loadFactor;  // Mark hashCode computation in progress
         Entry[] tab = table;
-        for (Entry<K,V> entry : tab)
-            while (entry != null) {
-                h += entry.hashCode();
-                entry = entry.next;
-            }
+        for (int i = 0; i < tab.length; i++)
+            for (Entry e = tab[i]; e != null; e = e.next)
+                h += e.key.hashCode() ^ e.value.hashCode();
         loadFactor = -loadFactor;  // Mark hashCode computation complete
 
         return h;
@@ -935,7 +847,7 @@ public class Hashtable<K,V>
      */
     private void writeObject(java.io.ObjectOutputStream s)
             throws IOException {
-        Entry<K, V> entryStack = null;
+        Entry<Object, Object> entryStack = null;
 
         synchronized (this) {
             // Write out the length, threshold, loadfactor
@@ -947,7 +859,7 @@ public class Hashtable<K,V>
 
             // Stack copies of the entries in the table
             for (int index = 0; index < table.length; index++) {
-                Entry<K,V> entry = table[index];
+                Entry entry = table[index];
 
                 while (entry != null) {
                     entryStack =
@@ -988,19 +900,17 @@ public class Hashtable<K,V>
         if (origlength > 0 && length > origlength)
             length = origlength;
 
-        Entry<K,V>[] newTable = new Entry[length];
-        threshold = (int) Math.min(length * loadFactor, MAX_ARRAY_SIZE + 1);
+        Entry[] table = new Entry[length];
         count = 0;
-        initHashSeedAsNeeded(length);
 
         // Read the number of elements and then all the key/value objects
         for (; elements > 0; elements--) {
             K key = (K)s.readObject();
             V value = (V)s.readObject();
             // synch could be eliminated for performance
-            reconstitutionPut(newTable, key, value);
+            reconstitutionPut(table, key, value);
         }
-        this.table = newTable;
+        this.table = table;
     }
 
     /**
@@ -1014,7 +924,7 @@ public class Hashtable<K,V>
      * because we are creating a new instance. Also, no return value
      * is needed.
      */
-    private void reconstitutionPut(Entry<K,V>[] tab, K key, V value)
+    private void reconstitutionPut(Entry[] tab, K key, V value)
         throws StreamCorruptedException
     {
         if (value == null) {
@@ -1022,7 +932,7 @@ public class Hashtable<K,V>
         }
         // Makes sure the key is not already in the hashtable.
         // This should not happen in deserialized version.
-        int hash = hash(key);
+        int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
@@ -1036,17 +946,17 @@ public class Hashtable<K,V>
     }
 
     /**
-     * Hashtable bucket collision list entry
+     * Hashtable collision list.
      */
     private static class Entry<K,V> implements Map.Entry<K,V> {
         int hash;
-        final K key;
+        K key;
         V value;
         Entry<K,V> next;
 
         protected Entry(int hash, K key, V value, Entry<K,V> next) {
             this.hash = hash;
-            this.key =  key;
+            this.key = key;
             this.value = value;
             this.next = next;
         }
@@ -1078,13 +988,14 @@ public class Hashtable<K,V>
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry<?,?> e = (Map.Entry)o;
+            Map.Entry e = (Map.Entry)o;
 
-            return key.equals(e.getKey()) && value.equals(e.getValue());
+            return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
+               (value==null ? e.getValue()==null : value.equals(e.getValue()));
         }
 
         public int hashCode() {
-            return (Objects.hashCode(key) ^ Objects.hashCode(value));
+            return hash ^ (value==null ? 0 : value.hashCode());
         }
 
         public String toString() {

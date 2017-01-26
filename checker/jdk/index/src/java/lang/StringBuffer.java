@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1994, 2008, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -143,19 +140,19 @@ import org.checkerframework.checker.index.qual.*;
         append(seq);
     }
 
-    public synchronized @NonNegative int length() {
+    public synchronized int length() {
         return count;
     }
 
-    public synchronized @NonNegative int capacity() {
+    public synchronized int capacity() {
         return value.length;
     }
 
 
     public synchronized void ensureCapacity(int minimumCapacity) {
-/*        if (minimumCapacity > value.length) {
+        if (minimumCapacity > value.length) {
             expandCapacity(minimumCapacity);
-        }*/
+        }
     }
 
     /**
@@ -186,28 +183,28 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @since      1.5
      */
-    public synchronized int codePointAt(@NonNegative int index) {
+    public synchronized int codePointAt(int index) {
         return super.codePointAt(index);
     }
 
     /**
      * @since     1.5
      */
-    public synchronized int codePointBefore(@Positive int index) {
+    public synchronized int codePointBefore(int index) {
         return super.codePointBefore(index);
     }
 
     /**
      * @since     1.5
      */
-    public synchronized @NonNegative int codePointCount(@NonNegative int beginIndex, @NonNegative int endIndex) {
+    public synchronized int codePointCount(int beginIndex, int endIndex) {
         return super.codePointCount(beginIndex, endIndex);
     }
 
     /**
      * @since     1.5
      */
-    public synchronized @NonNegative int offsetByCodePoints(@NonNegative int index, int codePointOffset) {
+    public synchronized int offsetByCodePoints(int index, int codePointOffset) {
         return super.offsetByCodePoints(index, codePointOffset);
     }
 
@@ -215,8 +212,8 @@ import org.checkerframework.checker.index.qual.*;
      * @throws NullPointerException {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized void getChars(@NonNegative int srcBegin, @NonNegative int srcEnd, char[] dst,
-                                      @NonNegative int dstBegin)
+    public synchronized void getChars(int srcBegin, int srcEnd, char[] dst,
+                                      int dstBegin)
     {
         super.getChars(srcBegin, srcEnd, dst, dstBegin);
     }
@@ -307,7 +304,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @since      1.5
      */
-    public synchronized StringBuffer append(CharSequence s, @NonNegative int start, @NonNegative int end)
+    public synchronized StringBuffer append(CharSequence s, int start, int end)
     {
         super.append(s, start, end);
         return this;
@@ -321,7 +318,7 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer append(char[] str, @NonNegative int offset, @NonNegative int len) {
+    public synchronized StringBuffer append(char[] str, int offset, int len) {
         super.append(str, offset, len);
         return this;
     }
@@ -368,7 +365,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized StringBuffer delete(@NonNegative int start, @NonNegative int end) {
+    public synchronized StringBuffer delete(int start, int end) {
         super.delete(start, end);
         return this;
     }
@@ -377,7 +374,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized StringBuffer deleteCharAt(@NonNegative int index) {
+    public synchronized StringBuffer deleteCharAt(int index) {
         super.deleteCharAt(index);
         return this;
     }
@@ -386,7 +383,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized StringBuffer replace(@NonNegative int start, @NonNegative int end, String str) {
+    public synchronized StringBuffer replace(int start, int end, String str) {
         super.replace(start, end, str);
         return this;
     }
@@ -395,7 +392,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized String substring(@NonNegative int start) {
+    public synchronized String substring(int start) {
         return substring(start, count);
     }
 
@@ -403,7 +400,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @since      1.4
      */
-    public synchronized CharSequence subSequence(@NonNegative int start, @NonNegative int end) {
+    public synchronized CharSequence subSequence(int start, int end) {
         return super.substring(start, end);
     }
 
@@ -411,7 +408,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized String substring(@NonNegative int start, @NonNegative int end) {
+    public synchronized String substring(int start, int end) {
         return super.substring(start, end);
     }
 
@@ -419,8 +416,8 @@ import org.checkerframework.checker.index.qual.*;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized StringBuffer insert(@NonNegative int index, char[] str, @NonNegative int offset,
-                                            @NonNegative int len)
+    public synchronized StringBuffer insert(int index, char[] str, int offset,
+                                            int len)
     {
         super.insert(index, str, offset, len);
         return this;
@@ -429,7 +426,7 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer insert(@NonNegative int offset, Object obj) {
+    public synchronized StringBuffer insert(int offset, Object obj) {
         super.insert(offset, String.valueOf(obj));
         return this;
     }
@@ -437,7 +434,7 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer insert(@NonNegative int offset, String str) {
+    public synchronized StringBuffer insert(int offset, String str) {
         super.insert(offset, str);
         return this;
     }
@@ -445,7 +442,7 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer insert(@NonNegative int offset, char[] str) {
+    public synchronized StringBuffer insert(int offset, char[] str) {
         super.insert(offset, str);
         return this;
     }
@@ -454,7 +451,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @since      1.5
      */
-    public StringBuffer insert(@NonNegative int dstOffset, CharSequence s) {
+    public StringBuffer insert(int dstOffset, CharSequence s) {
         // Note, synchronization achieved via other invocations
         if (s == null)
             s = "null";
@@ -467,8 +464,8 @@ import org.checkerframework.checker.index.qual.*;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @since      1.5
      */
-    public synchronized StringBuffer insert(@NonNegative int dstOffset, CharSequence s,
-                                            @NonNegative int start, @NonNegative int end)
+    public synchronized StringBuffer insert(int dstOffset, CharSequence s,
+                                            int start, int end)
     {
         super.insert(dstOffset, s, start, end);
         return this;
@@ -477,14 +474,14 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuffer insert(@NonNegative int offset, boolean b) {
+    public StringBuffer insert(int offset, boolean b) {
         return insert(offset, String.valueOf(b));
     }
 
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer insert(@NonNegative int offset, char c) {
+    public synchronized StringBuffer insert(int offset, char c) {
         super.insert(offset, c);
         return this;
     }
@@ -492,28 +489,28 @@ import org.checkerframework.checker.index.qual.*;
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuffer insert(@NonNegative int offset, int i) {
+    public StringBuffer insert(int offset, int i) {
         return insert(offset, String.valueOf(i));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuffer insert(@NonNegative int offset, long l) {
+    public StringBuffer insert(int offset, long l) {
         return insert(offset, String.valueOf(l));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuffer insert(@NonNegative int offset, float f) {
+    public StringBuffer insert(int offset, float f) {
         return insert(offset, String.valueOf(f));
     }
 
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuffer insert(@NonNegative int offset, double d) {
+    public StringBuffer insert(int offset, double d) {
         return insert(offset, String.valueOf(d));
     }
 
@@ -521,7 +518,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws NullPointerException {@inheritDoc}
      * @since      1.4
      */
-    public @GTENegativeOne int indexOf(String str) {
+    public int indexOf(String str) {
         return indexOf(str, 0);
     }
 
@@ -529,7 +526,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws NullPointerException {@inheritDoc}
      * @since      1.4
      */
-    public synchronized @GTENegativeOne int indexOf(String str, int fromIndex) {
+    public synchronized int indexOf(String str, int fromIndex) {
         return String.indexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }
@@ -538,7 +535,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws NullPointerException {@inheritDoc}
      * @since      1.4
      */
-    public @GTENegativeOne int lastIndexOf(String str) {
+    public int lastIndexOf(String str) {
         // Note, synchronization achieved via other invocations
         return lastIndexOf(str, count);
     }
@@ -547,7 +544,7 @@ import org.checkerframework.checker.index.qual.*;
      * @throws NullPointerException {@inheritDoc}
      * @since      1.4
      */
-    public synchronized @GTENegativeOne int lastIndexOf(String str, int fromIndex) {
+    public synchronized int lastIndexOf(String str, int fromIndex) {
         return String.lastIndexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }

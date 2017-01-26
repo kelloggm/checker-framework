@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1996, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -45,9 +45,6 @@ import sun.util.calendar.CalendarSystem;
 import sun.util.calendar.CalendarUtils;
 import sun.util.calendar.BaseCalendar;
 import sun.util.calendar.Gregorian;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * <code>SimpleTimeZone</code> is a concrete subclass of <code>TimeZone</code>
@@ -807,7 +804,7 @@ public class SimpleTimeZone extends TimeZone {
      * @see #getDSTSavings
      * @since 1.2
      */
-    public void setDSTSavings(@Positive int millisSavedDuringDST) {
+    public void setDSTSavings(int millisSavedDuringDST) {
         if (millisSavedDuringDST <= 0) {
             throw new IllegalArgumentException("Illegal daylight saving value: "
                                                + millisSavedDuringDST);
@@ -827,7 +824,7 @@ public class SimpleTimeZone extends TimeZone {
      * @see #setDSTSavings
      * @since 1.2
      */
-    public @NonNegative int getDSTSavings() {
+    public int getDSTSavings() {
         return useDaylight ? dstSavings : 0;
     }
 
@@ -946,7 +943,7 @@ public class SimpleTimeZone extends TimeZone {
      * @return a string representation of this time zone.
      */
     public String toString() {
-        return getClass().getName()/* +
+        return getClass().getName() +
             "[id=" + getID() +
             ",offset=" + rawOffset +
             ",dstSavings=" + dstSavings +
@@ -963,7 +960,7 @@ public class SimpleTimeZone extends TimeZone {
             ",endDay=" + endDay +
             ",endDayOfWeek=" + endDayOfWeek +
             ",endTime=" + endTime +
-            ",endTimeMode=" + endTimeMode + ']'*/;
+            ",endTimeMode=" + endTimeMode + ']';
     }
 
     // =======================privates===============================

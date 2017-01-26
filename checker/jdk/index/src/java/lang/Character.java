@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
@@ -29,11 +29,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
-
-import org.checkerframework.checker.index.qual.*;
-
-
-
 
 /**
  * The {@code Character} class wraps a value of the primitive
@@ -4621,7 +4616,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * @see     Character#isSupplementaryCodePoint(int)
      * @since   1.5
      */
-    public static @Positive int charCount(int codePoint) {
+    public static int charCount(int codePoint) {
         return codePoint >= MIN_SUPPLEMENTARY_CODE_POINT ? 2 : 1;
     }
 
@@ -4669,7 +4664,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * {@link CharSequence#length() seq.length()}.
      * @since  1.5
      */
-    public static int codePointAt(CharSequence seq, @NonNegative int index) {
+    public static int codePointAt(CharSequence seq, int index) {
         char c1 = seq.charAt(index++);
         if (isHighSurrogate(c1)) {
             if (index < seq.length()) {
@@ -4703,7 +4698,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * the length of the {@code char} array.
      * @since  1.5
      */
-    public static int codePointAt(char[] a, @NonNegative int index) {
+    public static int codePointAt(char[] a, int index) {
         return codePointAtImpl(a, index, a.length);
     }
 
@@ -4732,7 +4727,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * greater than the length of the {@code char} array.
      * @since  1.5
      */
-    public static int codePointAt(char[] a, @NonNegative int index,@NonNegative  int limit) {
+    public static int codePointAt(char[] a, int index, int limit) {
         if (index >= limit || limit < 0 || limit > a.length) {
             throw new IndexOutOfBoundsException();
         }
@@ -4774,7 +4769,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * CharSequence#length() seq.length()}.
      * @since  1.5
      */
-    public static int codePointBefore(CharSequence seq, @NonNegative int index) {
+    public static int codePointBefore(CharSequence seq, int index) {
         char c2 = seq.charAt(--index);
         if (isLowSurrogate(c2)) {
             if (index > 0) {
@@ -4808,7 +4803,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * {@code char} array
      * @since  1.5
      */
-    public static int codePointBefore(char[] a, @NonNegative int index) {
+    public static int codePointBefore(char[] a, int index) {
         return codePointBeforeImpl(a, index, 0);
     }
 
@@ -4839,7 +4834,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * the length of the {@code char} array.
      * @since  1.5
      */
-    public static int codePointBefore(char[] a, @NonNegative int index, @NonNegative int start) {
+    public static int codePointBefore(char[] a, int index, int start) {
         if (index <= start || start < 0 || start >= a.length) {
             throw new IndexOutOfBoundsException();
         }
@@ -4948,7 +4943,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * {@code dst[dstIndex]}.)
      * @since  1.5
      */
-    public static @Positive int toChars(int codePoint, char[] dst, @NonNegative int dstIndex) {
+    public static int toChars(int codePoint, char[] dst, int dstIndex) {
         if (isBmpCodePoint(codePoint)) {
             dst[dstIndex] = (char) codePoint;
             return 1;
@@ -5017,7 +5012,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * {@code beginIndex} is larger than {@code endIndex}.
      * @since  1.5
      */
-    public static @NonNegative int codePointCount(CharSequence seq, @NonNegative int beginIndex, @NonNegative int endIndex) {
+    public static int codePointCount(CharSequence seq, int beginIndex, int endIndex) {
         int length = seq.length();
         if (beginIndex < 0 || endIndex > length || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException();
@@ -5052,7 +5047,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * count} is larger than the length of the given array.
      * @since  1.5
      */
-    public static @NonNegative int codePointCount(char[] a, @NonNegative int offset, @NonNegative int count) {
+    public static int codePointCount(char[] a, int offset, int count) {
         if (count > a.length - offset || offset < 0 || count < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -5094,8 +5089,8 @@ class Character implements java.io.Serializable, Comparable<Character> {
      *   of {@code codePointOffset} code points.
      * @since 1.5
      */
-    public static @NonNegative int offsetByCodePoints(CharSequence seq, @NonNegative int index,
-                                         @NonNegative int codePointOffset) {
+    public static int offsetByCodePoints(CharSequence seq, int index,
+                                         int codePointOffset) {
         int length = seq.length();
         if (index < 0 || index > length) {
             throw new IndexOutOfBoundsException();
@@ -5161,8 +5156,8 @@ class Character implements java.io.Serializable, Comparable<Character> {
      *   {@code codePointOffset} code points.
      * @since 1.5
      */
-    public static @NonNegative int offsetByCodePoints(char[] a, @NonNegative int start, @NonNegative int count,
-                                         @NonNegative int index, int codePointOffset) {
+    public static int offsetByCodePoints(char[] a, int start, int count,
+                                         int index, int codePointOffset) {
         if (count > a.length-start || start < 0 || count < 0
             || index < start || index > start+count) {
             throw new IndexOutOfBoundsException();
@@ -6322,7 +6317,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * @see     Character#forDigit(int, int)
      * @see     Character#isDigit(char)
      */
-    public static int digit(char ch, @Positive int radix) {
+    public static int digit(char ch, int radix) {
         return digit((int)ch, radix);
     }
 
@@ -6374,7 +6369,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * @see     Character#isDigit(int)
      * @since   1.5
      */
-    public static int digit(int codePoint, @Positive int radix) {
+    public static int digit(int codePoint, int radix) {
         return CharacterData.of(codePoint).digit(codePoint, radix);
     }
 
@@ -6763,7 +6758,7 @@ class Character implements java.io.Serializable, Comparable<Character> {
      * @see     Character#MAX_RADIX
      * @see     Character#digit(char, int)
      */
-    public static char forDigit(int digit, @Positive int radix) {
+    public static char forDigit(int digit, int radix) {
         if ((digit >= radix) || (digit < 0)) {
             return '\0';
         }

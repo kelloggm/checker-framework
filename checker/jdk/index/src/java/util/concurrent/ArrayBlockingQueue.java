@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -36,9 +36,6 @@
 package java.util.concurrent;
 import java.util.concurrent.locks.*;
 import java.util.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A bounded {@linkplain BlockingQueue blocking queue} backed by an
@@ -90,13 +87,13 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     final Object[] items;
 
     /** items index for next take, poll, peek or remove */
-    @NonNegative int takeIndex;
+    int takeIndex;
 
     /** items index for next put, offer, or add */
-    @NonNegative int putIndex;
+    int putIndex;
 
     /** Number of elements in the queue */
-    @NonNegative int count;
+    int count;
 
     /*
      * Concurrency control uses the classic two-condition algorithm
@@ -134,7 +131,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     /**
      * Returns item at index i.
      */
-    final E itemAt(@NonNegative int i) {
+    final E itemAt(int i) {
         return this.<E>cast(items[i]);
     }
 
@@ -209,7 +206,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @param capacity the capacity of this queue
      * @throws IllegalArgumentException if {@code capacity < 1}
      */
-    public ArrayBlockingQueue(@Positive int capacity) {
+    public ArrayBlockingQueue(int capacity) {
         this(capacity, false);
     }
 
@@ -223,7 +220,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      *        if {@code false} the access order is unspecified.
      * @throws IllegalArgumentException if {@code capacity < 1}
      */
-    public ArrayBlockingQueue(@Positive int capacity, boolean fair) {
+    public ArrayBlockingQueue(int capacity, boolean fair) {
         if (capacity <= 0)
             throw new IllegalArgumentException();
         this.items = new Object[capacity];
@@ -248,7 +245,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
-    public ArrayBlockingQueue(@Positive int capacity, boolean fair,
+    public ArrayBlockingQueue(int capacity, boolean fair,
                               Collection<? extends E> c) {
         this(capacity, fair);
 
@@ -414,7 +411,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      *
      * @return the number of elements in this queue
      */
-    public @NonNegative int size() {
+    public int size() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -437,7 +434,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * because it may be the case that another thread is about to
      * insert or remove an element.
      */
-    public @NonNegative int remainingCapacity() {
+    public int remainingCapacity() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {

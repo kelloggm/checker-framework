@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -40,10 +40,6 @@ import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A hash table supporting full concurrency of retrievals and
@@ -182,63 +178,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     /* ---------------- Fields -------------- */
 
     /**
-     * holds values which can't be initialized until after VM is booted.
-     */
-    private static class Holder {
-
-        /**
-        * Enable alternative hashing of String keys?
-        *
-        * <p>Unlike the other hash map implementations we do not implement a
-        * threshold for regulating whether alternative hashing is used for
-        * String keys. Alternative hashing is either enabled for all instances
-        * or disabled for all instances.
-        */
-        static final boolean ALTERNATIVE_HASHING;
-
-        static {
-            // Use the "threshold" system property even though our threshold
-            // behaviour is "ON" or "OFF".
-            String altThreshold = java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction(
-                    "jdk.map.althashing.threshold"));
-
-            int threshold;
-            try {
-                threshold = (null != altThreshold)
-                        ? Integer.parseInt(altThreshold)
-                        : Integer.MAX_VALUE;
-
-                // disable alternative hashing if -1
-                if (threshold == -1) {
-                    threshold = Integer.MAX_VALUE;
-                }
-
-                if (threshold < 0) {
-                    throw new IllegalArgumentException("value must be positive integer.");
-                }
-            } catch(IllegalArgumentException failed) {
-                throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
-            }
-            ALTERNATIVE_HASHING = threshold <= MAXIMUM_CAPACITY;
-        }
-    }
-
-    /**
-     * A randomizing value associated with this instance that is applied to
-     * hash code of keys to make hash collisions harder to find.
-     */
-    private transient final int hashSeed = randomHashSeed(this);
-
-    private static int randomHashSeed(ConcurrentHashMap instance) {
-/*        if (sun.misc.VM.isBooted() && Holder.ALTERNATIVE_HASHING) {
-            return sun.misc.Hashing.randomHashSeed(instance);
-        }*/
-
-        return 0;
-    }
-
-    /**
      * Mask value for indexing into segments. The upper bits of a
      * key's hash code are used to choose the segment.
      */
@@ -304,7 +243,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * performance-sensitive methods to reduce call overhead.
      */
     @SuppressWarnings("unchecked")
-    static final <K,V> HashEntry<K,V> entryAt(HashEntry<K,V>[] tab, @NonNegative int i) {
+    static final <K,V> HashEntry<K,V> entryAt(HashEntry<K,V>[] tab, int i) {
         return (tab == null) ? null :
             (HashEntry<K,V>) UNSAFE.getObjectVolatile
             (tab, ((long)i << TSHIFT) + TBASE);
@@ -314,7 +253,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * Sets the ith element of given table, with volatile write
      * semantics. (See above about use of putOrderedObject.)
      */
-    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, @NonNegative int i,
+    static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i,
                                        HashEntry<K,V> e) {
         UNSAFE.putOrderedObject(tab, ((long)i << TSHIFT) + TBASE, e);
     }
@@ -326,15 +265,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * that otherwise encounter collisions for hashCodes that do not
      * differ in lower or upper bits.
      */
-    private int hash(Object k) {
-        int h = hashSeed;
-
-/*        if ((0 != h) && (k instanceof String)) {
-            return sun.misc.Hashing.stringHash32((String) k);
-        }*/
-
-        h ^= k.hashCode();
-
+    private static int hash(int h) {
         // Spread bits to regularize both segment and index locations,
         // using variant of single-word Wang/Jenkins hash.
         h += (h <<  15) ^ 0xffffcd7d;
@@ -801,8 +732,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * nonpositive.
      */
     @SuppressWarnings("unchecked")
-    public ConcurrentHashMap(@NonNegative int initialCapacity,
-                             float loadFactor, @Positive int concurrencyLevel) {
+    public ConcurrentHashMap(int initialCapacity,
+                             float loadFactor, int concurrencyLevel) {
         if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0)
             throw new IllegalArgumentException();
         if (concurrencyLevel > MAX_SEGMENTS)
@@ -847,7 +778,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      *
      * @since 1.6
      */
-    public ConcurrentHashMap(@NonNegative int initialCapacity, float loadFactor) {
+    public ConcurrentHashMap(int initialCapacity, float loadFactor) {
         this(initialCapacity, loadFactor, DEFAULT_CONCURRENCY_LEVEL);
     }
 
@@ -860,7 +791,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws IllegalArgumentException if the initial capacity of
      * elements is negative.
      */
-    public ConcurrentHashMap(@NonNegative int initialCapacity) {
+    public ConcurrentHashMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL);
     }
 
@@ -934,7 +865,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      *
      * @return the number of key-value mappings in this map
      */
-    public @NonNegative int size() {
+    public int size() {
         // Try a few times to get accurate count. On failure due to
         // continuous async changes in table, resort to locking.
         final Segment<K,V>[] segments = this.segments;
@@ -988,7 +919,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     public V get(Object key) {
         Segment<K,V> s; // manually integrate access methods to reduce overhead
         HashEntry<K,V>[] tab;
-        int h = hash(key);
+        int h = hash(key.hashCode());
         long u = (((h >>> segmentShift) & segmentMask) << SSHIFT) + SBASE;
         if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null &&
             (tab = s.table) != null) {
@@ -1016,7 +947,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     public boolean containsKey(Object key) {
         Segment<K,V> s; // same as get() except no need for volatile value read
         HashEntry<K,V>[] tab;
-        int h = hash(key);
+        int h = hash(key.hashCode());
         long u = (((h >>> segmentShift) & segmentMask) << SSHIFT) + SBASE;
         if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null &&
             (tab = s.table) != null) {
@@ -1125,7 +1056,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         Segment<K,V> s;
         if (value == null)
             throw new NullPointerException();
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         int j = (hash >>> segmentShift) & segmentMask;
         if ((s = (Segment<K,V>)UNSAFE.getObject          // nonvolatile; recheck
              (segments, (j << SSHIFT) + SBASE)) == null) //  in ensureSegment
@@ -1145,7 +1076,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         Segment<K,V> s;
         if (value == null)
             throw new NullPointerException();
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         int j = (hash >>> segmentShift) & segmentMask;
         if ((s = (Segment<K,V>)UNSAFE.getObject
              (segments, (j << SSHIFT) + SBASE)) == null)
@@ -1175,7 +1106,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws NullPointerException if the specified key is null
      */
     public V remove(Object key) {
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         Segment<K,V> s = segmentForHash(hash);
         return s == null ? null : s.remove(key, hash, null);
     }
@@ -1186,7 +1117,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws NullPointerException if the specified key is null
      */
     public boolean remove(Object key, Object value) {
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         Segment<K,V> s;
         return value != null && (s = segmentForHash(hash)) != null &&
             s.remove(key, hash, value) != null;
@@ -1198,7 +1129,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws NullPointerException if any of the arguments are null
      */
     public boolean replace(K key, V oldValue, V newValue) {
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         if (oldValue == null || newValue == null)
             throw new NullPointerException();
         Segment<K,V> s = segmentForHash(hash);
@@ -1213,7 +1144,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws NullPointerException if the specified key or value is null
      */
     public V replace(K key, V value) {
-        int hash = hash(key);
+        int hash = hash(key.hashCode());
         if (value == null)
             throw new NullPointerException();
         Segment<K,V> s = segmentForHash(hash);
@@ -1430,7 +1361,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         public Iterator<K> iterator() {
             return new KeyIterator();
         }
-        public @NonNegative int size() {
+        public int size() {
             return ConcurrentHashMap.this.size();
         }
         public boolean isEmpty() {
@@ -1451,7 +1382,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         public Iterator<V> iterator() {
             return new ValueIterator();
         }
-        public @NonNegative int size() {
+        public int size() {
             return ConcurrentHashMap.this.size();
         }
         public boolean isEmpty() {
@@ -1482,7 +1413,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             Map.Entry<?,?> e = (Map.Entry<?,?>)o;
             return ConcurrentHashMap.this.remove(e.getKey(), e.getValue());
         }
-        public @NonNegative int size() {
+        public int size() {
             return ConcurrentHashMap.this.size();
         }
         public boolean isEmpty() {
@@ -1539,26 +1470,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     @SuppressWarnings("unchecked")
     private void readObject(java.io.ObjectInputStream s)
         throws IOException, ClassNotFoundException {
-        // Don't call defaultReadObject()
-        ObjectInputStream.GetField oisFields = s.readFields();
-        final Segment<K,V>[] oisSegments = (Segment<K,V>[])oisFields.get("segments", null);
-
-        final int ssize = oisSegments.length;
-        if (ssize < 1 || ssize > MAX_SEGMENTS
-            || (ssize & (ssize-1)) != 0 )  // ssize not power of two
-            throw new java.io.InvalidObjectException("Bad number of segments:"
-                                                     + ssize);
-        int sshift = 0, ssizeTmp = ssize;
-        while (ssizeTmp > 1) {
-            ++sshift;
-            ssizeTmp >>>= 1;
-        }
-        UNSAFE.putIntVolatile(this, SEGSHIFT_OFFSET, 32 - sshift);
-        UNSAFE.putIntVolatile(this, SEGMASK_OFFSET, ssize - 1);
-        UNSAFE.putObjectVolatile(this, SEGMENTS_OFFSET, oisSegments);
-
-        // set hashMask
-        UNSAFE.putIntVolatile(this, HASHSEED_OFFSET, randomHashSeed(this));
+        s.defaultReadObject();
 
         // Re-initialize segments to be minimally sized, and let grow.
         int cap = MIN_SEGMENT_TABLE_CAPACITY;
@@ -1587,10 +1499,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     private static final int SSHIFT;
     private static final long TBASE;
     private static final int TSHIFT;
-    private static final long HASHSEED_OFFSET;
-    private static final long SEGSHIFT_OFFSET;
-    private static final long SEGMASK_OFFSET;
-    private static final long SEGMENTS_OFFSET;
 
     static {
         int ss, ts;
@@ -1602,14 +1510,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             SBASE = UNSAFE.arrayBaseOffset(sc);
             ts = UNSAFE.arrayIndexScale(tc);
             ss = UNSAFE.arrayIndexScale(sc);
-            HASHSEED_OFFSET = UNSAFE.objectFieldOffset(
-                ConcurrentHashMap.class.getDeclaredField("hashSeed"));
-            SEGSHIFT_OFFSET = UNSAFE.objectFieldOffset(
-                ConcurrentHashMap.class.getDeclaredField("segmentShift"));
-            SEGMASK_OFFSET = UNSAFE.objectFieldOffset(
-                ConcurrentHashMap.class.getDeclaredField("segmentMask"));
-            SEGMENTS_OFFSET = UNSAFE.objectFieldOffset(
-                ConcurrentHashMap.class.getDeclaredField("segments"));
         } catch (Exception e) {
             throw new Error(e);
         }

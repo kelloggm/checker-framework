@@ -1,49 +1,41 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang.invoke;
 
 import java.lang.reflect.*;
-
+import sun.invoke.WrapperInstance;
 import sun.invoke.util.ValueConversions;
 import sun.invoke.util.VerifyAccess;
 import sun.invoke.util.Wrapper;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
-import sun.reflect.misc.ReflectUtil;
 import static java.lang.invoke.MethodHandleStatics.*;
 import static java.lang.invoke.MethodHandleNatives.Constants.*;
-import sun.security.util.SecurityConstants;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class consists exclusively of static methods that operate on or return
@@ -74,9 +66,8 @@ public class MethodHandles {
      * This lookup object is a <em>capability</em> which may be delegated to trusted agents.
      * Do not store it in place where untrusted code can access it.
      */
-    @CallerSensitive
     public static Lookup lookup() {
-        return new Lookup(Reflection.getCallerClass());
+        return new Lookup();
     }
 
     /**
@@ -183,8 +174,6 @@ public class MethodHandles {
      * Both {@code MT} and the field type {@code FT} are documented as a parameter named {@code type}.
      * The formal parameter {@code this} stands for the self-reference of type {@code C};
      * if it is present, it is always the leading argument to the method handle invocation.
-     * (In the case of some {@code protected} members, {@code this} may be
-     * restricted in type to the lookup class; see below.)
      * The name {@code arg} stands for all the other method handle arguments.
      * In the code examples for the Core Reflection API, the name {@code thisOrNull}
      * stands for a null reference if the accessed method or field is static,
@@ -251,30 +240,9 @@ public class MethodHandles {
      * In general, the conditions under which a method handle may be
      * looked up for a method {@code M} are exactly equivalent to the conditions
      * under which the lookup class could have compiled and resolved a call to {@code M}.
-     * Where the JVM would raise exceptions like {@code NoSuchMethodError},
-     * a method handle lookup will generally raise a corresponding
-     * checked exception, such as {@code NoSuchMethodException}.
      * And the effect of invoking the method handle resulting from the lookup
      * is exactly equivalent to executing the compiled and resolved call to {@code M}.
      * The same point is true of fields and constructors.
-     * <p>
-     * If the desired member is {@code protected}, the usual JVM rules apply,
-     * including the requirement that the lookup class must be either be in the
-     * same package as the desired member, or must inherit that member.
-     * (See the Java Virtual Machine Specification, sections 4.9.2, 5.4.3.5, and 6.4.)
-     * In addition, if the desired member is a non-static field or method
-     * in a different package, the resulting method handle may only be applied
-     * to objects of the lookup class or one of its subclasses.
-     * This requirement is enforced by narrowing the type of the leading
-     * {@code this} parameter from {@code C}
-     * (which will necessarily be a superclass of the lookup class)
-     * to the lookup class itself.
-     * <p>
-     * The JVM represents constructors and static initializer blocks as internal methods
-     * with special names ({@code "<init>"} and {@code "<clinit>"}).
-     * The internal syntax of invocation instructions allows them to refer to such internal
-     * methods as if they were normal methods, but the JVM verifier rejects them.
-     * A lookup of such an internal method will produce a {@code NoSuchMethodException}.
      * <p>
      * In some cases, access between nested classes is obtained by the Java compiler by creating
      * an wrapper method to access a private method of another class
@@ -438,10 +406,14 @@ public class MethodHandles {
          * Also, don't make it private, lest javac interpose
          * an access$N method.
          */
+        Lookup() {
+            this(getCallerClassAtEntryPoint(), ALL_MODES);
+            // make sure we haven't accidentally picked up a privileged class:
+            checkUnprivilegedlookupClass(lookupClass);
+        }
 
         Lookup(Class<?> lookupClass) {
             this(lookupClass, ALL_MODES);
-            checkUnprivilegedlookupClass(lookupClass, ALL_MODES);
         }
 
         private Lookup(Class<?> lookupClass, int allowedModes) {
@@ -489,13 +461,13 @@ public class MethodHandles {
                 && !VerifyAccess.isSamePackageMember(this.lookupClass, requestedLookupClass)) {
                 newModes &= ~PRIVATE;
             }
-            if ((newModes & PUBLIC) != 0
-                && !VerifyAccess.isClassAccessible(requestedLookupClass, this.lookupClass, allowedModes)) {
+            if (newModes == PUBLIC
+                && !VerifyAccess.isClassAccessible(requestedLookupClass, this.lookupClass)) {
                 // The requested class it not accessible from the lookup class.
                 // No permissions.
                 newModes = 0;
             }
-            checkUnprivilegedlookupClass(requestedLookupClass, newModes);
+            checkUnprivilegedlookupClass(requestedLookupClass);
             return new Lookup(requestedLookupClass, newModes);
         }
 
@@ -511,19 +483,10 @@ public class MethodHandles {
         /** Package-private version of lookup which is trusted. */
         static final Lookup IMPL_LOOKUP = new Lookup(Object.class, TRUSTED);
 
-        private static void checkUnprivilegedlookupClass(Class<?> lookupClass, int allowedModes) {
+        private static void checkUnprivilegedlookupClass(Class<?> lookupClass) {
             String name = lookupClass.getName();
             if (name.startsWith("java.lang.invoke."))
                 throw newIllegalArgumentException("illegal lookupClass: "+lookupClass);
-
-            // For caller-sensitive MethodHandles.lookup()
-            // disallow lookup more restricted packages
-            if (allowedModes == ALL_MODES && lookupClass.getClassLoader() == null) {
-                if (name.startsWith("java.") ||
-                        (name.startsWith("sun.") && !name.startsWith("sun.invoke."))) {
-                    throw newIllegalArgumentException("illegal lookupClass: " + lookupClass);
-                }
-            }
         }
 
         /**
@@ -577,6 +540,16 @@ public class MethodHandles {
             }
         }
 
+        // call this from an entry point method in Lookup with extraFrames=0.
+        private static Class<?> getCallerClassAtEntryPoint() {
+            final int CALLER_DEPTH = 4;
+            // 0: Reflection.getCC, 1: getCallerClassAtEntryPoint,
+            // 2: Lookup.<init>, 3: MethodHandles.*, 4: caller
+            // Note:  This should be the only use of getCallerClass in this file.
+            assert(Reflection.getCallerClass(CALLER_DEPTH-1) == MethodHandles.class);
+            return Reflection.getCallerClass(CALLER_DEPTH);
+        }
+
         /**
          * Produces a method handle for a static method.
          * The type of the method handle will be that of the method.
@@ -590,15 +563,6 @@ public class MethodHandles {
          * The returned method handle will have
          * {@linkplain MethodHandle#asVarargsCollector variable arity} if and only if
          * the method's variable arity modifier bit ({@code 0x0080}) is set.
-         * <b>Example:</b>
-         * <p><blockquote><pre>{@code
-import static java.lang.invoke.MethodHandles.*;
-import static java.lang.invoke.MethodType.*;
-...
-MethodHandle MH_asList = publicLookup().findStatic(Arrays.class,
-  "asList", methodType(List.class, Object[].class));
-assertEquals("[x, y]", MH_asList.invoke("x", "y").toString());
-         * }</pre></blockquote>
          * @param refc the class from which the method is accessed
          * @param name the name of the method
          * @param type the type of the method
@@ -614,9 +578,19 @@ assertEquals("[x, y]", MH_asList.invoke("x", "y").toString());
          */
         public
         MethodHandle findStatic(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
-            MemberName method = resolveOrFail(REF_invokeStatic, refc, name, type);
-            checkSecurityManager(refc, method);
-            return getDirectMethod(REF_invokeStatic, refc, method, findBoundCallerClass(method));
+            MemberName method = resolveOrFail(refc, name, type, true);
+            checkSecurityManager(refc, method);  // stack walk magic: do not refactor
+            return accessStatic(refc, method);
+        }
+        private
+        MethodHandle accessStatic(Class<?> refc, MemberName method) throws IllegalAccessException {
+            checkMethod(refc, method, true);
+            return MethodHandleImpl.findMethod(method, false, lookupClassOrNull());
+        }
+        private
+        MethodHandle resolveStatic(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
+            MemberName method = resolveOrFail(refc, name, type, true);
+            return accessStatic(refc, method);
         }
 
         /**
@@ -631,11 +605,6 @@ assertEquals("[x, y]", MH_asList.invoke("x", "y").toString());
          * (The dispatching action is identical with that performed by an
          * {@code invokevirtual} or {@code invokeinterface} instruction.)
          * <p>
-         * The first argument will be of type {@code refc} if the lookup
-         * class has full privileges to access the member.  Otherwise
-         * the member must be {@code protected} and the first argument
-         * will be restricted in type to the lookup class.
-         * <p>
          * The returned method handle will have
          * {@linkplain MethodHandle#asVarargsCollector variable arity} if and only if
          * the method's variable arity modifier bit ({@code 0x0080}) is set.
@@ -648,34 +617,6 @@ assertEquals("[x, y]", MH_asList.invoke("x", "y").toString());
          * {@link java.lang.invoke.MethodHandles#exactInvoker MethodHandles.exactInvoker} or
          * {@link java.lang.invoke.MethodHandles#invoker MethodHandles.invoker}
          * with the same {@code type} argument.
-         *
-         * <b>Example:</b>
-         * <p><blockquote><pre>{@code
-import static java.lang.invoke.MethodHandles.*;
-import static java.lang.invoke.MethodType.*;
-...
-MethodHandle MH_concat = publicLookup().findVirtual(String.class,
-  "concat", methodType(String.class, String.class));
-MethodHandle MH_hashCode = publicLookup().findVirtual(Object.class,
-  "hashCode", methodType(int.class));
-MethodHandle MH_hashCode_String = publicLookup().findVirtual(String.class,
-  "hashCode", methodType(int.class));
-assertEquals("xy", (String) MH_concat.invokeExact("x", "y"));
-assertEquals("xy".hashCode(), (int) MH_hashCode.invokeExact((Object)"xy"));
-assertEquals("xy".hashCode(), (int) MH_hashCode_String.invokeExact("xy"));
-// interface method:
-MethodHandle MH_subSequence = publicLookup().findVirtual(CharSequence.class,
-  "subSequence", methodType(CharSequence.class, int.class, int.class));
-assertEquals("def", MH_subSequence.invoke("abcdefghi", 3, 6).toString());
-// constructor "internal method" must be accessed differently:
-MethodType MT_newString = methodType(void.class); //()V for new String()
-try { assertEquals("impossible", lookup()
-        .findVirtual(String.class, "<init>", MT_newString));
- } catch (NoSuchMethodException ex) { } // OK
-MethodHandle MH_newString = publicLookup()
-  .findConstructor(String.class, MT_newString);
-assertEquals("", (String) MH_newString.invokeExact());
-         * }</pre></blockquote>
          *
          * @param refc the class or interface from which the method is accessed
          * @param name the name of the method
@@ -691,22 +632,18 @@ assertEquals("", (String) MH_newString.invokeExact());
          * @throws NullPointerException if any argument is null
          */
         public MethodHandle findVirtual(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
-            if (refc == MethodHandle.class) {
-                MethodHandle mh = findVirtualForMH(name, type);
-                if (mh != null)  return mh;
-            }
-            byte refKind = (refc.isInterface() ? REF_invokeInterface : REF_invokeVirtual);
-            MemberName method = resolveOrFail(refKind, refc, name, type);
-            checkSecurityManager(refc, method);
-            return getDirectMethod(refKind, refc, method, findBoundCallerClass(method));
+            MemberName method = resolveOrFail(refc, name, type, false);
+            checkSecurityManager(refc, method);  // stack walk magic: do not refactor
+            return accessVirtual(refc, method);
         }
-        private MethodHandle findVirtualForMH(String name, MethodType type) {
-            // these names require special lookups because of the implicit MethodType argument
-            if ("invoke".equals(name))
-                return invoker(type);
-            if ("invokeExact".equals(name))
-                return exactInvoker(type);
-            return null;
+        private MethodHandle resolveVirtual(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
+            MemberName method = resolveOrFail(refc, name, type, false);
+            return accessVirtual(refc, method);
+        }
+        private MethodHandle accessVirtual(Class<?> refc, MemberName method) throws IllegalAccessException {
+            checkMethod(refc, method, false);
+            MethodHandle mh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
+            return restrictProtectedReceiver(method, mh);
         }
 
         /**
@@ -718,30 +655,12 @@ assertEquals("", (String) MH_newString.invokeExact());
          * If the constructor's class has not yet been initialized, that is done
          * immediately, before the method handle is returned.
          * <p>
-         * <em>(Note:  The requested type must have a return type of {@code void}.
-         * This is consistent with the JVM's treatment of constructor type descriptors.)</em>
+         * Note:  The requested type must have a return type of {@code void}.
+         * This is consistent with the JVM's treatment of constructor type descriptors.
          * <p>
          * The returned method handle will have
          * {@linkplain MethodHandle#asVarargsCollector variable arity} if and only if
          * the constructor's variable arity modifier bit ({@code 0x0080}) is set.
-         * <b>Example:</b>
-         * <p><blockquote><pre>{@code
-import static java.lang.invoke.MethodHandles.*;
-import static java.lang.invoke.MethodType.*;
-...
-MethodHandle MH_newArrayList = publicLookup().findConstructor(
-  ArrayList.class, methodType(void.class, Collection.class));
-Collection orig = Arrays.asList("x", "y");
-Collection copy = (ArrayList) MH_newArrayList.invokeExact(orig);
-assert(orig != copy);
-assertEquals(orig, copy);
-// a variable-arity constructor:
-MethodHandle MH_newProcessBuilder = publicLookup().findConstructor(
-  ProcessBuilder.class, methodType(void.class, String[].class));
-ProcessBuilder pb = (ProcessBuilder)
-  MH_newProcessBuilder.invoke("x", "y", "z");
-assertEquals("[x, y, z]", pb.command().toString());
-         * }</pre></blockquote>
          * @param refc the class or interface from which the method is accessed
          * @param type the type of the method, with the receiver argument omitted, and a void return type
          * @return the desired method handle
@@ -755,9 +674,36 @@ assertEquals("[x, y, z]", pb.command().toString());
          */
         public MethodHandle findConstructor(Class<?> refc, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             String name = "<init>";
-            MemberName ctor = resolveOrFail(REF_newInvokeSpecial, refc, name, type);
-            checkSecurityManager(refc, ctor);
-            return getDirectConstructor(refc, ctor);
+            MemberName ctor = resolveOrFail(refc, name, type, false, false, lookupClassOrNull());
+            checkSecurityManager(refc, ctor);  // stack walk magic: do not refactor
+            return accessConstructor(refc, ctor);
+        }
+        private MethodHandle accessConstructor(Class<?> refc, MemberName ctor) throws IllegalAccessException {
+            assert(ctor.isConstructor());
+            checkAccess(refc, ctor);
+            MethodHandle rawMH = MethodHandleImpl.findMethod(ctor, false, lookupClassOrNull());
+            MethodHandle allocMH = MethodHandleImpl.makeAllocator(rawMH);
+            return fixVarargs(allocMH, rawMH);
+        }
+        private MethodHandle resolveConstructor(Class<?> refc, MethodType type) throws NoSuchMethodException, IllegalAccessException {
+            String name = "<init>";
+            MemberName ctor = resolveOrFail(refc, name, type, false, false, lookupClassOrNull());
+            return accessConstructor(refc, ctor);
+        }
+
+        /** Return a version of MH which matches matchMH w.r.t. isVarargsCollector. */
+        private static MethodHandle fixVarargs(MethodHandle mh, MethodHandle matchMH) {
+            boolean va1 = mh.isVarargsCollector();
+            boolean va2 = matchMH.isVarargsCollector();
+            if (va1 == va2) {
+                return mh;
+            } else if (va2) {
+                MethodType type = mh.type();
+                int arity = type.parameterCount();
+                return mh.asVarargsCollector(type.parameterType(arity-1));
+            } else {
+                return mh.asFixedArity();
+            }
         }
 
         /**
@@ -781,45 +727,6 @@ assertEquals("[x, y, z]", pb.command().toString());
          * The returned method handle will have
          * {@linkplain MethodHandle#asVarargsCollector variable arity} if and only if
          * the method's variable arity modifier bit ({@code 0x0080}) is set.
-         * <p>
-         * <em>(Note:  JVM internal methods named {@code <init>} not visible to this API,
-         * even though the {@code invokespecial} instruction can refer to them
-         * in special circumstances.  Use {@link #findConstructor findConstructor}
-         * to access instance initialization methods in a safe manner.)</em>
-         * <b>Example:</b>
-         * <p><blockquote><pre>{@code
-import static java.lang.invoke.MethodHandles.*;
-import static java.lang.invoke.MethodType.*;
-...
-static class Listie extends ArrayList {
-  public String toString() { return "[wee Listie]"; }
-  static Lookup lookup() { return MethodHandles.lookup(); }
-}
-...
-// no access to constructor via invokeSpecial:
-MethodHandle MH_newListie = Listie.lookup()
-  .findConstructor(Listie.class, methodType(void.class));
-Listie l = (Listie) MH_newListie.invokeExact();
-try { assertEquals("impossible", Listie.lookup().findSpecial(
-        Listie.class, "<init>", methodType(void.class), Listie.class));
- } catch (NoSuchMethodException ex) { } // OK
-// access to super and self methods via invokeSpecial:
-MethodHandle MH_super = Listie.lookup().findSpecial(
-  ArrayList.class, "toString" , methodType(String.class), Listie.class);
-MethodHandle MH_this = Listie.lookup().findSpecial(
-  Listie.class, "toString" , methodType(String.class), Listie.class);
-MethodHandle MH_duper = Listie.lookup().findSpecial(
-  Object.class, "toString" , methodType(String.class), Listie.class);
-assertEquals("[]", (String) MH_super.invokeExact(l));
-assertEquals(""+l, (String) MH_this.invokeExact(l));
-assertEquals("[]", (String) MH_duper.invokeExact(l)); // ArrayList method
-try { assertEquals("inaccessible", Listie.lookup().findSpecial(
-        String.class, "toString", methodType(String.class), Listie.class));
- } catch (IllegalAccessException ex) { } // OK
-Listie subl = new Listie() { public String toString() { return "[subclass]"; } };
-assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
-         * }</pre></blockquote>
-         *
          * @param refc the class or interface from which the method is accessed
          * @param name the name of the method (which must not be "&lt;init&gt;")
          * @param type the type of the method, with the receiver argument omitted
@@ -836,10 +743,21 @@ assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
         public MethodHandle findSpecial(Class<?> refc, String name, MethodType type,
                                         Class<?> specialCaller) throws NoSuchMethodException, IllegalAccessException {
             checkSpecialCaller(specialCaller);
-            Lookup specialLookup = this.in(specialCaller);
-            MemberName method = specialLookup.resolveOrFail(REF_invokeSpecial, refc, name, type);
-            checkSecurityManager(refc, method);
-            return specialLookup.getDirectMethod(REF_invokeSpecial, refc, method, findBoundCallerClass(method));
+            MemberName method = resolveOrFail(refc, name, type, false, false, specialCaller);
+            checkSecurityManager(refc, method);  // stack walk magic: do not refactor
+            return accessSpecial(refc, method, specialCaller);
+        }
+        private MethodHandle accessSpecial(Class<?> refc, MemberName method,
+                                           Class<?> specialCaller) throws NoSuchMethodException, IllegalAccessException {
+            checkMethod(refc, method, false);
+            MethodHandle mh = MethodHandleImpl.findMethod(method, false, specialCaller);
+            return restrictReceiver(method, mh, specialCaller);
+        }
+        private MethodHandle resolveSpecial(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
+            Class<?> specialCaller = lookupClass();
+            checkSpecialCaller(specialCaller);
+            MemberName method = resolveOrFail(refc, name, type, false, false, specialCaller);
+            return accessSpecial(refc, method, specialCaller);
         }
 
         /**
@@ -860,9 +778,13 @@ assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
          * @throws NullPointerException if any argument is null
          */
         public MethodHandle findGetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            MemberName field = resolveOrFail(REF_getField, refc, name, type);
-            checkSecurityManager(refc, field);
-            return getDirectField(REF_getField, refc, field);
+            MemberName field = resolveOrFail(refc, name, type, false);
+            checkSecurityManager(refc, field);  // stack walk magic: do not refactor
+            return makeAccessor(refc, field, false, false, 0);
+        }
+        private MethodHandle resolveGetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+            MemberName field = resolveOrFail(refc, name, type, false);
+            return makeAccessor(refc, field, false, false, 0);
         }
 
         /**
@@ -883,9 +805,13 @@ assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
          * @throws NullPointerException if any argument is null
          */
         public MethodHandle findSetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            MemberName field = resolveOrFail(REF_putField, refc, name, type);
-            checkSecurityManager(refc, field);
-            return getDirectField(REF_putField, refc, field);
+            MemberName field = resolveOrFail(refc, name, type, false);
+            checkSecurityManager(refc, field);  // stack walk magic: do not refactor
+            return makeAccessor(refc, field, false, true, 0);
+        }
+        private MethodHandle resolveSetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+            MemberName field = resolveOrFail(refc, name, type, false);
+            return makeAccessor(refc, field, false, true, 0);
         }
 
         /**
@@ -905,9 +831,13 @@ assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
          * @throws NullPointerException if any argument is null
          */
         public MethodHandle findStaticGetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            MemberName field = resolveOrFail(REF_getStatic, refc, name, type);
-            checkSecurityManager(refc, field);
-            return getDirectField(REF_getStatic, refc, field);
+            MemberName field = resolveOrFail(refc, name, type, true);
+            checkSecurityManager(refc, field);  // stack walk magic: do not refactor
+            return makeAccessor(refc, field, false, false, 1);
+        }
+        private MethodHandle resolveStaticGetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+            MemberName field = resolveOrFail(refc, name, type, true);
+            return makeAccessor(refc, field, false, false, 1);
         }
 
         /**
@@ -927,9 +857,13 @@ assertEquals(""+l, (String) MH_this.invokeExact(subl)); // Listie method
          * @throws NullPointerException if any argument is null
          */
         public MethodHandle findStaticSetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            MemberName field = resolveOrFail(REF_putStatic, refc, name, type);
-            checkSecurityManager(refc, field);
-            return getDirectField(REF_putStatic, refc, field);
+            MemberName field = resolveOrFail(refc, name, type, true);
+            checkSecurityManager(refc, field);  // stack walk magic: do not refactor
+            return makeAccessor(refc, field, false, true, 1);
+        }
+        private MethodHandle resolveStaticSetter(Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+            MemberName field = resolveOrFail(refc, name, type, true);
+            return makeAccessor(refc, field, false, true, 1);
         }
 
         /**
@@ -980,10 +914,14 @@ return mh1;
          */
         public MethodHandle bind(Object receiver, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             Class<? extends Object> refc = receiver.getClass(); // may get NPE
-            MemberName method = resolveOrFail(REF_invokeSpecial, refc, name, type);
-            checkSecurityManager(refc, method);
-            MethodHandle mh = getDirectMethodNoRestrict(REF_invokeSpecial, refc, method, findBoundCallerClass(method));
-            return mh.bindReceiver(receiver).setVarargs(method);
+            MemberName method = resolveOrFail(refc, name, type, false);
+            checkSecurityManager(refc, method);  // stack walk magic: do not refactor
+            checkMethod(refc, method, false);
+            MethodHandle dmh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
+            MethodHandle bmh = MethodHandleImpl.bindReceiver(dmh, receiver);
+            if (bmh == null)
+                throw method.makeAccessException("no access", this);
+            return fixVarargs(bmh, dmh);
         }
 
         /**
@@ -1009,12 +947,12 @@ return mh1;
          */
         public MethodHandle unreflect(Method m) throws IllegalAccessException {
             MemberName method = new MemberName(m);
-            byte refKind = method.getReferenceKind();
-            if (refKind == REF_invokeSpecial)
-                refKind = REF_invokeVirtual;
             assert(method.isMethod());
-            Lookup lookup = m.isAccessible() ? IMPL_LOOKUP : this;
-            return lookup.getDirectMethod(refKind, method.getDeclaringClass(), method, findBoundCallerClass(method));
+            if (m.isAccessible())
+                return MethodHandleImpl.findMethod(method, true, /*no lookupClass*/ null);
+            checkMethod(method.getDeclaringClass(), method, method.isStatic());
+            MethodHandle mh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
+            return restrictProtectedReceiver(method, mh);
         }
 
         /**
@@ -1040,11 +978,12 @@ return mh1;
          */
         public MethodHandle unreflectSpecial(Method m, Class<?> specialCaller) throws IllegalAccessException {
             checkSpecialCaller(specialCaller);
-            Lookup specialLookup = this.in(specialCaller);
-            MemberName method = new MemberName(m, true);
+            MemberName method = new MemberName(m);
             assert(method.isMethod());
             // ignore m.isAccessible:  this is a new kind of access
-            return specialLookup.getDirectMethod(REF_invokeSpecial, method.getDeclaringClass(), method, findBoundCallerClass(method));
+            checkMethod(m.getDeclaringClass(), method, false);
+            MethodHandle mh = MethodHandleImpl.findMethod(method, false, lookupClassOrNull());
+            return restrictReceiver(method, mh, specialCaller);
         }
 
         /**
@@ -1068,12 +1007,18 @@ return mh1;
          *                                is set and {@code asVarargsCollector} fails
          * @throws NullPointerException if the argument is null
          */
-        @SuppressWarnings("rawtypes")  // Will be Constructor<?> after JSR 292 MR
         public MethodHandle unreflectConstructor(Constructor c) throws IllegalAccessException {
             MemberName ctor = new MemberName(c);
             assert(ctor.isConstructor());
-            Lookup lookup = c.isAccessible() ? IMPL_LOOKUP : this;
-            return lookup.getDirectConstructor(ctor.getDeclaringClass(), ctor);
+            MethodHandle rawCtor;
+            if (c.isAccessible()) {
+                rawCtor = MethodHandleImpl.findMethod(ctor, false, /*no lookupClass*/ null);
+            } else {
+                checkAccess(c.getDeclaringClass(), ctor);
+                rawCtor = MethodHandleImpl.findMethod(ctor, false, lookupClassOrNull());
+            }
+            MethodHandle allocator = MethodHandleImpl.makeAllocator(rawCtor);
+            return fixVarargs(allocator, rawCtor);
         }
 
         /**
@@ -1091,15 +1036,7 @@ return mh1;
          * @throws NullPointerException if the argument is null
          */
         public MethodHandle unreflectGetter(Field f) throws IllegalAccessException {
-            return unreflectField(f, false);
-        }
-        private MethodHandle unreflectField(Field f, boolean isSetter) throws IllegalAccessException {
-            MemberName field = new MemberName(f, isSetter);
-            assert(isSetter
-                    ? MethodHandleNatives.refKindIsSetter(field.getReferenceKind())
-                    : MethodHandleNatives.refKindIsGetter(field.getReferenceKind()));
-            Lookup lookup = f.isAccessible() ? IMPL_LOOKUP : this;
-            return lookup.getDirectField(field.getReferenceKind(), f.getDeclaringClass(), field);
+            return makeAccessor(f.getDeclaringClass(), new MemberName(f), f.isAccessible(), false, -1);
         }
 
         /**
@@ -1117,74 +1054,40 @@ return mh1;
          * @throws NullPointerException if the argument is null
          */
         public MethodHandle unreflectSetter(Field f) throws IllegalAccessException {
-            return unreflectField(f, true);
+            return makeAccessor(f.getDeclaringClass(), new MemberName(f), f.isAccessible(), true, -1);
         }
 
         /// Helper methods, all package-private.
 
-        MemberName resolveOrFail(byte refKind, Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            name.getClass(); type.getClass();  // NPE
+        MemberName resolveOrFail(Class<?> refc, String name, Class<?> type, boolean isStatic) throws NoSuchFieldException, IllegalAccessException {
             checkSymbolicClass(refc);  // do this before attempting to resolve
-            return IMPL_NAMES.resolveOrFail(refKind, new MemberName(refc, name, type, refKind), lookupClassOrNull(),
+            name.getClass(); type.getClass();  // NPE
+            int mods = (isStatic ? Modifier.STATIC : 0);
+            return IMPL_NAMES.resolveOrFail(new MemberName(refc, name, type, mods), true, lookupClassOrNull(),
                                             NoSuchFieldException.class);
         }
 
-        MemberName resolveOrFail(byte refKind, Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
-            type.getClass();  // NPE
+        MemberName resolveOrFail(Class<?> refc, String name, MethodType type, boolean isStatic) throws NoSuchMethodException, IllegalAccessException {
             checkSymbolicClass(refc);  // do this before attempting to resolve
-            checkMethodName(refKind, name);
-            return IMPL_NAMES.resolveOrFail(refKind, new MemberName(refc, name, type, refKind), lookupClassOrNull(),
+            name.getClass(); type.getClass();  // NPE
+            int mods = (isStatic ? Modifier.STATIC : 0);
+            return IMPL_NAMES.resolveOrFail(new MemberName(refc, name, type, mods), true, lookupClassOrNull(),
+                                            NoSuchMethodException.class);
+        }
+
+        MemberName resolveOrFail(Class<?> refc, String name, MethodType type, boolean isStatic,
+                                 boolean searchSupers, Class<?> specialCaller) throws NoSuchMethodException, IllegalAccessException {
+            checkSymbolicClass(refc);  // do this before attempting to resolve
+            name.getClass(); type.getClass();  // NPE
+            int mods = (isStatic ? Modifier.STATIC : 0);
+            return IMPL_NAMES.resolveOrFail(new MemberName(refc, name, type, mods), searchSupers, specialCaller,
                                             NoSuchMethodException.class);
         }
 
         void checkSymbolicClass(Class<?> refc) throws IllegalAccessException {
             Class<?> caller = lookupClassOrNull();
-            if (caller != null && !VerifyAccess.isClassAccessible(refc, caller, allowedModes))
+            if (caller != null && !VerifyAccess.isClassAccessible(refc, caller))
                 throw new MemberName(refc).makeAccessException("symbolic reference class is not public", this);
-        }
-
-        void checkMethodName(byte refKind, String name) throws NoSuchMethodException {
-            if (name.startsWith("<") && refKind != REF_newInvokeSpecial)
-                throw new NoSuchMethodException("illegal method name: "+name);
-        }
-
-
-        /**
-         * Find my trustable caller class if m is a caller sensitive method.
-         * If this lookup object has private access, then the caller class is the lookupClass.
-         * Otherwise, if m is caller-sensitive, throw IllegalAccessException.
-         */
-        Class<?> findBoundCallerClass(MemberName m) throws IllegalAccessException {
-            Class<?> callerClass = null;
-            if (MethodHandleNatives.isCallerSensitive(m)) {
-                // Only full-power lookup is allowed to resolve caller-sensitive methods
-                if (isFullPowerLookup()) {
-                    callerClass = lookupClass;
-                } else {
-                    throw new IllegalAccessException("Attempt to lookup caller-sensitive method using restricted lookup object");
-                }
-            }
-            return callerClass;
-        }
-
-        private boolean isFullPowerLookup() {
-            return (allowedModes & PRIVATE) != 0;
-        }
-
-        /**
-         * Determine whether a security manager has an overridden
-         * SecurityManager.checkMemberAccess method.
-         */
-        private boolean isCheckMemberAccessOverridden(SecurityManager sm) {
-            final Class<? extends SecurityManager> cls = sm.getClass();
-            if (cls == SecurityManager.class) return false;
-
-            try {
-                return cls.getMethod("checkMemberAccess", Class.class, int.class).
-                    getDeclaringClass() != SecurityManager.class;
-            } catch (NoSuchMethodException e) {
-                throw new InternalError("should not reach here");
-            }
         }
 
         /**
@@ -1195,53 +1098,39 @@ return mh1;
             SecurityManager smgr = System.getSecurityManager();
             if (smgr == null)  return;
             if (allowedModes == TRUSTED)  return;
-
-            final boolean overridden = isCheckMemberAccessOverridden(smgr);
             // Step 1:
-            {
-                // Default policy is to allow Member.PUBLIC; no need to check
-                // permission if SecurityManager is the default implementation
-                final int which = Member.PUBLIC;
-                final Class<?> clazz = refc;
-                if (overridden) {
-                    // Don't refactor; otherwise break the stack depth for
-                    // checkMemberAccess of subclasses of SecurityManager as specified.
-                    smgr.checkMemberAccess(clazz, which);
-                }
-            }
-
+            smgr.checkMemberAccess(refc, Member.PUBLIC);
             // Step 2:
-            if (!isFullPowerLookup() ||
-                !VerifyAccess.classLoaderIsAncestor(lookupClass, refc)) {
-                ReflectUtil.checkPackageAccess(refc);
-            }
-
+            if (!VerifyAccess.classLoaderIsAncestor(lookupClass, refc))
+                smgr.checkPackageAccess(VerifyAccess.getPackageName(refc));
             // Step 3:
             if (m.isPublic()) return;
             Class<?> defc = m.getDeclaringClass();
-            {
-                // Inline SecurityManager.checkMemberAccess
-                final int which = Member.DECLARED;
-                final Class<?> clazz = defc;
-                if (!overridden) {
-                    if (!isFullPowerLookup()) {
-                        smgr.checkPermission(SecurityConstants.CHECK_MEMBER_ACCESS_PERMISSION);
-                    }
-                } else {
-                    // Don't refactor; otherwise break the stack depth for
-                    // checkMemberAccess of subclasses of SecurityManager as specified.
-                    smgr.checkMemberAccess(clazz, which);
-                }
-            }
-
+            smgr.checkMemberAccess(defc, Member.DECLARED);  // STACK WALK HERE
             // Step 4:
-            if (defc != refc) {
-                ReflectUtil.checkPackageAccess(defc);
-            }
+            if (defc != refc)
+                smgr.checkPackageAccess(VerifyAccess.getPackageName(defc));
+
+            // Comment from SM.checkMemberAccess, where which=DECLARED:
+            /*
+             * stack depth of 4 should be the caller of one of the
+             * methods in java.lang.Class that invoke checkMember
+             * access. The stack should look like:
+             *
+             * someCaller                        [3]
+             * java.lang.Class.someReflectionAPI [2]
+             * java.lang.Class.checkMemberAccess [1]
+             * SecurityManager.checkMemberAccess [0]
+             *
+             */
+            // For us it is this stack:
+            // someCaller                        [3]
+            // Lookup.findSomeMember             [2]
+            // Lookup.checkSecurityManager       [1]
+            // SecurityManager.checkMemberAccess [0]
         }
 
-        void checkMethod(byte refKind, Class<?> refc, MemberName m) throws IllegalAccessException {
-            boolean wantStatic = (refKind == REF_invokeStatic);
+        void checkMethod(Class<?> refc, MemberName m, boolean wantStatic) throws IllegalAccessException {
             String message;
             if (m.isConstructor())
                 message = "expected a method, not a constructor";
@@ -1250,68 +1139,25 @@ return mh1;
             else if (wantStatic != m.isStatic())
                 message = wantStatic ? "expected a static method" : "expected a non-static method";
             else
-                { checkAccess(refKind, refc, m); return; }
+                { checkAccess(refc, m); return; }
             throw m.makeAccessException(message, this);
         }
 
-        void checkField(byte refKind, Class<?> refc, MemberName m) throws IllegalAccessException {
-            boolean wantStatic = !MethodHandleNatives.refKindHasReceiver(refKind);
-            String message;
-            if (wantStatic != m.isStatic())
-                message = wantStatic ? "expected a static field" : "expected a non-static field";
-            else
-                { checkAccess(refKind, refc, m); return; }
-            throw m.makeAccessException(message, this);
-        }
-
-        void checkAccess(byte refKind, Class<?> refc, MemberName m) throws IllegalAccessException {
-            assert(m.referenceKindIsConsistentWith(refKind) &&
-                   MethodHandleNatives.refKindIsValid(refKind) &&
-                   (MethodHandleNatives.refKindIsField(refKind) == m.isField()));
+        void checkAccess(Class<?> refc, MemberName m) throws IllegalAccessException {
             int allowedModes = this.allowedModes;
             if (allowedModes == TRUSTED)  return;
             int mods = m.getModifiers();
-            if (Modifier.isProtected(mods)) {
-                if (refKind == REF_invokeVirtual &&
-                        m.getDeclaringClass() == Object.class &&
-                        m.getName().equals("clone") &&
-                        refc.isArray()) {
-                    // The JVM does this hack also.
-                    // (See ClassVerifier::verify_invoke_instructions
-                    // and LinkResolver::check_method_accessability.)
-                    // Because the JVM does not allow separate methods on array types,
-                    // there is no separate method for int[].clone.
-                    // All arrays simply inherit Object.clone.
-                    // But for access checking logic, we make Object.clone
-                    // (normally protected) appear to be public.
-                    // Later on, when the DirectMethodHandle is created,
-                    // its leading argument will be restricted to the
-                    // requested array type.
-                    // N.B. The return type is not adjusted, because
-                    // that is *not* the bytecode behavior.
-                    mods ^= Modifier.PROTECTED | Modifier.PUBLIC;
-                }
-                if (refKind == REF_newInvokeSpecial) {
-                    // cannot "new" a protected ctor in a different package
-                    mods ^= Modifier.PROTECTED;
-                }
-            }
-            if (Modifier.isFinal(mods) &&
-                    MethodHandleNatives.refKindIsSetter(refKind))
-                throw m.makeAccessException("unexpected set of a final field", this);
             if (Modifier.isPublic(mods) && Modifier.isPublic(refc.getModifiers()) && allowedModes != 0)
                 return;  // common case
             int requestedModes = fixmods(mods);  // adjust 0 => PACKAGE
-            if ((requestedModes & allowedModes) != 0) {
-                if (VerifyAccess.isMemberAccessible(refc, m.getDeclaringClass(),
-                                                    mods, lookupClass(), allowedModes))
-                    return;
-            } else {
+            if ((requestedModes & allowedModes) != 0
+                && VerifyAccess.isMemberAccessible(refc, m.getDeclaringClass(),
+                                                   mods, lookupClass()))
+                return;
+            if (((requestedModes & ~allowedModes) & PROTECTED) != 0
+                && VerifyAccess.isSamePackage(m.getDeclaringClass(), lookupClass()))
                 // Protected members can also be checked as if they were package-private.
-                if ((requestedModes & PROTECTED) != 0 && (allowedModes & PACKAGE) != 0
-                        && VerifyAccess.isSamePackage(m.getDeclaringClass(), lookupClass()))
-                    return;
-            }
+                return;
             throw m.makeAccessException(accessFailedMessage(refc, m), this);
         }
 
@@ -1323,9 +1169,9 @@ return mh1;
                                (defc == refc ||
                                 Modifier.isPublic(refc.getModifiers())));
             if (!classOK && (allowedModes & PACKAGE) != 0) {
-                classOK = (VerifyAccess.isClassAccessible(defc, lookupClass(), ALL_MODES) &&
+                classOK = (VerifyAccess.isClassAccessible(defc, lookupClass()) &&
                            (defc == refc ||
-                            VerifyAccess.isClassAccessible(refc, lookupClass(), ALL_MODES)));
+                            VerifyAccess.isClassAccessible(refc, lookupClass())));
             }
             if (!classOK)
                 return "class is not public";
@@ -1340,8 +1186,7 @@ return mh1;
 
         private static final boolean ALLOW_NESTMATE_ACCESS = false;
 
-        private void checkSpecialCaller(Class<?> specialCaller) throws IllegalAccessException {
-            int allowedModes = this.allowedModes;
+        void checkSpecialCaller(Class<?> specialCaller) throws IllegalAccessException {
             if (allowedModes == TRUSTED)  return;
             if ((allowedModes & PRIVATE) == 0
                 || (specialCaller != lookupClass()
@@ -1351,7 +1196,7 @@ return mh1;
                     makeAccessException("no private access for invokespecial", this);
         }
 
-        private boolean restrictProtectedReceiver(MemberName method) {
+        MethodHandle restrictProtectedReceiver(MemberName method, MethodHandle mh) throws IllegalAccessException {
             // The accessing class only has the right to use a protected member
             // on itself or a subclass.  Enforce that restriction, from JVMS 5.4.4, etc.
             if (!method.isProtected() || method.isStatic()
@@ -1360,124 +1205,52 @@ return mh1;
                 || VerifyAccess.isSamePackage(method.getDeclaringClass(), lookupClass())
                 || (ALLOW_NESTMATE_ACCESS &&
                     VerifyAccess.isSamePackageMember(method.getDeclaringClass(), lookupClass())))
-                return false;
-            return true;
+                return mh;
+            else
+                return restrictReceiver(method, mh, lookupClass());
         }
-        private MethodHandle restrictReceiver(MemberName method, MethodHandle mh, Class<?> caller) throws IllegalAccessException {
+        MethodHandle restrictReceiver(MemberName method, MethodHandle mh, Class<?> caller) throws IllegalAccessException {
             assert(!method.isStatic());
-            // receiver type of mh is too wide; narrow to caller
-            if (!method.getDeclaringClass().isAssignableFrom(caller)) {
+            Class<?> defc = method.getDeclaringClass();  // receiver type of mh is too wide
+            if (defc.isInterface() || !defc.isAssignableFrom(caller)) {
                 throw method.makeAccessException("caller class must be a subclass below the method", caller);
             }
             MethodType rawType = mh.type();
             if (rawType.parameterType(0) == caller)  return mh;
             MethodType narrowType = rawType.changeParameterType(0, caller);
-            return mh.viewAsType(narrowType);
+            MethodHandle narrowMH = MethodHandleImpl.convertArguments(mh, narrowType, rawType, 0);
+            return fixVarargs(narrowMH, mh);
         }
 
-        private MethodHandle getDirectMethod(byte refKind, Class<?> refc, MemberName method, Class<?> callerClass) throws IllegalAccessException {
-            return getDirectMethodCommon(refKind, refc, method,
-                    (refKind == REF_invokeSpecial ||
-                        (MethodHandleNatives.refKindHasReceiver(refKind) &&
-                            restrictProtectedReceiver(method))), callerClass);
-        }
-        private MethodHandle getDirectMethodNoRestrict(byte refKind, Class<?> refc, MemberName method, Class<?> callerClass) throws IllegalAccessException {
-            return getDirectMethodCommon(refKind, refc, method, false, callerClass);
-        }
-        private MethodHandle getDirectMethodCommon(byte refKind, Class<?> refc, MemberName method,
-                                                   boolean doRestrict, Class<?> callerClass) throws IllegalAccessException {
-            checkMethod(refKind, refc, method);
-            if (method.isMethodHandleInvoke())
-                return fakeMethodHandleInvoke(method);
-
-            Class<?> refcAsSuper;
-            if (refKind == REF_invokeSpecial &&
-                refc != lookupClass() &&
-                refc != (refcAsSuper = lookupClass().getSuperclass()) &&
-                refc.isAssignableFrom(lookupClass())) {
-                assert(!method.getName().equals("<init>"));  // not this code path
-                // Per JVMS 6.5, desc. of invokespecial instruction:
-                // If the method is in a superclass of the LC,
-                // and if our original search was above LC.super,
-                // repeat the search (symbolic lookup) from LC.super.
-                // FIXME: MemberName.resolve should handle this instead.
-                MemberName m2 = new MemberName(refcAsSuper,
-                                               method.getName(),
-                                               method.getMethodType(),
-                                               REF_invokeSpecial);
-                m2 = IMPL_NAMES.resolveOrNull(refKind, m2, lookupClassOrNull());
-                if (m2 == null)  throw new InternalError(method.toString());
-                method = m2;
-                refc = refcAsSuper;
-                // redo basic checks
-                checkMethod(refKind, refc, method);
-            }
-
-            MethodHandle mh = DirectMethodHandle.make(refc, method);
-            mh = maybeBindCaller(method, mh, callerClass);
-            mh = mh.setVarargs(method);
-            if (doRestrict)
-                mh = restrictReceiver(method, mh, lookupClass());
-            return mh;
-        }
-        private MethodHandle fakeMethodHandleInvoke(MemberName method) {
-            return throwException(method.getReturnType(), UnsupportedOperationException.class);
-        }
-        private MethodHandle maybeBindCaller(MemberName method, MethodHandle mh,
-                                             Class<?> callerClass)
-                                             throws IllegalAccessException {
-            if (allowedModes == TRUSTED || !MethodHandleNatives.isCallerSensitive(method))
-                return mh;
-            Class<?> hostClass = lookupClass;
-            if ((allowedModes & PRIVATE) == 0)  // caller must use full-power lookup
-                hostClass = callerClass;  // callerClass came from a security manager style stack walk
-            MethodHandle cbmh = MethodHandleImpl.bindCaller(mh, hostClass);
-            // Note: caller will apply varargs after this step happens.
-            return cbmh;
-        }
-        private MethodHandle getDirectField(byte refKind, Class<?> refc, MemberName field) throws IllegalAccessException {
-            checkField(refKind, refc, field);
-            MethodHandle mh = DirectMethodHandle.make(refc, field);
-            boolean doRestrict = (MethodHandleNatives.refKindHasReceiver(refKind) &&
-                                    restrictProtectedReceiver(field));
-            if (doRestrict)
-                mh = restrictReceiver(field, mh, lookupClass());
-            return mh;
-        }
-        private MethodHandle getDirectConstructor(Class<?> refc, MemberName ctor) throws IllegalAccessException {
-            assert(ctor.isConstructor());
-            checkAccess(REF_newInvokeSpecial, refc, ctor);
-            assert(!MethodHandleNatives.isCallerSensitive(ctor));  // maybeBindCaller not relevant here
-            return DirectMethodHandle.make(ctor).setVarargs(ctor);
+        MethodHandle makeAccessor(Class<?> refc, MemberName field,
+                                  boolean trusted, boolean isSetter,
+                                  int checkStatic) throws IllegalAccessException {
+            assert(field.isField());
+            if (checkStatic >= 0 && (checkStatic != 0) != field.isStatic())
+                throw field.makeAccessException((checkStatic != 0)
+                                                ? "expected a static field"
+                                                : "expected a non-static field", this);
+            if (trusted)
+                return MethodHandleImpl.accessField(field, isSetter, /*no lookupClass*/ null);
+            checkAccess(refc, field);
+            MethodHandle mh = MethodHandleImpl.accessField(field, isSetter, lookupClassOrNull());
+            return restrictProtectedReceiver(field, mh);
         }
 
         /** Hook called from the JVM (via MethodHandleNatives) to link MH constants:
          */
         /*non-public*/
-        MethodHandle linkMethodHandleConstant(byte refKind, Class<?> defc, String name, Object type) throws ReflectiveOperationException {
-            MemberName resolved = null;
-            if (type instanceof MemberName) {
-                resolved = (MemberName) type;
-                if (!resolved.isResolved())  throw new InternalError("unresolved MemberName");
-                assert(name == null || name.equals(resolved.getName()));
-            }
-            if (MethodHandleNatives.refKindIsField(refKind)) {
-                MemberName field = (resolved != null) ? resolved
-                        : resolveOrFail(refKind, defc, name, (Class<?>) type);
-                return getDirectField(refKind, defc, field);
-            } else if (MethodHandleNatives.refKindIsMethod(refKind)) {
-                if (defc == MethodHandle.class && refKind == REF_invokeVirtual) {
-                    MethodHandle mh = findVirtualForMH(name, (MethodType) type);
-                    if (mh != null)  return mh;
-                }
-                MemberName method = (resolved != null) ? resolved
-                        : resolveOrFail(refKind, defc, name, (MethodType) type);
-                return getDirectMethod(refKind, defc, method, lookupClass);
-            } else if (refKind == REF_newInvokeSpecial) {
-                assert(name == null || name.equals("<init>"));
-                MemberName ctor = (resolved != null) ? resolved
-                        : resolveOrFail(REF_newInvokeSpecial, defc, name, (MethodType) type);
-                return getDirectConstructor(defc, ctor);
+        MethodHandle linkMethodHandleConstant(int refKind, Class<?> defc, String name, Object type) throws ReflectiveOperationException {
+            switch (refKind) {
+            case REF_getField:          return resolveGetter(       defc, name, (Class<?>)   type );
+            case REF_getStatic:         return resolveStaticGetter( defc, name, (Class<?>)   type );
+            case REF_putField:          return resolveSetter(       defc, name, (Class<?>)   type );
+            case REF_putStatic:         return resolveStaticSetter( defc, name, (Class<?>)   type );
+            case REF_invokeVirtual:     return resolveVirtual(      defc, name, (MethodType) type );
+            case REF_invokeStatic:      return resolveStatic(       defc, name, (MethodType) type );
+            case REF_invokeSpecial:     return resolveSpecial(      defc, name, (MethodType) type );
+            case REF_newInvokeSpecial:  return resolveConstructor(  defc,       (MethodType) type );
+            case REF_invokeInterface:   return resolveVirtual(      defc, name, (MethodType) type );
             }
             // oops
             throw new ReflectiveOperationException("bad MethodHandle constant #"+refKind+" "+name+" : "+type);
@@ -1496,7 +1269,7 @@ return mh1;
      */
     public static
     MethodHandle arrayElementGetter(Class<?> arrayClass) throws IllegalArgumentException {
-        return MethodHandleImpl.makeArrayElementAccessor(arrayClass, false);
+        return MethodHandleImpl.accessArrayElement(arrayClass, false);
     }
 
     /**
@@ -1510,7 +1283,7 @@ return mh1;
      */
     public static
     MethodHandle arrayElementSetter(Class<?> arrayClass) throws IllegalArgumentException {
-        return MethodHandleImpl.makeArrayElementAccessor(arrayClass, true);
+        return MethodHandleImpl.accessArrayElement(arrayClass, true);
     }
 
     /// method handle invocation (reflective style)
@@ -1540,9 +1313,6 @@ return mh1;
      * <p>
      * Before invoking its target, the invoker will spread the final array, apply
      * reference casts as necessary, and unbox and widen primitive arguments.
-     * If, when the invoker is called, the supplied array argument does
-     * not have the correct number of elements, the invoker will throw
-     * an {@link IllegalArgumentException} instead of invoking the target.
      * <p>
      * This method is equivalent to the following code (though it may be more efficient):
      * <p><blockquote><pre>
@@ -1561,7 +1331,7 @@ return invoker;
      *                  the range from 0 to {@code type.parameterCount()} inclusive
      */
     static public
-    MethodHandle spreadInvoker(MethodType type, @NonNegative int leadingArgCount) {
+    MethodHandle spreadInvoker(MethodType type, int leadingArgCount) {
         if (leadingArgCount < 0 || leadingArgCount > type.parameterCount())
             throw new IllegalArgumentException("bad argument count "+leadingArgCount);
         return type.invokers().spreadInvoker(leadingArgCount);
@@ -1637,16 +1407,81 @@ publicLookup().findVirtual(MethodHandle.class, "invoke", type)
      */
     static public
     MethodHandle invoker(MethodType type) {
-        // return type.invokers().generalInvoker();
-    	return null;
+        return type.invokers().generalInvoker();
     }
 
-    static /*non-public*/
-    MethodHandle basicInvoker(MethodType type) {
-        return type.form().basicInvoker();
+    /**
+     * Perform value checking, exactly as if for an adapted method handle.
+     * It is assumed that the given value is either null, of type T0,
+     * or (if T0 is primitive) of the wrapper class corresponding to T0.
+     * The following checks and conversions are made:
+     * <ul>
+     * <li>If T0 and T1 are references, then a cast to T1 is applied.
+     *     (The types do not need to be related in any particular way.)
+     * <li>If T0 and T1 are primitives, then a widening or narrowing
+     *     conversion is applied, if one exists.
+     * <li>If T0 is a primitive and T1 a reference, and
+     *     T0 has a wrapper class TW, a boxing conversion to TW is applied,
+     *     possibly followed by a reference conversion.
+     *     T1 must be TW or a supertype.
+     * <li>If T0 is a reference and T1 a primitive, and
+     *     T1 has a wrapper class TW, an unboxing conversion is applied,
+     *     possibly preceded by a reference conversion.
+     *     T0 must be TW or a supertype.
+     * <li>If T1 is void, the return value is discarded
+     * <li>If T0 is void and T1 a reference, a null value is introduced.
+     * <li>If T0 is void and T1 a primitive, a zero value is introduced.
+     * </ul>
+     * If the value is discarded, null will be returned.
+     * @param valueType
+     * @param value
+     * @return the value, converted if necessary
+     * @throws java.lang.ClassCastException if a cast fails
+     */
+    // FIXME: This is used in just one place.  Refactor away.
+    static
+    <T0, T1> T1 checkValue(Class<T0> t0, Class<T1> t1, Object value)
+       throws ClassCastException
+    {
+        if (t0 == t1) {
+            // no conversion needed; just reassert the same type
+            if (t0.isPrimitive())
+                return Wrapper.asPrimitiveType(t1).cast(value);
+            else
+                return Wrapper.OBJECT.convert(value, t1);
+        }
+        boolean prim0 = t0.isPrimitive(), prim1 = t1.isPrimitive();
+        if (!prim0) {
+            // check contract with caller
+            Wrapper.OBJECT.convert(value, t0);
+            if (!prim1) {
+                return Wrapper.OBJECT.convert(value, t1);
+            }
+            // convert reference to primitive by unboxing
+            Wrapper w1 = Wrapper.forPrimitiveType(t1);
+            return w1.convert(value, t1);
+        }
+        // check contract with caller:
+        Wrapper.asWrapperType(t0).cast(value);
+        Wrapper w1 = Wrapper.forPrimitiveType(t1);
+        return w1.convert(value, t1);
     }
 
-     /// method handle modification (creation from other method handles)
+    // FIXME: Delete this.  It is used only for insertArguments & bindTo.
+    // Replace by a more standard check.
+    static
+    Object checkValue(Class<?> T1, Object value)
+       throws ClassCastException
+    {
+        Class<?> T0;
+        if (value == null)
+            T0 = Object.class;
+        else
+            T0 = value.getClass();
+        return checkValue(T0, T1, value);
+    }
+
+    /// method handle modification (creation from other method handles)
 
     /**
      * Produces a method handle which adapts the type of the
@@ -1694,11 +1529,7 @@ publicLookup().findVirtual(MethodHandle.class, "invoke", type)
      */
     public static
     MethodHandle explicitCastArguments(MethodHandle target, MethodType newType) {
-/*        if (!target.type().isCastableTo(newType)) {
-            throw new WrongMethodTypeException("cannot explicitly cast "+target+" to "+newType);
-        }
-        return MethodHandleImpl.makePairwiseConvert(target, newType, 2);*/
-    	return null;
+        return MethodHandleImpl.convertArguments(target, newType, 2);
     }
 
     /**
@@ -1762,9 +1593,11 @@ assert((int)twice.invokeExact(21) == 42);
      */
     public static
     MethodHandle permuteArguments(MethodHandle target, MethodType newType, int... reorder) {
-        reorder = reorder.clone();
-        checkReorder(reorder, newType, target.type());
-        return target.permuteArguments(newType, reorder);
+        MethodType oldType = target.type();
+        checkReorder(reorder, newType, oldType);
+        return MethodHandleImpl.permuteArguments(target,
+                                                 newType, oldType,
+                                                 reorder);
     }
 
     private static void checkReorder(int[] reorder, MethodType newType, MethodType oldType) {
@@ -1826,15 +1659,15 @@ assert((int)twice.invokeExact(21) == 42);
      */
     public static
     MethodHandle identity(Class<?> type) {
-/*        if (type == void.class)
+        if (type == void.class)
             throw newIllegalArgumentException("void type");
         else if (type == Object.class)
             return ValueConversions.identity();
         else if (type.isPrimitive())
             return ValueConversions.identity(Wrapper.forPrimitiveType(type));
         else
-            return MethodHandleImpl.makeReferenceIdentity(type);*/
-    	return null;
+            return AdapterMethodHandle.makeRetypeRaw(
+                    MethodType.methodType(type, type), ValueConversions.identity());
     }
 
     /**
@@ -1868,7 +1701,7 @@ assert((int)twice.invokeExact(21) == 42);
      * @see MethodHandle#bindTo
      */
     public static
-    MethodHandle insertArguments(MethodHandle target, @NonNegative int pos, Object... values) {
+    MethodHandle insertArguments(MethodHandle target, int pos, Object... values) {
         int insCount = values.length;
         MethodType oldType = target.type();
         int outargs = oldType.parameterCount();
@@ -1880,26 +1713,18 @@ assert((int)twice.invokeExact(21) == 42);
         MethodHandle result = target;
         for (int i = 0; i < insCount; i++) {
             Object value = values[i];
-            Class<?> ptype = oldType.parameterType(pos+i);
-            if (ptype.isPrimitive()) {
-                char btype = 'I';
-                Wrapper w = Wrapper.forPrimitiveType(ptype);
-                switch (w) {
-                case LONG:    btype = 'J'; break;
-                case FLOAT:   btype = 'F'; break;
-                case DOUBLE:  btype = 'D'; break;
+            Class<?> valueType = oldType.parameterType(pos+i);
+            value = checkValue(valueType, value);
+            if (pos == 0 && !valueType.isPrimitive()) {
+                // At least for now, make bound method handles a special case.
+                MethodHandle bmh = MethodHandleImpl.bindReceiver(result, value);
+                if (bmh != null) {
+                    result = bmh;
+                    continue;
                 }
-                // perform unboxing and/or primitive conversion
-                value = w.convert(value, ptype);
-                result = result.bindArgument(pos, btype, value);
-                continue;
+                // else fall through to general adapter machinery
             }
-            value = ptype.cast(value);  // throw CCE if needed
-            if (pos == 0) {
-                result = result.bindReceiver(value);
-            } else {
-                result = result.bindArgument(pos, 'L', value);
-            }
+            result = MethodHandleImpl.bindArgument(result, pos, value);
         }
         return result;
     }
@@ -1947,20 +1772,18 @@ assertEquals("yz", (String) d0.invokeExact(123, "x", "y", "z"));
      *                  or if the new method handle's type would have too many parameters
      */
     public static
-    MethodHandle dropArguments(MethodHandle target, @NonNegative int pos, List<Class<?>> valueTypes) {
+    MethodHandle dropArguments(MethodHandle target, int pos, List<Class<?>> valueTypes) {
         MethodType oldType = target.type();  // get NPE
-        int dropped = valueTypes.size();
-        MethodType.checkSlotCount(dropped);
-        if (dropped == 0)  return target;
+        if (valueTypes.size() == 0)  return target;
         int outargs = oldType.parameterCount();
-        int inargs  = outargs + dropped;
+        int inargs  = outargs + valueTypes.size();
         if (pos < 0 || pos >= inargs)
             throw newIllegalArgumentException("no argument type to remove");
-        ArrayList<Class<?>> ptypes = new ArrayList<>(oldType.parameterList());
+        ArrayList<Class<?>> ptypes =
+                new ArrayList<Class<?>>(oldType.parameterList());
         ptypes.addAll(pos, valueTypes);
-        if (ptypes.size() != inargs)  throw newIllegalArgumentException("valueTypes");
         MethodType newType = MethodType.methodType(oldType.returnType(), ptypes);
-        return target.dropArguments(newType, pos, dropped);
+        return MethodHandleImpl.dropArguments(target, newType, pos);
     }
 
     /**
@@ -2010,7 +1833,7 @@ assertEquals("xz", (String) d12.invokeExact("x", 12, true, "z"));
      *                  or if the new method handle's type would have too many parameters
      */
     public static
-    MethodHandle dropArguments(MethodHandle target, @NonNegative int pos, Class<?>... valueTypes) {
+    MethodHandle dropArguments(MethodHandle target, int pos, Class<?>... valueTypes) {
         return dropArguments(target, pos, Arrays.asList(valueTypes));
     }
 
@@ -2078,7 +1901,7 @@ assertEquals("XY", (String) f2.invokeExact("x", "y")); // XY
      *          or if the {@code pos+filters.length} is greater than {@code target.type().parameterCount()}
      */
     public static
-    MethodHandle filterArguments(MethodHandle target, @NonNegative int pos, MethodHandle... filters) {
+    MethodHandle filterArguments(MethodHandle target, int pos, MethodHandle... filters) {
         MethodType targetType = target.type();
         MethodHandle adapter = target;
         MethodType adapterType = null;
@@ -2098,24 +1921,13 @@ assertEquals("XY", (String) f2.invokeExact("x", "y")); // XY
     }
 
     /*non-public*/ static
-    MethodHandle filterArgument(MethodHandle target, @NonNegative int pos, MethodHandle filter) {
+    MethodHandle filterArgument(MethodHandle target, int pos, MethodHandle filter) {
         MethodType targetType = target.type();
         MethodType filterType = filter.type();
         if (filterType.parameterCount() != 1
             || filterType.returnType() != targetType.parameterType(pos))
             throw newIllegalArgumentException("target and filter types do not match", targetType, filterType);
-        return MethodHandleImpl.makeCollectArguments(target, filter, pos, false);
-    }
-
-    // FIXME: Make this public in M1.
-    /*non-public*/ static
-    MethodHandle collectArguments(MethodHandle target, @NonNegative int pos, MethodHandle collector) {
-        MethodType targetType = target.type();
-        MethodType filterType = collector.type();
-        if (filterType.returnType() != void.class &&
-            filterType.returnType() != targetType.parameterType(pos))
-            throw newIllegalArgumentException("target and filter types do not match", targetType, filterType);
-        return MethodHandleImpl.makeCollectArguments(target, collector, pos, false);
+        return MethodHandleImpl.filterArgument(target, pos, filter);
     }
 
     /**
@@ -2187,7 +1999,18 @@ System.out.println((int) f0.invokeExact("x", "y")); // 2
             throw newIllegalArgumentException("target and filter types do not match", target, filter);
         // result = fold( lambda(retval, arg...) { filter(retval) },
         //                lambda(        arg...) { target(arg...) } )
-        return MethodHandleImpl.makeCollectArguments(filter, target, 0, false);
+        MethodType newType = targetType.changeReturnType(filterType.returnType());
+        MethodHandle result = null;
+        if (AdapterMethodHandle.canCollectArguments(filterType, targetType, 0, false)) {
+            result = AdapterMethodHandle.makeCollectArguments(filter, target, 0, false);
+            if (result != null)  return result;
+        }
+        // FIXME: Too many nodes here.
+        assert(MethodHandleNatives.workaroundWithoutRicochetFrames());  // this class is deprecated
+        MethodHandle returner = dropArguments(filter, filterValues, targetType.parameterList());
+        result = foldArguments(returner, target);
+        assert(result.type().equals(newType));
+        return result;
     }
 
     /**
@@ -2285,7 +2108,9 @@ assertEquals("boojum", (String) catTrace.invokeExact("boo", "jum"));
         if (!ok)
             throw misMatchedTypes("target and combiner types", targetType, combinerType);
         MethodType newType = targetType.dropParameterTypes(foldPos, afterInsertPos);
-        return MethodHandleImpl.makeCollectArguments(target, combiner, foldPos, true);
+        MethodHandle res = MethodHandleImpl.foldArguments(target, newType, foldPos, combiner);
+        if (res == null)  throw newIllegalArgumentException("cannot fold from "+newType+" to " +targetType);
+        return res;
     }
 
     /**
@@ -2426,8 +2251,6 @@ assertEquals("boojum", (String) catTrace.invokeExact("boo", "jum"));
      */
     public static
     MethodHandle throwException(Class<?> returnType, Class<? extends Throwable> exType) {
-        if (!Throwable.class.isAssignableFrom(exType))
-            throw new ClassCastException(exType.getName());
         return MethodHandleImpl.throwException(MethodType.methodType(returnType, exType));
     }
 }

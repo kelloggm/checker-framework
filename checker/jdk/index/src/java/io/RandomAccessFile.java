@@ -1,36 +1,32 @@
 /*
- * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 1994, 2012, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
-import sun.misc.IoTrace;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -65,9 +61,6 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     private FileDescriptor fd;
     private FileChannel channel = null;
     private boolean rw;
-
-    /* The path of the referenced file */
-    private final String path;
 
     private Object closeLock = new Object();
     private volatile boolean closed = false;
@@ -235,12 +228,8 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
         if (name == null) {
             throw new NullPointerException();
         }
-        if (file.isInvalid()) {
-            throw new FileNotFoundException("Invalid file path");
-        }
         fd = new FileDescriptor();
-        //fd.incrementAndGetUseCount();
-        this.path = name;
+        fd.attach(this);
         open(name, imode);
     }
 
@@ -253,7 +242,9 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @see        java.io.FileDescriptor
      */
     public final FileDescriptor getFD() throws IOException {
-        if (fd != null) return fd;
+        if (fd != null) {
+            return fd;
+        }
         throw new IOException();
     }
 
@@ -278,18 +269,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     public final FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = FileChannelImpl.open(fd, path, true, rw, this);
-
-                /*
-                 * FileDescriptor could be shared by FileInputStream or
-                 * FileOutputStream.
-                 * Ensure that FD is GC'ed only when all the streams/channels
-                 * are done using it.
-                 * Increment fd's use count. Invoking the channel's close()
-                 * method will result in decrementing the use count set for
-                 * the channel.
-                 */
-                //fd.incrementAndGetUseCount();
+                channel = FileChannelImpl.open(fd, true, rw, this);
             }
             return channel;
         }
@@ -326,18 +306,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @exception  IOException  if an I/O error occurs. Not thrown if
      *                          end-of-file has been reached.
      */
-    public @GTENegativeOne int read() throws IOException {
-        Object traceContext = IoTrace.fileReadBegin(path);
-        int b = 0;
-        try {
-            b = read0();
-        } finally {
-            IoTrace.fileReadEnd(traceContext, b == -1 ? 0 : 1);
-        }
-        return b;
-    }
-
-    private native int read0() throws IOException;
+    public native int read() throws IOException;
 
     /**
      * Reads a sub array as a sequence of bytes.
@@ -346,18 +315,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @param len the number of bytes to read.
      * @exception IOException If an I/O error has occurred.
      */
-    private int readBytes(byte b[], int off, int len) throws IOException {
-        Object traceContext = IoTrace.fileReadBegin(path);
-        int bytesRead = 0;
-        try {
-            bytesRead = readBytes0(b, off, len);
-        } finally {
-            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
-        }
-        return bytesRead;
-    }
-
-    private native int readBytes0(byte b[], int off, int len) throws IOException;
+    private native int readBytes(byte b[], int off, int len) throws IOException;
 
     /**
      * Reads up to <code>len</code> bytes of data from this file into an
@@ -384,7 +342,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * <code>len</code> is negative, or <code>len</code> is greater than
      * <code>b.length - off</code>
      */
-    public @GTENegativeOne int read(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public int read(byte b[], int off, int len) throws IOException {
         return readBytes(b, off, len);
     }
 
@@ -407,7 +365,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * some other I/O error occurs.
      * @exception  NullPointerException If <code>b</code> is <code>null</code>.
      */
-    public @GTENegativeOne int read(byte b[]) throws IOException {
+    public int read(byte b[]) throws IOException {
         return readBytes(b, 0, b.length);
     }
 
@@ -441,7 +399,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      *               all the bytes.
      * @exception  IOException   if an I/O error occurs.
      */
-    public final void readFully(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public final void readFully(byte b[], int off, int len) throws IOException {
         int n = 0;
         do {
             int count = this.read(b, off + n, len - n);
@@ -467,7 +425,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @return     the actual number of bytes skipped.
      * @exception  IOException  if an I/O error occurs.
      */
-    public @NonNegative int skipBytes(int n) throws IOException {
+    public int skipBytes(int n) throws IOException {
         long pos;
         long len;
         long newpos;
@@ -496,38 +454,17 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @param      b   the <code>byte</code> to be written.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(int b) throws IOException {
-        Object traceContext = IoTrace.fileWriteBegin(path);
-        int bytesWritten = 0;
-        try {
-            write0(b);
-            bytesWritten = 1;
-        } finally {
-            IoTrace.fileWriteEnd(traceContext, bytesWritten);
-        }
-    }
-
-    private native void write0(int b) throws IOException;
+    public native void write(int b) throws IOException;
 
     /**
      * Writes a sub array as a sequence of bytes.
      * @param b the data to be written
+
      * @param off the start offset in the data
      * @param len the number of bytes that are written
      * @exception IOException If an I/O error has occurred.
      */
-    private void writeBytes(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
-        Object traceContext = IoTrace.fileWriteBegin(path);
-        int bytesWritten = 0;
-        try {
-            writeBytes0(b, off, len);
-            bytesWritten = len;
-        } finally {
-            IoTrace.fileWriteEnd(traceContext, bytesWritten);
-        }
-    }
-
-    private native void writeBytes0(byte b[], int off, int len) throws IOException;
+    private native void writeBytes(byte b[], int off, int len) throws IOException;
 
     /**
      * Writes <code>b.length</code> bytes from the specified byte array
@@ -549,7 +486,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(byte b[], @NonNegative int off, @NonNegative int len) throws IOException {
+    public void write(byte b[], int off, int len) throws IOException {
         writeBytes(b, off, len);
     }
 
@@ -631,21 +568,13 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
             closed = true;
         }
         if (channel != null) {
-            /*
-             * Decrement FD use count associated with the channel. The FD use
-             * count is incremented whenever a new channel is obtained from
-             * this stream.
-             */
-            //fd.decrementAndGetUseCount();
             channel.close();
         }
-
-        /*
-         * Decrement FD use count associated with this stream.
-         * The count got incremented by FileDescriptor during its construction.
-         */
-        //fd.decrementAndGetUseCount();
-        close0();
+        fd.closeAll(new Closeable() {
+            public void close() throws IOException {
+               close0();
+           }
+        });
     }
 
     //

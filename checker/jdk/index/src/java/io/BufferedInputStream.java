@@ -1,33 +1,30 @@
 /*
  * Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A <code>BufferedInputStream</code> adds
@@ -82,7 +79,7 @@ class BufferedInputStream extends FilterInputStream {
      * </code>contain buffered input data obtained
      * from the underlying  input stream.
      */
-    protected @IndexOrHigh("buf") int count;
+    protected int count;
 
     /**
      * The current position in the buffer. This is the index of the next
@@ -99,7 +96,7 @@ class BufferedInputStream extends FilterInputStream {
      *
      * @see     java.io.BufferedInputStream#buf
      */
-    protected @IndexFor("buf") int pos;
+    protected int pos;
 
     /**
      * The value of the <code>pos</code> field at the time the last
@@ -142,7 +139,7 @@ class BufferedInputStream extends FilterInputStream {
      * @see     java.io.BufferedInputStream#mark(int)
      * @see     java.io.BufferedInputStream#reset()
      */
-    protected @GTENegativeOne int marklimit;
+    protected int marklimit;
 
     /**
      * Check to make sure that underlying input stream has not been
@@ -252,7 +249,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          or an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public @GTENegativeOne synchronized int read() throws IOException {
+    public synchronized int read() throws IOException {
         if (pos >= count) {
             fill();
             if (pos >= count)
@@ -265,7 +262,7 @@ class BufferedInputStream extends FilterInputStream {
      * Read characters into a portion of an array, reading from the underlying
      * stream at most once if necessary.
      */
-    private @GTENegativeOne int read1(byte[] b, @NonNegative int off, @IndexOrHigh("#1") int len) throws IOException {
+    private int read1(byte[] b, int off, int len) throws IOException {
         int avail = count - pos;
         if (avail <= 0) {
             /* If the requested length is at least as large as the buffer, and
@@ -322,7 +319,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized @GTENegativeOne int read(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len)
+    public synchronized int read(byte b[], int off, int len)
         throws IOException
     {
         getBufIfOpen(); // Check for closed stream
@@ -397,7 +394,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized @NonNegative int available() throws IOException {
+    public synchronized int available() throws IOException {
         int n = count - pos;
         int avail = getInIfOpen().available();
         return n > (Integer.MAX_VALUE - avail)

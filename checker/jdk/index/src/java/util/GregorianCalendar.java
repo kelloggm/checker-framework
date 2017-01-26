@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1996, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -48,9 +48,6 @@ import sun.util.calendar.Era;
 import sun.util.calendar.Gregorian;
 import sun.util.calendar.JulianCalendar;
 import sun.util.calendar.ZoneInfo;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * <code>GregorianCalendar</code> is a concrete subclass of
@@ -879,7 +876,7 @@ public class GregorianCalendar extends Calendar {
      * or if any calendar fields have out-of-range values in
      * non-lenient mode.
      */
-    public void add(@NonNegative int field, int amount) {
+    public void add(int field, int amount) {
         // If amount == 0, do nothing even the given field is out of
         // range. This is tested by JCK.
         if (amount == 0) {
@@ -1077,7 +1074,7 @@ public class GregorianCalendar extends Calendar {
      * @see #add(int,int)
      * @see #set(int,int)
      */
-    public void roll(@NonNegative int field, boolean up) {
+    public void roll(int field, boolean up) {
         roll(field, up ? +1 : -1);
     }
 
@@ -1125,7 +1122,7 @@ public class GregorianCalendar extends Calendar {
      * @see #set(int,int)
      * @since 1.2
      */
-    public void roll(@NonNegative int field, int amount) {
+    public void roll(int field, int amount) {
         // If amount == 0, do nothing even the given field is out of
         // range. This is tested by JCK.
         if (amount == 0) {
@@ -1481,7 +1478,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getMinimum(@NonNegative int field) {
+    public int getMinimum(int field) {
         return MIN_VALUES[field];
     }
 
@@ -1504,7 +1501,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getMaximum(@NonNegative int field) {
+    public int getMaximum(int field) {
         switch (field) {
         case MONTH:
         case DAY_OF_MONTH:
@@ -1552,7 +1549,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getGreatestMinimum(@NonNegative int field) {
+    public int getGreatestMinimum(int field) {
         if (field == DAY_OF_MONTH) {
             BaseCalendar.Date d = getGregorianCutoverDate();
             long mon1 = getFixedDateMonth1(d, gregorianCutoverDate);
@@ -1581,7 +1578,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getLeastMaximum(@NonNegative int field) {
+    public int getLeastMaximum(int field) {
         switch (field) {
         case MONTH:
         case DAY_OF_MONTH:
@@ -1630,7 +1627,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMaximum(int)
      * @since 1.2
      */
-    public int getActualMinimum(@NonNegative int field) {
+    public int getActualMinimum(int field) {
         if (field == DAY_OF_MONTH) {
             GregorianCalendar gc = getNormalizedCalendar();
             int year = gc.cdate.getNormalizedYear();
@@ -1673,7 +1670,7 @@ public class GregorianCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @since 1.2
      */
-    public int getActualMaximum(@NonNegative int field) {
+    public int getActualMaximum(int field) {
         final int fieldsForFixedMax = ERA_MASK|DAY_OF_WEEK_MASK|HOUR_MASK|AM_PM_MASK|
             HOUR_OF_DAY_MASK|MINUTE_MASK|SECOND_MASK|MILLISECOND_MASK|
             ZONE_OFFSET_MASK|DST_OFFSET_MASK;

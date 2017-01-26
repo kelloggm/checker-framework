@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class provides a skeletal implementation of the <tt>Collection</tt>
@@ -78,7 +75,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      */
     public abstract Iterator<E> iterator();
 
-    public abstract @NonNegative int size();
+    public abstract int size();
 
     /**
      * {@inheritDoc}
@@ -183,21 +180,13 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 
         for (int i = 0; i < r.length; i++) {
             if (! it.hasNext()) { // fewer elements than expected
-                if (a == r) {
-                    r[i] = null; // null-terminate
-                } else if (a.length < i) {
+                if (a != r)
                     return Arrays.copyOf(r, i);
-                } else {
-                    System.arraycopy(r, 0, a, 0, i);
-                    if (a.length > i) {
-                        a[i] = null;
-                    }
-                }
-                return a;
+                r[i] = null; // null-terminate
+                return r;
             }
             r[i] = (T)it.next();
         }
-        // more elements than expected
         return it.hasNext() ? finishToArray(r, it) : r;
     }
 

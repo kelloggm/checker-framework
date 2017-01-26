@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util.zip;
@@ -32,9 +32,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 import java.util.HashSet;
 import static java.util.zip.ZipConstants64.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class implements an output stream filter for writing files in the
@@ -160,7 +157,7 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
      * @param level the compression level (0-9)
      * @exception IllegalArgumentException if the compression level is invalid
      */
-    public void setLevel(@NonNegative int level) {
+    public void setLevel(int level) {
         def.setLevel(level);
     }
 
@@ -179,9 +176,9 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
         if (current != null) {
             closeEntry();       // close previous entry
         }
-/*        if (e.time == -1) {
+        if (e.time == -1) {
             e.setTime(System.currentTimeMillis());
-        }*/
+        }
         if (e.method == -1) {
             e.method = method;  // use default method
         }
@@ -298,7 +295,7 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
      * @exception ZipException if a ZIP file error has occurred
      * @exception IOException if an I/O error has occurred
      */
-    public synchronized void write(byte[] b, @NonNegative int off, @NonNegative int len)
+    public synchronized void write(byte[] b, int off, int len)
         throws IOException
     {
         ensureOpen();
@@ -380,7 +377,7 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
             writeShort(version(e));     // version needed to extract
             writeShort(flag);           // general purpose bit flag
             writeShort(e.method);       // compression method
-            //writeInt(e.time);           // last modification time
+            writeInt(e.time);           // last modification time
 
             // store size, uncompressed size, and crc-32 in data descriptor
             // immediately following compressed entry data
@@ -396,7 +393,7 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
             }
             writeShort(flag);           // general purpose bit flag
             writeShort(e.method);       // compression method
-            //writeInt(e.time);           // last modification time
+            writeInt(e.time);           // last modification time
             writeInt(e.crc);            // crc-32
             if (hasZip64) {
                 writeInt(ZIP64_MAGICVAL);
@@ -477,7 +474,7 @@ class ZipOutputStream extends DeflaterOutputStream implements ZipConstants {
         }
         writeShort(flag);           // general purpose bit flag
         writeShort(e.method);       // compression method
-        // writeInt(e.time);           // last modification time
+        writeInt(e.time);           // last modification time
         writeInt(e.crc);            // crc-32
         writeInt(csize);            // compressed size
         writeInt(size);             // uncompressed size

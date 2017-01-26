@@ -1,34 +1,31 @@
 /*
  * Copyright (c) 1996, 2005, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
 
 import java.util.Arrays;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class implements a character buffer that can be used as an Writer.
@@ -95,7 +92,7 @@ class CharArrayWriter extends Writer {
      * @param off       the start offset in the data
      * @param len       the number of chars that are written
      */
-    public void write(char c[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) {
+    public void write(char c[], int off, int len) {
         if ((off < 0) || (off > c.length) || (len < 0) ||
             ((off + len) > c.length) || ((off + len) < 0)) {
             throw new IndexOutOfBoundsException();
@@ -118,7 +115,7 @@ class CharArrayWriter extends Writer {
      * @param  off  Offset from which to start reading characters
      * @param  len  Number of characters to be written
      */
-    public void write(String str,@IndexFor("#1") int off, @IndexOrHigh("#1") int len) {
+    public void write(String str, int off, int len) {
         synchronized (lock) {
             int newcount = count + len;
             if (newcount > buf.length) {
@@ -203,7 +200,7 @@ class CharArrayWriter extends Writer {
      *
      * @since  1.5
      */
-    public CharArrayWriter append(CharSequence csq, @NonNegative int start, @NonNegative int end) {
+    public CharArrayWriter append(CharSequence csq, int start, int end) {
         String s = (csq == null ? "null" : csq).subSequence(start, end).toString();
         write(s, 0, s.length());
         return this;
@@ -243,7 +240,7 @@ class CharArrayWriter extends Writer {
      *
      * @return an array of chars copied from the input data.
      */
-    public char toCharArray() @SameLen("this") [] {
+    public char toCharArray()[] {
         synchronized (lock) {
             return Arrays.copyOf(buf, count);
         }
@@ -254,7 +251,7 @@ class CharArrayWriter extends Writer {
      *
      * @return an int representing the current size of the buffer.
      */
-    public @IndexOrHigh("this") int size() {
+    public int size() {
         return count;
     }
 
@@ -262,7 +259,7 @@ class CharArrayWriter extends Writer {
      * Converts input data to a string.
      * @return the string.
      */
-    public @SameLen("this") String toString() {
+    public String toString() {
         synchronized (lock) {
             return new String(buf, 0, count);
         }

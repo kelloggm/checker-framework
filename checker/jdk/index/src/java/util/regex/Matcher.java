@@ -1,31 +1,29 @@
 /*
  * Copyright (c) 1999, 2009, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util.regex;
-
-import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -339,7 +337,7 @@ public final class Matcher implements MatchResult {
      *          If no match has yet been attempted,
      *          or if the previous match operation failed
      */
-    public @NonNegative int start() {
+    public int start() {
         if (first < 0)
             throw new IllegalStateException("No match available");
         return first;
@@ -369,7 +367,7 @@ public final class Matcher implements MatchResult {
      *          If there is no capturing group in the pattern
      *          with the given index
      */
-    public @NonNegative int start(@NonNegative int group) {
+    public int start(int group) {
         if (first < 0)
             throw new IllegalStateException("No match available");
         if (group > groupCount())
@@ -386,7 +384,7 @@ public final class Matcher implements MatchResult {
      *          If no match has yet been attempted,
      *          or if the previous match operation failed
      */
-    public @GTENegativeOne int end() {
+    public int end() {
         if (first < 0)
             throw new IllegalStateException("No match available");
         return last;
@@ -416,7 +414,7 @@ public final class Matcher implements MatchResult {
      *          If there is no capturing group in the pattern
      *          with the given index
      */
-    public @GTENegativeOne int end(@NonNegative int group) {
+    public int end(int group) {
         if (first < 0)
             throw new IllegalStateException("No match available");
         if (group > groupCount())
@@ -482,7 +480,7 @@ public final class Matcher implements MatchResult {
      *          If there is no capturing group in the pattern
      *          with the given index
      */
-    public String group(@NonNegative int group) {
+    public String group(int group) {
         if (first < 0)
             throw new IllegalStateException("No match found");
         if (group < 0 || group > groupCount())
@@ -544,7 +542,7 @@ public final class Matcher implements MatchResult {
      *
      * @return The number of capturing groups in this matcher's pattern
      */
-    public @NonNegative int groupCount() {
+    public int groupCount() {
         return parentPattern.capturingGroupCount - 1;
     }
 
@@ -612,7 +610,7 @@ public final class Matcher implements MatchResult {
      *          sequence starting at the given index matches this matcher's
      *          pattern
      */
-    public boolean find(@NonNegative int start) {
+    public boolean find(int start) {
         int limit = getTextLength();
         if ((start < 0) || (start > limit))
             throw new IndexOutOfBoundsException("Illegal start index");
@@ -984,7 +982,7 @@ public final class Matcher implements MatchResult {
      * @return  this matcher
      * @since 1.5
      */
-    public Matcher region(@NonNegative int start, @NonNegative int end) {
+    public Matcher region(int start, int end) {
         if ((start < 0) || (start > getTextLength()))
             throw new IndexOutOfBoundsException("start");
         if ((end < 0) || (end > getTextLength()))
@@ -1006,7 +1004,7 @@ public final class Matcher implements MatchResult {
      * @return  The starting point of this matcher's region
      * @since 1.5
      */
-    public @NonNegative int regionStart() {
+    public int regionStart() {
         return from;
     }
 
@@ -1019,7 +1017,7 @@ public final class Matcher implements MatchResult {
      * @return  the ending point of this matcher's region
      * @since 1.5
      */
-    public @NonNegative int regionEnd() {
+    public int regionEnd() {
         return to;
     }
 
@@ -1232,7 +1230,7 @@ public final class Matcher implements MatchResult {
      *
      * @return the index after the last character in the text
      */
-    @NonNegative int getTextLength() {
+    int getTextLength() {
         return text.length();
     }
 
@@ -1243,7 +1241,7 @@ public final class Matcher implements MatchResult {
      * @param  endIndex     the ending index, exclusive
      * @return A String generated from this Matcher's input
      */
-    CharSequence getSubSequence(@NonNegative int beginIndex, @NonNegative int endIndex) {
+    CharSequence getSubSequence(int beginIndex, int endIndex) {
         return text.subSequence(beginIndex, endIndex);
     }
 
@@ -1252,7 +1250,7 @@ public final class Matcher implements MatchResult {
      *
      * @return A char from the specified index
      */
-    char charAt(@NonNegative int i) {
+    char charAt(int i) {
         return text.charAt(i);
     }
 

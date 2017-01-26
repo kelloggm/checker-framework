@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
@@ -43,9 +43,6 @@ import sun.util.LocaleServiceProviderPool;
 import sun.util.logging.PlatformLogger;
 import sun.util.resources.LocaleData;
 import sun.util.resources.OpenListResourceBundle;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -474,7 +471,7 @@ public final class Currency implements Serializable {
      * @exception NullPointerException if <code>locale</code> is null
      */
     public String getSymbol(Locale locale) {
-/*        try {
+        try {
             // Check whether a provider can provide an implementation that's closer
             // to the requested locale than what the Java runtime itself can provide.
             LocaleServiceProviderPool pool =
@@ -499,8 +496,8 @@ public final class Currency implements Serializable {
             return bundle.getString(currencyCode);
         } catch (MissingResourceException e) {
             // use currency code as symbol of last resort
-*/            return currencyCode;
-//        }
+            return currencyCode;
+        }
     }
 
     /**
@@ -512,7 +509,7 @@ public final class Currency implements Serializable {
      *
      * @return the default number of fraction digits used with this currency
      */
-    public @GTENegativeOne int getDefaultFractionDigits() {
+    public int getDefaultFractionDigits() {
         return defaultFractionDigits;
     }
 
@@ -522,7 +519,7 @@ public final class Currency implements Serializable {
      * @return the ISO 4217 numeric code of this currency
      * @since 1.7
      */
-    public @NonNegative int getNumericCode() {
+    public int getNumericCode() {
         return numericCode;
     }
 
@@ -550,7 +547,7 @@ public final class Currency implements Serializable {
      * @since 1.7
      */
     public String getDisplayName(Locale locale) {
-        /*try {
+        try {
             OpenListResourceBundle bundle = LocaleData.getCurrencyNames(locale);
             String result = null;
             String bundleKey = currencyCode.toLowerCase(Locale.ROOT);
@@ -574,7 +571,7 @@ public final class Currency implements Serializable {
             }
         } catch (MissingResourceException e) {
             // fall through
-        }*/
+        }
 
         // use currency code as symbol of last resort
         return currencyCode;
@@ -735,12 +732,12 @@ public final class Currency implements Serializable {
 
     private static void info(String message, Throwable t) {
         PlatformLogger logger = PlatformLogger.getLogger("java.util.Currency");
-/*        if (logger.isLoggable(PlatformLogger.INFO)) {
+        if (logger.isLoggable(PlatformLogger.INFO)) {
             if (t != null) {
                 logger.info(message, t);
             } else {
                 logger.info(message);
             }
-        }*/
+        }
     }
 }

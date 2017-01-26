@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -37,9 +37,6 @@ package java.util.concurrent;
 import java.util.concurrent.atomic.*;
 import java.util.concurrent.locks.*;
 import java.util.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A {@link ThreadPoolExecutor} that can additionally schedule
@@ -426,7 +423,7 @@ public class ScheduledThreadPoolExecutor
      *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      */
-    public ScheduledThreadPoolExecutor(@NonNegative int corePoolSize) {
+    public ScheduledThreadPoolExecutor(int corePoolSize) {
         super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
               new DelayedWorkQueue());
     }
@@ -442,7 +439,7 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      * @throws NullPointerException if {@code threadFactory} is null
      */
-    public ScheduledThreadPoolExecutor(@NonNegative int corePoolSize,
+    public ScheduledThreadPoolExecutor(int corePoolSize,
                                        ThreadFactory threadFactory) {
         super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
               new DelayedWorkQueue(), threadFactory);
@@ -459,7 +456,7 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      * @throws NullPointerException if {@code handler} is null
      */
-    public ScheduledThreadPoolExecutor(@NonNegative int corePoolSize,
+    public ScheduledThreadPoolExecutor(int corePoolSize,
                                        RejectedExecutionHandler handler) {
         super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
               new DelayedWorkQueue(), handler);
@@ -479,7 +476,7 @@ public class ScheduledThreadPoolExecutor
      * @throws NullPointerException if {@code threadFactory} or
      *         {@code handler} is null
      */
-    public ScheduledThreadPoolExecutor(@NonNegative int corePoolSize,
+    public ScheduledThreadPoolExecutor(int corePoolSize,
                                        ThreadFactory threadFactory,
                                        RejectedExecutionHandler handler) {
         super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
@@ -975,7 +972,7 @@ public class ScheduledThreadPoolExecutor
             }
         }
 
-        public @NonNegative int size() {
+        public int size() {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -989,7 +986,7 @@ public class ScheduledThreadPoolExecutor
             return size() == 0;
         }
 
-        public @Positive int remainingCapacity() {
+        public int remainingCapacity() {
             return Integer.MAX_VALUE;
         }
 
@@ -1174,7 +1171,7 @@ public class ScheduledThreadPoolExecutor
             return finishPoll(first);
         }
 
-        public @NonNegative int drainTo(Collection<? super Runnable> c) {
+        public int drainTo(Collection<? super Runnable> c) {
             if (c == null)
                 throw new NullPointerException();
             if (c == this)
@@ -1194,7 +1191,7 @@ public class ScheduledThreadPoolExecutor
             }
         }
 
-        public @NonNegative int drainTo(Collection<? super Runnable> c, int maxElements) {
+        public int drainTo(Collection<? super Runnable> c, int maxElements) {
             if (c == null)
                 throw new NullPointerException();
             if (c == this)

@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -37,9 +37,6 @@ package java.util.concurrent;
 import java.util.*;
 import java.util.concurrent.locks.*;
 import java.util.concurrent.atomic.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A counting semaphore.  Conceptually, a semaphore maintains a set of
@@ -470,7 +467,7 @@ public class Semaphore implements java.io.Serializable {
      * @throws InterruptedException if the current thread is interrupted
      * @throws IllegalArgumentException if {@code permits} is negative
      */
-    public void acquire(@NonNegative int permits) throws InterruptedException {
+    public void acquire(int permits) throws InterruptedException {
         if (permits < 0) throw new IllegalArgumentException();
         sync.acquireSharedInterruptibly(permits);
     }
@@ -498,7 +495,7 @@ public class Semaphore implements java.io.Serializable {
      * @throws IllegalArgumentException if {@code permits} is negative
      *
      */
-    public void acquireUninterruptibly(@NonNegative int permits) {
+    public void acquireUninterruptibly(int permits) {
         if (permits < 0) throw new IllegalArgumentException();
         sync.acquireShared(permits);
     }
@@ -530,7 +527,7 @@ public class Semaphore implements java.io.Serializable {
      *         {@code false} otherwise
      * @throws IllegalArgumentException if {@code permits} is negative
      */
-    public boolean tryAcquire(@NonNegative int permits) {
+    public boolean tryAcquire(int permits) {
         if (permits < 0) throw new IllegalArgumentException();
         return sync.nonfairTryAcquireShared(permits) >= 0;
     }
@@ -585,7 +582,7 @@ public class Semaphore implements java.io.Serializable {
      * @throws InterruptedException if the current thread is interrupted
      * @throws IllegalArgumentException if {@code permits} is negative
      */
-    public boolean tryAcquire(@NonNegative int permits, long timeout, TimeUnit unit)
+    public boolean tryAcquire(int permits, long timeout, TimeUnit unit)
         throws InterruptedException {
         if (permits < 0) throw new IllegalArgumentException();
         return sync.tryAcquireSharedNanos(permits, unit.toNanos(timeout));
@@ -613,7 +610,7 @@ public class Semaphore implements java.io.Serializable {
      * @param permits the number of permits to release
      * @throws IllegalArgumentException if {@code permits} is negative
      */
-    public void release(@NonNegative int permits) {
+    public void release(int permits) {
         if (permits < 0) throw new IllegalArgumentException();
         sync.releaseShared(permits);
     }
@@ -625,7 +622,7 @@ public class Semaphore implements java.io.Serializable {
      *
      * @return the number of permits available in this semaphore
      */
-    public @NonNegative int availablePermits() {
+    public int availablePermits() {
         return sync.getPermits();
     }
 
@@ -634,7 +631,7 @@ public class Semaphore implements java.io.Serializable {
      *
      * @return the number of permits acquired
      */
-    public @NonNegative int drainPermits() {
+    public int drainPermits() {
         return sync.drainPermits();
     }
 
@@ -648,7 +645,7 @@ public class Semaphore implements java.io.Serializable {
      * @param reduction the number of permits to remove
      * @throws IllegalArgumentException if {@code reduction} is negative
      */
-    protected void reducePermits(@NonNegative int reduction) {
+    protected void reducePermits(int reduction) {
         if (reduction < 0) throw new IllegalArgumentException();
         sync.reducePermits(reduction);
     }
@@ -685,7 +682,7 @@ public class Semaphore implements java.io.Serializable {
      *
      * @return the estimated number of threads waiting for this lock
      */
-    public final @NonNegative int getQueueLength() {
+    public final int getQueueLength() {
         return sync.getQueueLength();
     }
 

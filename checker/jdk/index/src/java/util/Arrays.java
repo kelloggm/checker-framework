@@ -1,34 +1,31 @@
 /*
  * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
 import java.lang.reflect.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class contains various methods for manipulating arrays (such as
@@ -99,7 +96,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(int[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(int[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -139,7 +136,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(long[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(long[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -179,7 +176,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(short[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(short[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -219,7 +216,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(char[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(char[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -259,7 +256,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(byte[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(byte[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -315,7 +312,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(float[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(float[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -371,7 +368,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException
      *     if {@code fromIndex < 0} or {@code toIndex > a.length}
      */
-    public static void sort(double[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    public static void sort(double[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         DualPivotQuicksort.sort(a, fromIndex, toIndex - 1);
     }
@@ -469,10 +466,10 @@ public class Arrays {
      *         {@link Comparable} contract
      */
     public static void sort(Object[] a) {
-//        if (LegacyMergeSort.userRequested)
-//            legacyMergeSort(a);
-//        else
-//            ComparableTimSort.sort(a);
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a);
+        else
+            ComparableTimSort.sort(a);
     }
 
     /** To be removed in a future release. */
@@ -533,16 +530,16 @@ public class Arrays {
      *         not <i>mutually comparable</i> (for example, strings and
      *         integers).
      */
-    public static void sort(Object[] a, @NonNegative int fromIndex, @NonNegative int toIndex) {
-//        if (LegacyMergeSort.userRequested)
-//            legacyMergeSort(a, fromIndex, toIndex);
-//        else
-//            ComparableTimSort.sort(a, fromIndex, toIndex);
+    public static void sort(Object[] a, int fromIndex, int toIndex) {
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a, fromIndex, toIndex);
+        else
+            ComparableTimSort.sort(a, fromIndex, toIndex);
     }
 
     /** To be removed in a future release. */
     private static void legacyMergeSort(Object[] a,
-                                        @NonNegative int fromIndex, @NonNegative int toIndex) {
+                                        int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
         Object[] aux = copyOfRange(a, fromIndex, toIndex);
         mergeSort(aux, a, fromIndex, toIndex, -fromIndex);
@@ -656,10 +653,10 @@ public class Arrays {
      *         found to violate the {@link Comparator} contract
      */
     public static <T> void sort(T[] a, Comparator<? super T> c) {
-//        if (LegacyMergeSort.userRequested)
-//            legacyMergeSort(a, c);
-//        else
-//            TimSort.sort(a, c);
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a, c);
+        else
+            TimSort.sort(a, c);
     }
 
     /** To be removed in a future release. */
@@ -722,16 +719,16 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or
      *         {@code toIndex > a.length}
      */
-    public static <T> void sort(T[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static <T> void sort(T[] a, int fromIndex, int toIndex,
                                 Comparator<? super T> c) {
-//        if (LegacyMergeSort.userRequested)
-//            legacyMergeSort(a, fromIndex, toIndex, c);
-//        else
-//            TimSort.sort(a, fromIndex, toIndex, c);
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a, fromIndex, toIndex, c);
+        else
+            TimSort.sort(a, fromIndex, toIndex, c);
     }
 
     /** To be removed in a future release. */
-    private static <T> void legacyMergeSort(T[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static <T> void legacyMergeSort(T[] a, int fromIndex, int toIndex,
                                             Comparator<? super T> c) {
         rangeCheck(a.length, fromIndex, toIndex);
         T[] aux = copyOfRange(a, fromIndex, toIndex);
@@ -792,7 +789,7 @@ public class Arrays {
      * Checks that {@code fromIndex} and {@code toIndex} are in
      * the range and throws an appropriate exception, if they aren't.
      */
-    private static void rangeCheck(int length, @NonNegative int fromIndex, @NonNegative int toIndex) {
+    private static void rangeCheck(int length, int fromIndex, int toIndex) {
         if (fromIndex > toIndex) {
             throw new IllegalArgumentException(
                 "fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
@@ -862,14 +859,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(long[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(long[] a, int fromIndex, int toIndex,
                                    long key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(long[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(long[] a, int fromIndex, int toIndex,
                                      long key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -943,14 +940,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(int[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(int[] a, int fromIndex, int toIndex,
                                    int key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(int[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(int[] a, int fromIndex, int toIndex,
                                      int key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1024,7 +1021,7 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(short[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(short[] a, int fromIndex, int toIndex,
                                    short key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
@@ -1105,14 +1102,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(char[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(char[] a, int fromIndex, int toIndex,
                                    char key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(char[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(char[] a, int fromIndex, int toIndex,
                                      char key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1186,14 +1183,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(byte[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(byte[] a, int fromIndex, int toIndex,
                                    byte key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(byte[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(byte[] a, int fromIndex, int toIndex,
                                      byte key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1269,14 +1266,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(double[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(double[] a, int fromIndex, int toIndex,
                                    double key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(double[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(double[] a, int fromIndex, int toIndex,
                                      double key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1360,14 +1357,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(float[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(float[] a, int fromIndex, int toIndex,
                                    float key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(float[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(float[] a, int fromIndex, int toIndex,
                                      float key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1466,14 +1463,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static int binarySearch(Object[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static int binarySearch(Object[] a, int fromIndex, int toIndex,
                                    Object key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(Object[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static int binarySearch0(Object[] a, int fromIndex, int toIndex,
                                      Object key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -1567,14 +1564,14 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static <T> int binarySearch(T[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static <T> int binarySearch(T[] a, int fromIndex, int toIndex,
                                        T key, Comparator<? super T> c) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key, c);
     }
 
     // Like public version, but without range checks.
-    private static <T> int binarySearch0(T[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    private static <T> int binarySearch0(T[] a, int fromIndex, int toIndex,
                                          T key, Comparator<? super T> c) {
         if (c == null) {
             return binarySearch0(a, fromIndex, toIndex, key);
@@ -1907,7 +1904,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(long[] a, @NonNegative int fromIndex, @NonNegative int toIndex, long val) {
+    public static void fill(long[] a, int fromIndex, int toIndex, long val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -1942,7 +1939,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(int[] a, @NonNegative int fromIndex, @NonNegative int toIndex, int val) {
+    public static void fill(int[] a, int fromIndex, int toIndex, int val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -1977,7 +1974,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(short[] a, @NonNegative int fromIndex, @NonNegative int toIndex, short val) {
+    public static void fill(short[] a, int fromIndex, int toIndex, short val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2012,7 +2009,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(char[] a, @NonNegative int fromIndex, @NonNegative int toIndex, char val) {
+    public static void fill(char[] a, int fromIndex, int toIndex, char val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2047,7 +2044,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(byte[] a, @NonNegative int fromIndex, @NonNegative int toIndex, byte val) {
+    public static void fill(byte[] a, int fromIndex, int toIndex, byte val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2082,7 +2079,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(boolean[] a, @NonNegative int fromIndex, @NonNegative int toIndex,
+    public static void fill(boolean[] a, int fromIndex, int toIndex,
                             boolean val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
@@ -2118,7 +2115,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(double[] a, @NonNegative int fromIndex, @NonNegative int toIndex,double val){
+    public static void fill(double[] a, int fromIndex, int toIndex,double val){
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2153,7 +2150,7 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
      *         <tt>toIndex &gt; a.length</tt>
      */
-    public static void fill(float[] a, @NonNegative int fromIndex, @NonNegative int toIndex, float val) {
+    public static void fill(float[] a, int fromIndex, int toIndex, float val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2192,7 +2189,7 @@ public class Arrays {
      * @throws ArrayStoreException if the specified value is not of a
      *         runtime type that can be stored in the specified array
      */
-    public static void fill(Object[] a, @NonNegative int fromIndex, @NonNegative int toIndex, Object val) {
+    public static void fill(Object[] a, int fromIndex, int toIndex, Object val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -2218,7 +2215,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static <T> T[] copyOf(T[] original, @NonNegative int newLength) {
+    public static <T> T[] copyOf(T[] original, int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
 
@@ -2244,7 +2241,7 @@ public class Arrays {
      *     an array of class <tt>newType</tt>
      * @since 1.6
      */
-    public static <T,U> T[] copyOf(U[] original, @NonNegative int newLength, Class<? extends T[]> newType) {
+    public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
         T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
             : (T[]) Array.newInstance(newType.getComponentType(), newLength);
@@ -2270,7 +2267,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static byte[] copyOf(byte[] original, @NonNegative int newLength) {
+    public static byte[] copyOf(byte[] original, int newLength) {
         byte[] copy = new byte[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2294,7 +2291,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static short[] copyOf(short[] original, @NonNegative int newLength) {
+    public static short[] copyOf(short[] original, int newLength) {
         short[] copy = new short[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2318,7 +2315,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static int[] copyOf(int[] original, @NonNegative int newLength) {
+    public static int[] copyOf(int[] original, int newLength) {
         int[] copy = new int[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2342,7 +2339,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static long[] copyOf(long[] original, @NonNegative int newLength) {
+    public static long[] copyOf(long[] original, int newLength) {
         long[] copy = new long[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2366,7 +2363,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static char[] copyOf(char[] original, @NonNegative int newLength) {
+    public static char[] copyOf(char[] original, int newLength) {
         char[] copy = new char[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2390,7 +2387,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static float[] copyOf(float[] original, @NonNegative int newLength) {
+    public static float[] copyOf(float[] original, int newLength) {
         float[] copy = new float[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2414,7 +2411,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static double[] copyOf(double[] original, @NonNegative int newLength) {
+    public static double[] copyOf(double[] original, int newLength) {
         double[] copy = new double[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2438,7 +2435,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static boolean[] copyOf(boolean[] original, @NonNegative int newLength) {
+    public static boolean[] copyOf(boolean[] original, int newLength) {
         boolean[] copy = new boolean[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -2473,7 +2470,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static <T> T[] copyOfRange(T[] original, @NonNegative int from, @NonNegative int to) {
+    public static <T> T[] copyOfRange(T[] original, int from, int to) {
         return copyOfRange(original, from, to, (Class<T[]>) original.getClass());
     }
 
@@ -2508,7 +2505,7 @@ public class Arrays {
      *     an array of class <tt>newType</tt>.
      * @since 1.6
      */
-    public static <T,U> T[] copyOfRange(U[] original, @NonNegative int from, @NonNegative int to, Class<? extends T[]> newType) {
+    public static <T,U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2546,7 +2543,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static byte[] copyOfRange(byte[] original, @NonNegative int from, @NonNegative int to) {
+    public static byte[] copyOfRange(byte[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2582,7 +2579,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static short[] copyOfRange(short[] original, @NonNegative int from, @NonNegative int to) {
+    public static short[] copyOfRange(short[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2618,7 +2615,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static int[] copyOfRange(int[] original, @NonNegative int from, @NonNegative int to) {
+    public static int[] copyOfRange(int[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2654,7 +2651,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static long[] copyOfRange(long[] original, @NonNegative int from, @NonNegative int to) {
+    public static long[] copyOfRange(long[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2690,7 +2687,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static char[] copyOfRange(char[] original, @NonNegative int from, @NonNegative int to) {
+    public static char[] copyOfRange(char[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2726,7 +2723,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static float[] copyOfRange(float[] original, @NonNegative int from, @NonNegative int to) {
+    public static float[] copyOfRange(float[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2762,7 +2759,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static double[] copyOfRange(double[] original, @NonNegative int from, @NonNegative int to) {
+    public static double[] copyOfRange(double[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2798,7 +2795,7 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static boolean[] copyOfRange(boolean[] original, @NonNegative int from, @NonNegative int to) {
+    public static boolean[] copyOfRange(boolean[] original, int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -2846,7 +2843,7 @@ public class Arrays {
             a = array;
         }
 
-        public @GTENegativeOne int size() {
+        public int size() {
             return a.length;
         }
 
@@ -2865,17 +2862,17 @@ public class Arrays {
             return a;
         }
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             return a[index];
         }
 
-        public E set(@NonNegative int index, E element) {
+        public E set(int index, E element) {
             E oldValue = a[index];
             a[index] = element;
             return oldValue;
         }
 
-        public @GTENegativeOne int indexOf(Object o) {
+        public int indexOf(Object o) {
             if (o==null) {
                 for (int i=0; i<a.length; i++)
                     if (a[i]==null)

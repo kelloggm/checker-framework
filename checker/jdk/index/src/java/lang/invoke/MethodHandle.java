@@ -1,41 +1,34 @@
 /*
  * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang.invoke;
 
 
-import java.util.*;
-import sun.invoke.util.*;
-import sun.misc.Unsafe;
-
+import java.util.ArrayList;
+import sun.invoke.util.ValueConversions;
 import static java.lang.invoke.MethodHandleStatics.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A method handle is a typed, directly executable reference to an underlying method,
@@ -215,8 +208,8 @@ import org.checkerframework.checker.index.qual.*;
  * refers directly to an associated {@code CONSTANT_Methodref},
  * {@code CONSTANT_InterfaceMethodref}, or {@code CONSTANT_Fieldref}
  * constant pool entry.
- * (For full details on method handle constants,
- * see sections 4.4.8 and 5.4.3.5 of the Java Virtual Machine Specification.)
+ * (For more details on method handle constants,
+ * see the <a href="package-summary.html#mhcon">package summary</a>.)
  * <p>
  * Method handles produced by lookups or constant loads from methods or
  * constructors with the variable arity modifier bit ({@code 0x0080})
@@ -230,19 +223,6 @@ import org.checkerframework.checker.index.qual.*;
  * according to the class under which the method was initially requested.
  * (E.g., if a non-static method handle is obtained via {@code ldc},
  * the type of the receiver is the class named in the constant pool entry.)
- * <p>
- * Method handle constants are subject to the same link-time access checks
- * their corresponding bytecode instructions, and the {@code ldc} instruction
- * will throw corresponding linkage errors if the bytecode behaviors would
- * throw such errors.
- * <p>
- * As a corollary of this, access to protected members is restricted
- * to receivers only of the accessing class, or one of its subclasses,
- * and the accessing class must in turn be a subclass (or package sibling)
- * of the protected member's defining class.
- * If a method reference refers to a protected non-static method or field
- * of a class outside the current package, the receiver argument will
- * be narrowed to the type of the accessing class.
  * <p>
  * When a method handle to a virtual method is invoked, the method is
  * always looked up in the receiver (that is, the first argument).
@@ -295,7 +275,7 @@ mh.invokeExact(System.out, "Hello, world.");
  * generates a single invokevirtual instruction with
  * the symbolic type descriptor indicated in the following comment.
  * In these examples, the helper method {@code assertEquals} is assumed to
- * be a method which calls {@link java.util.Objects#equals(Object,Object) Objects.equals }
+ * be a method which calls {@link Objects.equals java.util.Objects#equals}
  * on its arguments, and asserts that the result is true.
  *
  * <h3>Exceptions</h3>
@@ -410,7 +390,38 @@ mh.invokeExact(System.out, "Hello, world.");
  * @author John Rose, JSR 292 EG
  */
 public abstract class MethodHandle {
+    // { JVM internals:
+
+    private byte       vmentry;    // adapter stub or method entry point
+    //private int      vmslots;    // optionally, hoist type.form.vmslots
+    /*non-public*/ Object vmtarget;   // VM-specific, class-specific target value
+
+    // TO DO:  vmtarget should be invisible to Java, since the JVM puts internal
+    // managed pointers into it.  Making it visible exposes it to debuggers,
+    // which can cause errors when they treat the pointer as an Object.
+
+    // These two dummy fields are present to force 'I' and 'J' signatures
+    // into this class's constant pool, so they can be transferred
+    // to vmentry when this class is loaded.
+    static final int  INT_FIELD = 0;
+    static final long LONG_FIELD = 0;
+
+    // vmentry (a void* field) is used *only* by the JVM.
+    // The JVM adjusts its type to int or long depending on system wordsize.
+    // Since it is statically typed as neither int nor long, it is impossible
+    // to use this field from Java bytecode.  (Please don't try to, either.)
+
+    // The vmentry is an assembly-language stub which is jumped to
+    // immediately after the method type is verified.
+    // For a direct MH, this stub loads the vmtarget's entry point
+    // and jumps to it.
+
+    // } End of JVM internals.
+
     static { MethodHandleImpl.initStatics(); }
+
+    // interface MethodHandle<R throws X extends Exception,A...>
+    // { MethodType<R throws X,A...> type(); public R invokeExact(A...) throws X; }
 
     /**
      * Internal marker interface which distinguishes (to the Java compiler)
@@ -420,9 +431,7 @@ public abstract class MethodHandle {
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
     @interface PolymorphicSignature { }
 
-    private final MethodType type;
-    /*private*/ final LambdaForm form;
-    // form is not private so that invokers can easily fetch it
+    private MethodType type;
 
     /**
      * Reports the type of this method handle.
@@ -439,13 +448,9 @@ public abstract class MethodHandle {
      * the {@code java.lang.invoke} package.
      */
     // @param type type (permanently assigned) of the new method handle
-    /*non-public*/ MethodHandle(MethodType type, LambdaForm form) {
-        type.getClass();  // explicit NPE
-        form.getClass();  // explicit NPE
+    /*non-public*/ MethodHandle(MethodType type) {
+        type.getClass();  // elicit NPE
         this.type = type;
-        this.form = form;
-
-        form.prepare();  // TO DO:  Try to delay this step until just before invocation.
     }
 
     /**
@@ -501,46 +506,6 @@ public abstract class MethodHandle {
     public final native @PolymorphicSignature Object invoke(Object... args) throws Throwable;
 
     /**
-     * Private method for trusted invocation of a method handle respecting simplified signatures.
-     * Type mismatches will not throw {@code WrongMethodTypeException}, but could crash the JVM.
-     * <p>
-     * The caller signature is restricted to the following basic types:
-     * Object, int, long, float, double, and void return.
-     * <p>
-     * The caller is responsible for maintaining type correctness by ensuring
-     * that the each outgoing argument value is a member of the range of the corresponding
-     * callee argument type.
-     * (The caller should therefore issue appropriate casts and integer narrowing
-     * operations on outgoing argument values.)
-     * The caller can assume that the incoming result value is part of the range
-     * of the callee's return type.
-     */
-    /*non-public*/ final native @PolymorphicSignature Object invokeBasic(Object... args) throws Throwable;
-
-    /*non-public*/ static native @PolymorphicSignature Object linkToVirtual(Object... args) throws Throwable;
-
-    /**
-     * Private method for trusted invocation of a MemberName of kind {@code REF_invokeStatic}.
-     * The caller signature is restricted to basic types as with {@code invokeBasic}.
-     * The trailing (not leading) argument must be a MemberName.
-     */
-    /*non-public*/ static native @PolymorphicSignature Object linkToStatic(Object... args) throws Throwable;
-
-    /**
-     * Private method for trusted invocation of a MemberName of kind {@code REF_invokeSpecial}.
-     * The caller signature is restricted to basic types as with {@code invokeBasic}.
-     * The trailing (not leading) argument must be a MemberName.
-     */
-    /*non-public*/ static native @PolymorphicSignature Object linkToSpecial(Object... args) throws Throwable;
-
-    /**
-     * Private method for trusted invocation of a MemberName of kind {@code REF_invokeInterface}.
-     * The caller signature is restricted to basic types as with {@code invokeBasic}.
-     * The trailing (not leading) argument must be a MemberName.
-     */
-    /*non-public*/ static native @PolymorphicSignature Object linkToInterface(Object... args) throws Throwable;
-
-    /**
      * Performs a variable arity invocation, passing the arguments in the given array
      * to the method handle, as if via an inexact {@link #invoke invoke} from a call site
      * which mentions only the type {@code Object}, and whose arity is the length
@@ -591,16 +556,14 @@ public abstract class MethodHandle {
      * @see MethodHandles#spreadInvoker
      */
     public Object invokeWithArguments(Object... arguments) throws Throwable {
-/*        int argc = arguments == null ? 0 : arguments.length;
-        @SuppressWarnings("LocalVariableHidesMemberVariable")
+        int argc = arguments == null ? 0 : arguments.length;
         MethodType type = type();
         if (type.parameterCount() != argc || isVarargsCollector()) {
             // simulate invoke
             return asType(MethodType.genericMethodType(argc)).invokeWithArguments(arguments);
         }
         MethodHandle invoker = type.invokers().varargsInvoker();
-        return invoker.invokeExact(this, arguments);*/
-    	return null;
+        return invoker.invokeExact(this, arguments);
     }
 
     /**
@@ -727,7 +690,7 @@ public abstract class MethodHandle {
         if (!type.isConvertibleTo(newType)) {
             throw new WrongMethodTypeException("cannot convert "+this+" to "+newType);
         }
-        return convertArguments(newType);
+        return MethodHandleImpl.convertArguments(this, newType, 1);
     }
 
     /**
@@ -757,10 +720,6 @@ public abstract class MethodHandle {
      * to the target method handle.
      * (The array may also be null when zero elements are required.)
      * <p>
-     * If, when the adapter is called, the supplied array argument does
-     * not have the correct number of elements, the adapter will throw
-     * an {@link IllegalArgumentException} instead of invoking the target.
-     * <p>
      * Here are some simple examples of array-spreading method handles:
      * <blockquote><pre>
 MethodHandle equals = publicLookup()
@@ -771,12 +730,6 @@ assert(!(boolean) equals.invokeExact("me", (Object)"thee"));
 MethodHandle eq2 = equals.asSpreader(Object[].class, 2);
 assert( (boolean) eq2.invokeExact(new Object[]{ "me", "me" }));
 assert(!(boolean) eq2.invokeExact(new Object[]{ "me", "thee" }));
-// try to spread from anything but a 2-array:
-for (int n = 0; n <= 10; n++) {
-  Object[] badArityArgs = (n == 2 ? null : new Object[n]);
-  try { assert((boolean) eq2.invokeExact(badArityArgs) && false); }
-  catch (IllegalArgumentException ex) { } // OK
-}
 // spread both arguments from a String array:
 MethodHandle eq2s = equals.asSpreader(String[].class, 2);
 assert( (boolean) eq2s.invokeExact(new String[]{ "me", "me" }));
@@ -817,10 +770,9 @@ assertEquals("[A, B, C]", (String) caToString2.invokeExact('A', "BC".toCharArray
      * @throws WrongMethodTypeException if the implied {@code asType} call fails
      * @see #asCollector
      */
-    public MethodHandle asSpreader(Class<?> arrayType, @NonNegative int arrayLength) {
+    public MethodHandle asSpreader(Class<?> arrayType, int arrayLength) {
         asSpreaderChecks(arrayType, arrayLength);
-        int spreadArgPos = type.parameterCount() - arrayLength;
-        return MethodHandleImpl.makeSpreadArguments(this, arrayType, spreadArgPos, arrayLength);
+        return MethodHandleImpl.spreadArguments(this, arrayType, arrayLength);
     }
 
     private void asSpreaderChecks(Class<?> arrayType, int arrayLength) {
@@ -838,7 +790,7 @@ assertEquals("[A, B, C]", (String) caToString2.invokeExact('A', "BC".toCharArray
                 }
             }
             if (sawProblem) {
-                ArrayList<Class<?>> ptypes = new ArrayList<>(type().parameterList());
+                ArrayList<Class<?>> ptypes = new ArrayList<Class<?>>(type().parameterList());
                 for (int i = nargs - arrayLength; i < nargs; i++) {
                     ptypes.set(i, arrayElement);
                 }
@@ -931,15 +883,10 @@ assertEquals("[123]", (String) longsToString.invokeExact((long)123));
      * @see #asSpreader
      * @see #asVarargsCollector
      */
-    public MethodHandle asCollector(Class<?> arrayType, @NonNegative int arrayLength) {
-/*        asCollectorChecks(arrayType, arrayLength);
-        int collectArgPos = type().parameterCount()-1;
-        MethodHandle target = this;
-        if (arrayType != type().parameterType(collectArgPos))
-            target = convertArguments(type().changeParameterType(collectArgPos, arrayType));
+    public MethodHandle asCollector(Class<?> arrayType, int arrayLength) {
+        asCollectorChecks(arrayType, arrayLength);
         MethodHandle collector = ValueConversions.varargsArray(arrayType, arrayLength);
-        return MethodHandles.collectArguments(target, collectArgPos, collector);*/
-    	return null;
+        return MethodHandleImpl.collectArguments(this, type.parameterCount()-1, collector);
     }
 
     // private API: return true if last param exactly matches arrayType
@@ -1109,7 +1056,7 @@ assertEquals("[three, thee, tee]", Arrays.toString((Object[])ls.get(0)));
         boolean lastMatch = asCollectorChecks(arrayType, 0);
         if (isVarargsCollector() && lastMatch)
             return this;
-        return MethodHandleImpl.makeVarargsCollector(this, arrayType);
+        return AdapterMethodHandle.makeVarargsCollector(this, arrayType);
     }
 
     /**
@@ -1208,13 +1155,14 @@ assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());
      */
     public MethodHandle bindTo(Object x) {
         Class<?> ptype;
-        @SuppressWarnings("LocalVariableHidesMemberVariable")
-        MethodType type = type();
-        if (type.parameterCount() == 0 ||
-            (ptype = type.parameterType(0)).isPrimitive())
+        if (type().parameterCount() == 0 ||
+            (ptype = type().parameterType(0)).isPrimitive())
             throw newIllegalArgumentException("no leading reference parameter", x);
-        x = ptype.cast(x);  // throw CCE if needed
-        return bindReceiver(x);
+        x = MethodHandles.checkValue(ptype, x);
+        // Cf. MethodHandles.insertArguments for the following logic:
+        MethodHandle bmh = MethodHandleImpl.bindReceiver(this, x);
+        if (bmh != null)  return bmh;
+        return MethodHandleImpl.bindArgument(this, 0, x);
     }
 
     /**
@@ -1235,185 +1183,11 @@ assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());
     @Override
     public String toString() {
         if (DEBUG_METHOD_HANDLE_NAMES)  return debugString();
-        return standardString();
-    }
-    String standardString() {
         return "MethodHandle"+type;
     }
+
+    /*non-public*/
     String debugString() {
-        return standardString()+"/LF="+internalForm()+internalProperties();
-    }
-
-    //// Implementation methods.
-    //// Sub-classes can override these default implementations.
-    //// All these methods assume arguments are already validated.
-
-    // Other transforms to do:  convert, explicitCast, permute, drop, filter, fold, GWT, catch
-
-    /*non-public*/
-    MethodHandle setVarargs(MemberName member) throws IllegalAccessException {
-        if (!member.isVarargs())  return this;
-        int argc = type().parameterCount();
-        if (argc != 0) {
-            Class<?> arrayType = type().parameterType(argc-1);
-            if (arrayType.isArray()) {
-                return MethodHandleImpl.makeVarargsCollector(this, arrayType);
-            }
-        }
-        throw member.makeAccessException("cannot make variable arity", null);
-    }
-    /*non-public*/
-    MethodHandle viewAsType(MethodType newType) {
-        // No actual conversions, just a new view of the same method.
-        // return MethodHandleImpl.makePairwiseConvert(this, newType, 0);
-    	return null;
-    }
-
-    // Decoding
-
-    /*non-public*/
-    LambdaForm internalForm() {
-        return form;
-    }
-
-    /*non-public*/
-    MemberName internalMemberName() {
-        return null;  // DMH returns DMH.member
-    }
-
-    /*non-public*/
-    Object internalValues() {
-        return null;
-    }
-
-    /*non-public*/
-    Object internalProperties() {
-        // Override to something like "/FOO=bar"
-        return "";
-    }
-
-    //// Method handle implementation methods.
-    //// Sub-classes can override these default implementations.
-    //// All these methods assume arguments are already validated.
-
-    /*non-public*/ MethodHandle convertArguments(MethodType newType) {
-        // Override this if it can be improved.
-        //return MethodHandleImpl.makePairwiseConvert(this, newType, 1);
-    	return null;
-    }
-
-    /*non-public*/
-    MethodHandle bindArgument(int pos, char basicType, Object value) {
-        // Override this if it can be improved.
-        return rebind().bindArgument(pos, basicType, value);
-    }
-
-    /*non-public*/
-    MethodHandle bindReceiver(Object receiver) {
-        // Override this if it can be improved.
-        return bindArgument(0, 'L', receiver);
-    }
-
-    /*non-public*/
-    MethodHandle bindImmediate(int pos, char basicType, Object value) {
-        // Bind an immediate value to a position in the arguments.
-        // This means, elide the respective argument,
-        // and replace all references to it in NamedFunction args with the specified value.
-
-        // CURRENT RESTRICTIONS
-        // * only for pos 0 and UNSAFE (position is adjusted in MHImpl to make API usable for others)
-/*        assert pos == 0 && basicType == 'L' && value instanceof Unsafe;
-        MethodType type2 = type.dropParameterTypes(pos, pos + 1); // adjustment: ignore receiver!
-        LambdaForm form2 = form.bindImmediate(pos + 1, basicType, value); // adjust pos to form-relative pos
-        return copyWith(type2, form2);*/
-    	return null;
-    }
-
-    /*non-public*/
-    MethodHandle copyWith(MethodType mt, LambdaForm lf) {
-        throw new InternalError("copyWith: " + this.getClass());
-    }
-
-    /*non-public*/
-    MethodHandle dropArguments(MethodType srcType, int pos, int drops) {
-        // Override this if it can be improved.
-        return rebind().dropArguments(srcType, pos, drops);
-    }
-
-    /*non-public*/
-    MethodHandle permuteArguments(MethodType newType, int[] reorder) {
-        // Override this if it can be improved.
-        return rebind().permuteArguments(newType, reorder);
-    }
-
-    /*non-public*/
-    MethodHandle rebind() {
-        // Bind 'this' into a new invoker, of the known class BMH.
-        MethodType type2 = type();
-        LambdaForm form2 = reinvokerForm(type2.basicType());
-        // form2 = lambda (bmh, arg*) { thismh = bmh[0]; invokeBasic(thismh, arg*) }
-        return BoundMethodHandle.bindSingle(type2, form2, this);
-    }
-
-    /*non-public*/
-    MethodHandle reinvokerTarget() {
-        throw new InternalError("not a reinvoker MH: "+this.getClass().getName()+": "+this);
-    }
-
-    /** Create a LF which simply reinvokes a target of the given basic type.
-     *  The target MH must override {@link #reinvokerTarget} to provide the target.
-     */
-    static LambdaForm reinvokerForm(MethodType mtype) {
-        mtype = mtype.basicType();
-        LambdaForm reinvoker = mtype.form().cachedLambdaForm(MethodTypeForm.LF_REINVOKE);
-        if (reinvoker != null)  return reinvoker;
-        MethodHandle MH_invokeBasic = MethodHandles.basicInvoker(mtype);
-        final int THIS_BMH    = 0;
-        final int ARG_BASE    = 1;
-        final int ARG_LIMIT   = ARG_BASE + mtype.parameterCount();
-        int nameCursor = ARG_LIMIT;
-        final int NEXT_MH     = nameCursor++;
-        final int REINVOKE    = nameCursor++;
-        LambdaForm.Name[] names = LambdaForm.arguments(nameCursor - ARG_LIMIT, mtype.invokerType());
-        names[NEXT_MH] = new LambdaForm.Name(NF_reinvokerTarget, names[THIS_BMH]);
-        Object[] targetArgs = Arrays.copyOfRange(names, THIS_BMH, ARG_LIMIT, Object[].class);
-        targetArgs[0] = names[NEXT_MH];  // overwrite this MH with next MH
-        names[REINVOKE] = new LambdaForm.Name(MH_invokeBasic, targetArgs);
-        return mtype.form().setCachedLambdaForm(MethodTypeForm.LF_REINVOKE, new LambdaForm("BMH.reinvoke", ARG_LIMIT, names));
-    }
-
-    private static final LambdaForm.NamedFunction NF_reinvokerTarget;
-    static {
-        try {
-            NF_reinvokerTarget = new LambdaForm.NamedFunction(MethodHandle.class
-                .getDeclaredMethod("reinvokerTarget"));
-        } catch (ReflectiveOperationException ex) {
-            throw newInternalError(ex);
-        }
-    }
-
-    /**
-     * Replace the old lambda form of this method handle with a new one.
-     * The new one must be functionally equivalent to the old one.
-     * Threads may continue running the old form indefinitely,
-     * but it is likely that the new one will be preferred for new executions.
-     * Use with discretion.
-     * @param newForm
-     */
-    /*non-public*/
-    void updateForm(LambdaForm newForm) {
-        if (form == newForm)  return;
-        // ISSUE: Should we have a memory fence here?
-        UNSAFE.putObject(this, FORM_OFFSET, newForm);
-        this.form.prepare();  // as in MethodHandle.<init>
-    }
-
-    private static final long FORM_OFFSET;
-    static {
-        try {
-            FORM_OFFSET = UNSAFE.objectFieldOffset(MethodHandle.class.getDeclaredField("form"));
-        } catch (ReflectiveOperationException ex) {
-            throw newInternalError(ex);
-        }
+        return getNameString(this);
     }
 }

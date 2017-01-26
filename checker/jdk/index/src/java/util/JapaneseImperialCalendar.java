@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 2005, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
@@ -36,9 +36,6 @@ import sun.util.calendar.Gregorian;
 import sun.util.calendar.LocalGregorianCalendar;
 import sun.util.calendar.ZoneInfo;
 import sun.util.resources.LocaleData;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * <code>JapaneseImperialCalendar</code> implements a Japanese
@@ -357,7 +354,7 @@ class JapaneseImperialCalendar extends Calendar {
      * or if any calendar fields have out-of-range values in
      * non-lenient mode.
      */
-    public void add(@NonNegative int field, int amount) {
+    public void add(int field, int amount) {
         // If amount == 0, do nothing even the given field is out of
         // range. This is tested by JCK.
         if (amount == 0) {
@@ -485,7 +482,7 @@ class JapaneseImperialCalendar extends Calendar {
         }
     }
 
-    public void roll(@NonNegative int field, boolean up) {
+    public void roll(int field, boolean up) {
         roll(field, up ? +1 : -1);
     }
 
@@ -509,7 +506,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #add(int,int)
      * @see #set(int,int)
      */
-    public void roll(@NonNegative int field, int amount) {
+    public void roll(int field, int amount) {
         // If amount == 0, do nothing even the given field is out of
         // range. This is tested by JCK.
         if (amount == 0) {
@@ -949,9 +946,9 @@ class JapaneseImperialCalendar extends Calendar {
             return null;
         }
 
-/*        ResourceBundle rb = LocaleData.getDateFormatData(locale);
-*/        String name = null;
-/*        String key = getKey(field, style);
+        ResourceBundle rb = LocaleData.getDateFormatData(locale);
+        String name = null;
+        String key = getKey(field, style);
         if (key != null) {
             String[] strings = rb.getStringArray(key);
             if (field == YEAR) {
@@ -971,7 +968,7 @@ class JapaneseImperialCalendar extends Calendar {
                     name = strings[index];
                 }
             }
-        }*/
+        }
         return name;
     }
 
@@ -1001,10 +998,10 @@ class JapaneseImperialCalendar extends Calendar {
     }
 
     private Map<String,Integer> getDisplayNamesImpl(int field, int style, Locale locale) {
-/*        ResourceBundle rb = LocaleData.getDateFormatData(locale);
-*/        String key = getKey(field, style);
+        ResourceBundle rb = LocaleData.getDateFormatData(locale);
+        String key = getKey(field, style);
         Map<String,Integer> map = new HashMap<String,Integer>();
-/*        if (key != null) {
+        if (key != null) {
             String[] strings = rb.getStringArray(key);
             if (field == YEAR) {
                 if (strings.length > 0) {
@@ -1024,7 +1021,7 @@ class JapaneseImperialCalendar extends Calendar {
                     }
                 }
             }
-        }*/
+        }
         return map.size() > 0 ? map : null;
     }
 
@@ -1077,7 +1074,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getMinimum(@NonNegative int field) {
+    public int getMinimum(int field) {
         return MIN_VALUES[field];
     }
 
@@ -1099,7 +1096,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getMaximum(@NonNegative int field) {
+    public int getMaximum(int field) {
         switch (field) {
         case YEAR:
             {
@@ -1130,7 +1127,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getGreatestMinimum(@NonNegative int field) {
+    public int getGreatestMinimum(int field) {
         return field == YEAR ? 1 : MIN_VALUES[field];
     }
 
@@ -1152,7 +1149,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    public int getLeastMaximum(@NonNegative int field) {
+    public int getLeastMaximum(int field) {
         switch (field) {
         case YEAR:
             {
@@ -1179,7 +1176,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getLeastMaximum(int)
      * @see #getActualMaximum(int)
      */
-    public int getActualMinimum(@NonNegative int field) {
+    public int getActualMinimum(int field) {
         if (!isFieldSet(YEAR_MASK|MONTH_MASK|WEEK_OF_YEAR_MASK, field)) {
             return getMinimum(field);
         }
@@ -1288,7 +1285,7 @@ class JapaneseImperialCalendar extends Calendar {
      * @see #getLeastMaximum(int)
      * @see #getActualMinimum(int)
      */
-    public int getActualMaximum(@NonNegative int field) {
+    public int getActualMaximum(int field) {
         final int fieldsForFixedMax = ERA_MASK|DAY_OF_WEEK_MASK|HOUR_MASK|AM_PM_MASK|
             HOUR_OF_DAY_MASK|MINUTE_MASK|SECOND_MASK|MILLISECOND_MASK|
             ZONE_OFFSET_MASK|DST_OFFSET_MASK;

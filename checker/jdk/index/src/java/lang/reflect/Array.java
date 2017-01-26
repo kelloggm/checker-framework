@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1996, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang.reflect;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * The {@code Array} class provides static methods to dynamically create and
@@ -68,7 +65,7 @@ class Array {
      * @exception NegativeArraySizeException if the specified {@code length}
      * is negative
      */
-    public static Object newInstance(Class<?> componentType, @NonNegative int length)
+    public static Object newInstance(Class<?> componentType, int length)
         throws NegativeArraySizeException {
         return newArray(componentType, length);
     }
@@ -119,7 +116,7 @@ class Array {
      * @exception IllegalArgumentException if the object argument is not
      * an array
      */
-    public static native @NonNegative int getLength(Object array)
+    public static native int getLength(Object array)
         throws IllegalArgumentException;
 
     /**
@@ -157,7 +154,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native boolean getBoolean(Object array, @NonNegative int index)
+    public static native boolean getBoolean(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -195,7 +192,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native char getChar(Object array, @NonNegative int index)
+    public static native char getChar(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -214,7 +211,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native short getShort(Object array, @NonNegative int index)
+    public static native short getShort(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -233,7 +230,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native int getInt(Object array, @NonNegative int index)
+    public static native int getInt(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -252,7 +249,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native long getLong(Object array, @NonNegative int index)
+    public static native long getLong(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -271,7 +268,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native float getFloat(Object array, @NonNegative int index)
+    public static native float getFloat(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -290,7 +287,7 @@ class Array {
      * length of the specified array
      * @see Array#get
      */
-    public static native double getDouble(Object array, @NonNegative int index)
+    public static native double getDouble(Object array, int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -310,7 +307,7 @@ class Array {
      * argument is negative, or if it is greater than or equal to
      * the length of the specified array
      */
-    public static native void set(Object array, @NonNegative int index, Object value)
+    public static native void set(Object array, int index, Object value)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -330,7 +327,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setBoolean(Object array, @NonNegative int index, boolean z)
+    public static native void setBoolean(Object array, int index, boolean z)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -350,7 +347,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setByte(Object array, @NonNegative int index, byte b)
+    public static native void setByte(Object array, int index, byte b)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -370,7 +367,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setChar(Object array, @NonNegative int index, char c)
+    public static native void setChar(Object array, int index, char c)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -390,7 +387,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setShort(Object array, @NonNegative int index, short s)
+    public static native void setShort(Object array, int index, short s)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -410,7 +407,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setInt(Object array, @NonNegative int index, int i)
+    public static native void setInt(Object array, int index, int i)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -430,7 +427,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setLong(Object array, @NonNegative int index, long l)
+    public static native void setLong(Object array, int index, long l)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -450,7 +447,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setFloat(Object array, @NonNegative int index, float f)
+    public static native void setFloat(Object array, int index, float f)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
@@ -470,7 +467,7 @@ class Array {
      * the length of the specified array
      * @see Array#set
      */
-    public static native void setDouble(Object array, @NonNegative int index, double d)
+    public static native void setDouble(Object array, int index, double d)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /*

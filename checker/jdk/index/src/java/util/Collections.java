@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
@@ -28,9 +28,6 @@ import java.io.Serializable;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * This class consists exclusively of static methods that operate on or return
@@ -265,7 +262,7 @@ public class Collections {
     }
 
     private static <T>
-    @NonNegative int indexedBinarySearch(List<? extends Comparable<? super T>> list, T key)
+    int indexedBinarySearch(List<? extends Comparable<? super T>> list, T key)
     {
         int low = 0;
         int high = list.size()-1;
@@ -311,7 +308,7 @@ public class Collections {
      * Gets the ith element from the given list by repositioning the specified
      * list listIterator.
      */
-    private static <T> T get(ListIterator<? extends T> i, @NonNegative int index) {
+    private static <T> T get(ListIterator<? extends T> i, int index) {
         T obj = null;
         int pos = i.nextIndex();
         if (pos <= index) {
@@ -370,7 +367,7 @@ public class Collections {
             return Collections.iteratorBinarySearch(list, key, c);
     }
 
-    private static <T> @NonNegative int indexedBinarySearch(List<? extends T> l, T key, Comparator<? super T> c) {
+    private static <T> int indexedBinarySearch(List<? extends T> l, T key, Comparator<? super T> c) {
         int low = 0;
         int high = l.size()-1;
 
@@ -422,7 +419,7 @@ public class Collections {
      *         its list-iterator does not support the <tt>set</tt> operation.
      */
     public static void reverse(List<?> list) {
-        @NonNegative int size = list.size();
+        int size = list.size();
         if (size < REVERSE_THRESHOLD || list instanceof RandomAccess) {
             for (int i=0, mid=size>>1, j=size-1; i<mid; i++, j--)
                 swap(list, i, j);
@@ -497,7 +494,7 @@ public class Collections {
      *         list-iterator does not support the <tt>set</tt> operation.
      */
     public static void shuffle(List<?> list, Random rnd) {
-        @NonNegative int size = list.size();
+        int size = list.size();
         if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
             for (int i=size; i>1; i--)
                 swap(list, i-1, rnd.nextInt(i));
@@ -556,7 +553,7 @@ public class Collections {
      *         list-iterator does not support the <tt>set</tt> operation.
      */
     public static <T> void fill(List<? super T> list, T obj) {
-        @NonNegative int size = list.size();
+        int size = list.size();
 
         if (size < FILL_THRESHOLD || list instanceof RandomAccess) {
             for (int i=0; i<size; i++)
@@ -808,7 +805,7 @@ public class Collections {
     }
 
     private static <T> void rotate1(List<T> list, int distance) {
-        @NonNegative int size = list.size();
+        int size = list.size();
         if (size == 0)
             return;
         distance = distance % size;
@@ -831,7 +828,7 @@ public class Collections {
     }
 
     private static void rotate2(List<?> list, int distance) {
-        @NonNegative int size = list.size();
+        int size = list.size();
         if (size == 0)
             return;
         int mid =  -distance % size;
@@ -865,7 +862,7 @@ public class Collections {
      */
     public static <T> boolean replaceAll(List<T> list, T oldVal, T newVal) {
         boolean result = false;
-        @NonNegative int size = list.size();
+        int size = list.size();
         if (size < REPLACEALL_THRESHOLD || list instanceof RandomAccess) {
             if (oldVal==null) {
                 for (int i=0; i<size; i++) {
@@ -923,7 +920,7 @@ public class Collections {
      *         is no such occurrence.
      * @since  1.4
      */
-    public static @GTENegativeOne int indexOfSubList(List<?> source, List<?> target) {
+    public static int indexOfSubList(List<?> source, List<?> target) {
         int sourceSize = source.size();
         int targetSize = target.size();
         int maxCandidate = sourceSize - targetSize;
@@ -976,7 +973,7 @@ public class Collections {
      *         is no such occurrence.
      * @since  1.4
      */
-    public static @GTENegativeOne int lastIndexOfSubList(List<?> source, List<?> target) {
+    public static int lastIndexOfSubList(List<?> source, List<?> target) {
         int sourceSize = source.size();
         int targetSize = target.size();
         int maxCandidate = sourceSize - targetSize;
@@ -1055,7 +1052,7 @@ public class Collections {
             this.c = c;
         }
 
-        public @NonNegative int size()                   {return c.size();}
+        public int size()                   {return c.size();}
         public boolean isEmpty()            {return c.isEmpty();}
         public boolean contains(Object o)   {return c.contains(o);}
         public Object[] toArray()           {return c.toArray();}
@@ -1211,24 +1208,24 @@ public class Collections {
         public boolean equals(Object o) {return o == this || list.equals(o);}
         public int hashCode()           {return list.hashCode();}
 
-        public E get(@NonNegative int index) {return list.get(index);}
-        public E set(@NonNegative int index, E element) {
+        public E get(int index) {return list.get(index);}
+        public E set(int index, E element) {
             throw new UnsupportedOperationException();
         }
-        public void add(@NonNegative int index, E element) {
+        public void add(int index, E element) {
             throw new UnsupportedOperationException();
         }
-        public E remove(@NonNegative int index) {
+        public E remove(int index) {
             throw new UnsupportedOperationException();
         }
-        public @GTENegativeOne int indexOf(Object o)            {return list.indexOf(o);}
-        public @GTENegativeOne int lastIndexOf(Object o)        {return list.lastIndexOf(o);}
-        public boolean addAll(@NonNegative int index, Collection<? extends E> c) {
+        public int indexOf(Object o)            {return list.indexOf(o);}
+        public int lastIndexOf(Object o)        {return list.lastIndexOf(o);}
+        public boolean addAll(int index, Collection<? extends E> c) {
             throw new UnsupportedOperationException();
         }
         public ListIterator<E> listIterator()   {return listIterator(0);}
 
-        public ListIterator<E> listIterator(final @NonNegative int index) {
+        public ListIterator<E> listIterator(final int index) {
             return new ListIterator<E>() {
                 private final ListIterator<? extends E> i
                     = list.listIterator(index);
@@ -1237,8 +1234,8 @@ public class Collections {
                 public E next()              {return i.next();}
                 public boolean hasPrevious() {return i.hasPrevious();}
                 public E previous()          {return i.previous();}
-                public @NonNegative int nextIndex()       {return i.nextIndex();}
-                public @GTENegativeOne int previousIndex()   {return i.previousIndex();}
+                public int nextIndex()       {return i.nextIndex();}
+                public int previousIndex()   {return i.previousIndex();}
 
                 public void remove() {
                     throw new UnsupportedOperationException();
@@ -1252,7 +1249,7 @@ public class Collections {
             };
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             return new UnmodifiableList<>(list.subList(fromIndex, toIndex));
         }
 
@@ -1285,7 +1282,7 @@ public class Collections {
             super(list);
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             return new UnmodifiableRandomAccessList<>(
                 list.subList(fromIndex, toIndex));
         }
@@ -1335,7 +1332,7 @@ public class Collections {
             this.m = m;
         }
 
-        public @NonNegative int size()                        {return m.size();}
+        public int size()                        {return m.size();}
         public boolean isEmpty()                 {return m.isEmpty();}
         public boolean containsKey(Object key)   {return m.containsKey(key);}
         public boolean containsValue(Object val) {return m.containsValue(val);}
@@ -1615,7 +1612,7 @@ public class Collections {
             this.mutex = mutex;
         }
 
-        public @NonNegative int size() {
+        public int size() {
             synchronized (mutex) {return c.size();}
         }
         public boolean isEmpty() {
@@ -1878,27 +1875,27 @@ public class Collections {
             synchronized (mutex) {return list.hashCode();}
         }
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             synchronized (mutex) {return list.get(index);}
         }
-        public E set(@NonNegative int index, E element) {
+        public E set(int index, E element) {
             synchronized (mutex) {return list.set(index, element);}
         }
-        public void add(@NonNegative int index, E element) {
+        public void add(int index, E element) {
             synchronized (mutex) {list.add(index, element);}
         }
-        public E remove(@NonNegative int index) {
+        public E remove(int index) {
             synchronized (mutex) {return list.remove(index);}
         }
 
-        public @GTENegativeOne int indexOf(Object o) {
+        public int indexOf(Object o) {
             synchronized (mutex) {return list.indexOf(o);}
         }
-        public @GTENegativeOne int lastIndexOf(Object o) {
+        public int lastIndexOf(Object o) {
             synchronized (mutex) {return list.lastIndexOf(o);}
         }
 
-        public boolean addAll(@NonNegative int index, Collection<? extends E> c) {
+        public boolean addAll(int index, Collection<? extends E> c) {
             synchronized (mutex) {return list.addAll(index, c);}
         }
 
@@ -1906,11 +1903,11 @@ public class Collections {
             return list.listIterator(); // Must be manually synched by user
         }
 
-        public ListIterator<E> listIterator(@NonNegative int index) {
+        public ListIterator<E> listIterator(int index) {
             return list.listIterator(index); // Must be manually synched by user
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             synchronized (mutex) {
                 return new SynchronizedList<>(list.subList(fromIndex, toIndex),
                                             mutex);
@@ -1951,7 +1948,7 @@ public class Collections {
             super(list, mutex);
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             synchronized (mutex) {
                 return new SynchronizedRandomAccessList<>(
                     list.subList(fromIndex, toIndex), mutex);
@@ -2024,7 +2021,7 @@ public class Collections {
             this.mutex = mutex;
         }
 
-        public @NonNegative int size() {
+        public int size() {
             synchronized (mutex) {return m.size();}
         }
         public boolean isEmpty() {
@@ -2291,7 +2288,7 @@ public class Collections {
             this.type = type;
         }
 
-        public @NonNegative int size()                 { return c.size(); }
+        public int size()                 { return c.size(); }
         public boolean isEmpty()          { return c.isEmpty(); }
         public boolean contains(Object o) { return c.contains(o); }
         public Object[] toArray()         { return c.toArray(); }
@@ -2516,27 +2513,27 @@ public class Collections {
 
         public boolean equals(Object o)  { return o == this || list.equals(o); }
         public int hashCode()            { return list.hashCode(); }
-        public E get(@NonNegative int index)          { return list.get(index); }
-        public E remove(@NonNegative int index)       { return list.remove(index); }
-        public @GTENegativeOne int indexOf(Object o)     { return list.indexOf(o); }
-        public @GTENegativeOne int lastIndexOf(Object o) { return list.lastIndexOf(o); }
+        public E get(int index)          { return list.get(index); }
+        public E remove(int index)       { return list.remove(index); }
+        public int indexOf(Object o)     { return list.indexOf(o); }
+        public int lastIndexOf(Object o) { return list.lastIndexOf(o); }
 
-        public E set(@NonNegative int index, E element) {
+        public E set(int index, E element) {
             typeCheck(element);
             return list.set(index, element);
         }
 
-        public void add(@NonNegative int index, E element) {
+        public void add(int index, E element) {
             typeCheck(element);
             list.add(index, element);
         }
 
-        public boolean addAll(@NonNegative int index, Collection<? extends E> c) {
+        public boolean addAll(int index, Collection<? extends E> c) {
             return list.addAll(index, checkedCopyOf(c));
         }
         public ListIterator<E> listIterator()   { return listIterator(0); }
 
-        public ListIterator<E> listIterator(final @NonNegative int index) {
+        public ListIterator<E> listIterator(final int index) {
             final ListIterator<E> i = list.listIterator(index);
 
             return new ListIterator<E>() {
@@ -2544,8 +2541,8 @@ public class Collections {
                 public E next()              { return i.next(); }
                 public boolean hasPrevious() { return i.hasPrevious(); }
                 public E previous()          { return i.previous(); }
-                public @NonNegative int nextIndex()       { return i.nextIndex(); }
-                public @GTENegativeOne int previousIndex()   { return i.previousIndex(); }
+                public int nextIndex()       { return i.nextIndex(); }
+                public int previousIndex()   { return i.previousIndex(); }
                 public void remove()         {        i.remove(); }
 
                 public void set(E e) {
@@ -2560,7 +2557,7 @@ public class Collections {
             };
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             return new CheckedList<>(list.subList(fromIndex, toIndex), type);
         }
     }
@@ -2577,7 +2574,7 @@ public class Collections {
             super(list, type);
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             return new CheckedRandomAccessList<>(
                 list.subList(fromIndex, toIndex), type);
         }
@@ -2662,7 +2659,7 @@ public class Collections {
             this.valueType = valueType;
         }
 
-        public @NonNegative int size()                      { return m.size(); }
+        public int size()                      { return m.size(); }
         public boolean isEmpty()               { return m.isEmpty(); }
         public boolean containsKey(Object key) { return m.containsKey(key); }
         public boolean containsValue(Object v) { return m.containsValue(v); }
@@ -2726,7 +2723,7 @@ public class Collections {
                 this.valueType = valueType;
             }
 
-            public @NonNegative int size()        { return s.size(); }
+            public int size()        { return s.size(); }
             public boolean isEmpty() { return s.isEmpty(); }
             public String toString() { return s.toString(); }
             public int hashCode()    { return s.hashCode(); }
@@ -3056,8 +3053,8 @@ public class Collections {
 
         public boolean hasPrevious() { return false; }
         public E previous() { throw new NoSuchElementException(); }
-        public @NonNegative int nextIndex()     { return 0; }
-        public @GTENegativeOne int previousIndex() { return -1; }
+        public int nextIndex()     { return 0; }
+        public int previousIndex() { return -1; }
         public void set(E e) { throw new IllegalStateException(); }
         public void add(E e) { throw new UnsupportedOperationException(); }
     }
@@ -3134,7 +3131,7 @@ public class Collections {
 
         public Iterator<E> iterator() { return emptyIterator(); }
 
-        public @NonNegative int size() {return 0;}
+        public int size() {return 0;}
         public boolean isEmpty() {return true;}
 
         public boolean contains(Object obj) {return false;}
@@ -3197,7 +3194,7 @@ public class Collections {
             return emptyListIterator();
         }
 
-        public @NonNegative int size() {return 0;}
+        public int size() {return 0;}
         public boolean isEmpty() {return true;}
 
         public boolean contains(Object obj) {return false;}
@@ -3211,7 +3208,7 @@ public class Collections {
             return a;
         }
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             throw new IndexOutOfBoundsException("Index: "+index);
         }
 
@@ -3265,7 +3262,7 @@ public class Collections {
     {
         private static final long serialVersionUID = 6428348081105594320L;
 
-        public @NonNegative int size()                          {return 0;}
+        public int size()                          {return 0;}
         public boolean isEmpty()                   {return true;}
         public boolean containsKey(Object key)     {return false;}
         public boolean containsValue(Object value) {return false;}
@@ -3335,7 +3332,7 @@ public class Collections {
             return singletonIterator(element);
         }
 
-        public @NonNegative int size() {return 1;}
+        public int size() {return 1;}
 
         public boolean contains(Object o) {return eq(o, element);}
     }
@@ -3369,11 +3366,11 @@ public class Collections {
             return singletonIterator(element);
         }
 
-        public @NonNegative int size()                   {return 1;}
+        public int size()                   {return 1;}
 
         public boolean contains(Object obj) {return eq(obj, element);}
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             if (index != 0)
               throw new IndexOutOfBoundsException("Index: "+index+", Size: 1");
             return element;
@@ -3410,7 +3407,7 @@ public class Collections {
             v = value;
         }
 
-        public @NonNegative int size()                          {return 1;}
+        public int size()                          {return 1;}
 
         public boolean isEmpty()                   {return false;}
 
@@ -3462,7 +3459,7 @@ public class Collections {
      * @see    List#addAll(Collection)
      * @see    List#addAll(int, Collection)
      */
-    public static <T> List<T> nCopies(@NonNegative int n, T o) {
+    public static <T> List<T> nCopies(int n, T o) {
         if (n < 0)
             throw new IllegalArgumentException("List length = " + n);
         return new CopiesList<>(n, o);
@@ -3486,7 +3483,7 @@ public class Collections {
             element = e;
         }
 
-        public @NonNegative int size() {
+        public int size() {
             return n;
         }
 
@@ -3494,15 +3491,15 @@ public class Collections {
             return n != 0 && eq(obj, element);
         }
 
-        public @GTENegativeOne int indexOf(Object o) {
+        public int indexOf(Object o) {
             return contains(o) ? 0 : -1;
         }
 
-        public @GTENegativeOne int lastIndexOf(Object o) {
+        public int lastIndexOf(Object o) {
             return contains(o) ? n - 1 : -1;
         }
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             if (index < 0 || index >= n)
                 throw new IndexOutOfBoundsException("Index: "+index+
                                                     ", Size: "+n);
@@ -3531,7 +3528,7 @@ public class Collections {
             return a;
         }
 
-        public List<E> subList(@NonNegative int fromIndex, @NonNegative int toIndex) {
+        public List<E> subList(int fromIndex, int toIndex) {
             if (fromIndex < 0)
                 throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
             if (toIndex > n)
@@ -3711,7 +3708,7 @@ public class Collections {
      * @throws NullPointerException if <tt>c</tt> is null
      * @since 1.5
      */
-    public static @NonNegative int frequency(Collection<?> c, Object o) {
+    public static int frequency(Collection<?> c, Object o) {
         int result = 0;
         if (o == null) {
             for (Object e : c)
@@ -3899,7 +3896,7 @@ public class Collections {
         }
 
         public void clear()               {        m.clear(); }
-        public @NonNegative int size()                 { return m.size(); }
+        public int size()                 { return m.size(); }
         public boolean isEmpty()          { return m.isEmpty(); }
         public boolean contains(Object o) { return m.containsKey(o); }
         public boolean remove(Object o)   { return m.remove(o) != null; }
@@ -3961,7 +3958,7 @@ public class Collections {
         public E peek()                   { return q.peekFirst(); }
         public E element()                { return q.getFirst(); }
         public void clear()               {        q.clear(); }
-        public @NonNegative int size()                 { return q.size(); }
+        public int size()                 { return q.size(); }
         public boolean isEmpty()          { return q.isEmpty(); }
         public boolean contains(Object o) { return q.contains(o); }
         public boolean remove(Object o)   { return q.remove(o); }

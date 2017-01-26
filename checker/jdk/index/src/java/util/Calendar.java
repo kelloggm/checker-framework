@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 1996, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -56,9 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import sun.util.BuddhistCalendar;
 import sun.util.calendar.ZoneInfo;
 import sun.util.resources.LocaleData;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * The <code>Calendar</code> class is an abstract class that provides methods
@@ -1160,7 +1157,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #set(int,int)
      * @see #complete()
      */
-    public int get(@NonNegative int field)
+    public int get(int field)
     {
         complete();
         return internalGet(field);
@@ -1174,7 +1171,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @return the value for the given calendar field.
      * @see #get(int)
      */
-    protected final int internalGet(@NonNegative int field)
+    protected final int internalGet(int field)
     {
         return fields[field];
     }
@@ -1191,7 +1188,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #areAllFieldsSet
      * @see #set(int,int)
      */
-    final void internalSet(@NonNegative int field, int value)
+    final void internalSet(int field, int value)
     {
         fields[field] = value;
     }
@@ -1210,7 +1207,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #set(int,int,int,int,int,int)
      * @see #get(int)
      */
-    public void set(@NonNegative int field, int value)
+    public void set(int field, int value)
     {
         // If the fields are partially normalized, calculate all the
         // fields before changing any fields.
@@ -1348,7 +1345,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @param field the calendar field to be cleared.
      * @see #clear()
      */
-    public final void clear(@NonNegative int field)
+    public final void clear(int field)
     {
         fields[field] = 0;
         stamp[field] = UNSET;
@@ -1366,7 +1363,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @return <code>true</code> if the given calendar field has a value set;
      * <code>false</code> otherwise.
      */
-    public final boolean isSet(@NonNegative int field)
+    public final boolean isSet(int field)
     {
         return stamp[field] != UNSET;
     }
@@ -1412,7 +1409,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      *        if <code>locale</code> is null
      * @since 1.6
      */
-    public String getDisplayName(@NonNegative int field, int style, Locale locale) {
+    public String getDisplayName(int field, int style, Locale locale) {
         if (!checkDisplayNameParams(field, style, ALL_STYLES, LONG, locale,
                                     ERA_MASK|MONTH_MASK|DAY_OF_WEEK_MASK|AM_PM_MASK)) {
             return null;
@@ -1578,7 +1575,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #selectFields()
      * @see #setFieldsComputed(int)
      */
-    final boolean isExternallySet(@NonNegative int field) {
+    final boolean isExternallySet(int field) {
         return stamp[field] >= MINIMUM_USER_STAMP;
     }
 
@@ -2013,7 +2010,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #roll(int,int)
      * @see #set(int,int)
      */
-    abstract public void add(@NonNegative int field, int amount);
+    abstract public void add(int field, int amount);
 
     /**
      * Adds or subtracts (up/down) a single unit of time on the given time
@@ -2035,7 +2032,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see Calendar#add(int,int)
      * @see Calendar#set(int,int)
      */
-    abstract public void roll(@NonNegative int field, boolean up);
+    abstract public void roll(int field, boolean up);
 
     /**
      * Adds the specified (signed) amount to the specified calendar field
@@ -2056,7 +2053,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #add(int,int)
      * @see #set(int,int)
      */
-    public void roll(@NonNegative int field, int amount)
+    public void roll(int field, int amount)
     {
         while (amount > 0) {
             roll(field, true);
@@ -2339,7 +2336,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    abstract public int getMaximum(@NonNegative int field);
+    abstract public int getMaximum(int field);
 
     /**
      * Returns the highest minimum value for the given calendar field
@@ -2357,7 +2354,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    abstract public int getGreatestMinimum(@NonNegative int field);
+    abstract public int getGreatestMinimum(int field);
 
     /**
      * Returns the lowest maximum value for the given calendar field
@@ -2379,7 +2376,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getActualMinimum(int)
      * @see #getActualMaximum(int)
      */
-    abstract public int getLeastMaximum(@NonNegative int field);
+    abstract public int getLeastMaximum(int field);
 
     /**
      * Returns the minimum value that the specified calendar field
@@ -2401,7 +2398,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getActualMaximum(int)
      * @since 1.2
      */
-    public int getActualMinimum(@NonNegative int field) {
+    public int getActualMinimum(int field) {
         int fieldValue = getGreatestMinimum(field);
         int endValue = getMinimum(field);
 
@@ -2455,7 +2452,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getActualMinimum(int)
      * @since 1.2
      */
-    public int getActualMaximum(@NonNegative int field) {
+    public int getActualMaximum(int field) {
         int fieldValue = getLeastMaximum(field);
         int endValue = getMaximum(field);
 
@@ -2534,7 +2531,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @exception IndexOutOfBoundsException if <code>field</code> is negative,
      * equal to or greater then <code>FIELD_COUNT</code>.
      */
-    static final String getFieldName(@NonNegative int field) {
+    static final String getFieldName(int field) {
         return FIELD_NAME[field];
     }
 
@@ -2589,13 +2586,13 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     {
         /* try to get the Locale data from the cache */
         int[] data = cachedLocaleData.get(desiredLocale);
-/*        if (data == null) {   cache miss
+        if (data == null) {  /* cache miss */
             ResourceBundle bundle = LocaleData.getCalendarData(desiredLocale);
             data = new int[2];
             data[0] = Integer.parseInt(bundle.getString("firstDayOfWeek"));
             data[1] = Integer.parseInt(bundle.getString("minimalDaysInFirstWeek"));
             cachedLocaleData.putIfAbsent(desiredLocale, data);
-        }*/
+        }
         firstDayOfWeek = data[0];
         minimalDaysInFirstWeek = data[1];
     }

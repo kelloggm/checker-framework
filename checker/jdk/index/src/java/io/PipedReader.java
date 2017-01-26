@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1996, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -97,7 +94,7 @@ public class PipedReader extends Reader {
      * @exception  IllegalArgumentException if <code>pipeSize <= 0</code>.
      * @since      1.6
      */
-    public PipedReader(PipedWriter src, @Positive int pipeSize) throws IOException {
+    public PipedReader(PipedWriter src, int pipeSize) throws IOException {
         initPipe(pipeSize);
         connect(src);
     }
@@ -126,7 +123,7 @@ public class PipedReader extends Reader {
      * @exception  IllegalArgumentException if <code>pipeSize <= 0</code>.
      * @since      1.6
      */
-    public PipedReader(@Positive int pipeSize) {
+    public PipedReader(int pipeSize) {
         initPipe(pipeSize);
     }
 
@@ -205,7 +202,7 @@ public class PipedReader extends Reader {
      * Receives data into an array of characters.  This method will
      * block until some input is available.
      */
-    synchronized void receive(char c[], @NonNegative int off, int len)  throws IOException {
+    synchronized void receive(char c[], int off, int len)  throws IOException {
         while (--len >= 0) {
             receive(c[off++]);
         }
@@ -234,7 +231,7 @@ public class PipedReader extends Reader {
      *          {@link #connect(java.io.PipedWriter) unconnected}, closed,
      *          or an I/O error occurs.
      */
-    public synchronized @GTENegativeOne int read()  throws IOException {
+    public synchronized int read()  throws IOException {
         if (!connected) {
             throw new IOException("Pipe not connected");
         } else if (closedByReader) {
@@ -291,7 +288,7 @@ public class PipedReader extends Reader {
      *                  {@link #connect(java.io.PipedWriter) unconnected}, closed,
      *                  or an I/O error occurs.
      */
-    public synchronized @GTENegativeOne int read(char cbuf[], @NonNegative int off, @NonNegative int len)  throws IOException {
+    public synchronized int read(char cbuf[], int off, int len)  throws IOException {
         if (!connected) {
             throw new IOException("Pipe not connected");
         } else if (closedByReader) {

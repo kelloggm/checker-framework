@@ -1,33 +1,30 @@
 /*
  * Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 import java.io.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * <p>Hash table and linked list implementation of the <tt>Map</tt> interface,
@@ -176,7 +173,7 @@ public class LinkedHashMap<K,V>
      * @throws IllegalArgumentException if the initial capacity is negative
      *         or the load factor is nonpositive
      */
-    public LinkedHashMap(@NonNegative int initialCapacity, float loadFactor) {
+    public LinkedHashMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
         accessOrder = false;
     }
@@ -188,7 +185,7 @@ public class LinkedHashMap<K,V>
      * @param  initialCapacity the initial capacity
      * @throws IllegalArgumentException if the initial capacity is negative
      */
-    public LinkedHashMap(@NonNegative int initialCapacity) {
+    public LinkedHashMap(int initialCapacity) {
         super(initialCapacity);
         accessOrder = false;
     }
@@ -227,7 +224,7 @@ public class LinkedHashMap<K,V>
      * @throws IllegalArgumentException if the initial capacity is negative
      *         or the load factor is nonpositive
      */
-    public LinkedHashMap(@NonNegative int initialCapacity,
+    public LinkedHashMap(int initialCapacity,
                          float loadFactor,
                          boolean accessOrder) {
         super(initialCapacity, loadFactor);
@@ -239,7 +236,6 @@ public class LinkedHashMap<K,V>
      * readObject) before any entries are inserted into the map.  Initializes
      * the chain.
      */
-    @Override
     void init() {
         header = new Entry<>(-1, null, null, null);
         header.before = header.after = header;
@@ -250,12 +246,9 @@ public class LinkedHashMap<K,V>
      * by superclass resize.  It is overridden for performance, as it is
      * faster to iterate using our linked list.
      */
-    @Override
-    void transfer(HashMap.Entry[] newTable, boolean rehash) {
+    void transfer(HashMap.Entry[] newTable) {
         int newCapacity = newTable.length;
         for (Entry<K,V> e = header.after; e != header; e = e.after) {
-            if (rehash)
-                e.hash = (e.key == null) ? 0 : hash(e.key);
             int index = indexFor(e.hash, newCapacity);
             e.next = newTable[index];
             newTable[index] = e;
@@ -427,12 +420,15 @@ public class LinkedHashMap<K,V>
      * removes the eldest entry if appropriate.
      */
     void addEntry(int hash, K key, V value, int bucketIndex) {
-        super.addEntry(hash, key, value, bucketIndex);
+        createEntry(hash, key, value, bucketIndex);
 
-        // Remove eldest entry if instructed
+        // Remove eldest entry if instructed, else grow capacity if appropriate
         Entry<K,V> eldest = header.after;
         if (removeEldestEntry(eldest)) {
             removeEntryForKey(eldest.key);
+        } else {
+            if (size >= threshold)
+                resize(2 * table.length);
         }
     }
 

@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A <code>ByteArrayInputStream</code> contains
@@ -123,7 +120,7 @@ class ByteArrayInputStream extends InputStream {
      * @param   offset   the offset in the buffer of the first byte to read.
      * @param   length   the maximum number of bytes to read from the buffer.
      */
-    public ByteArrayInputStream(byte buf[], @IndexFor("#1") int offset, @IndexOrHigh("#1") int length) {
+    public ByteArrayInputStream(byte buf[], int offset, int length) {
         this.buf = buf;
         this.pos = offset;
         this.count = Math.min(offset + length, buf.length);
@@ -143,7 +140,7 @@ class ByteArrayInputStream extends InputStream {
      * @return  the next byte of data, or <code>-1</code> if the end of the
      *          stream has been reached.
      */
-    public synchronized @GTENegativeOne int read() {
+    public synchronized int read() {
         return (pos < count) ? (buf[pos++] & 0xff) : -1;
     }
 
@@ -176,7 +173,7 @@ class ByteArrayInputStream extends InputStream {
      * <code>len</code> is negative, or <code>len</code> is greater than
      * <code>b.length - off</code>
      */
-    public synchronized @GTENegativeOne int read(byte b[], @IndexFor("#1") int off, @IndexOrHigh("#1") int len) {
+    public synchronized int read(byte b[], int off, int len) {
         if (b == null) {
             throw new NullPointerException();
         } else if (off < 0 || len < 0 || len > b.length - off) {
@@ -231,7 +228,7 @@ class ByteArrayInputStream extends InputStream {
      * @return  the number of remaining bytes that can be read (or skipped
      *          over) from this input stream without blocking.
      */
-    public synchronized @NonNegative int available() {
+    public synchronized int available() {
         return count - pos;
     }
 

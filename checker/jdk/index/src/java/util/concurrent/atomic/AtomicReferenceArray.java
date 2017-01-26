@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -38,9 +38,6 @@ package java.util.concurrent.atomic;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import sun.misc.Unsafe;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * An array of object references in which elements may be updated
@@ -93,7 +90,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      *
      * @param length the length of the array
      */
-    public AtomicReferenceArray(@NonNegative int length) {
+    public AtomicReferenceArray(int length) {
         array = new Object[length];
     }
 
@@ -114,7 +111,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      *
      * @return the length of the array
      */
-    public final @NonNegative int length() {
+    public final int length() {
         return array.length;
     }
 
@@ -124,7 +121,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @param i the index
      * @return the current value
      */
-    public final E get(@NonNegative int i) {
+    public final E get(int i) {
         return getRaw(checkedByteOffset(i));
     }
 
@@ -138,7 +135,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @param i the index
      * @param newValue the new value
      */
-    public final void set(@NonNegative int i, E newValue) {
+    public final void set(int i, E newValue) {
         unsafe.putObjectVolatile(array, checkedByteOffset(i), newValue);
     }
 
@@ -149,7 +146,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @param newValue the new value
      * @since 1.6
      */
-    public final void lazySet(@NonNegative int i, E newValue) {
+    public final void lazySet(int i, E newValue) {
         unsafe.putOrderedObject(array, checkedByteOffset(i), newValue);
     }
 
@@ -162,7 +159,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @param newValue the new value
      * @return the previous value
      */
-    public final E getAndSet(@NonNegative int i, E newValue) {
+    public final E getAndSet(int i, E newValue) {
         long offset = checkedByteOffset(i);
         while (true) {
             E current = getRaw(offset);
@@ -181,7 +178,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @return true if successful. False return indicates that
      * the actual value was not equal to the expected value.
      */
-    public final boolean compareAndSet(@NonNegative int i, E expect, E update) {
+    public final boolean compareAndSet(int i, E expect, E update) {
         return compareAndSetRaw(checkedByteOffset(i), expect, update);
     }
 
@@ -202,7 +199,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
      * @param update the new value
      * @return true if successful.
      */
-    public final boolean weakCompareAndSet(@NonNegative int i, E expect, E update) {
+    public final boolean weakCompareAndSet(int i, E expect, E update) {
         return compareAndSet(i, expect, update);
     }
 

@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -37,9 +37,6 @@ package java.util.concurrent;
 import java.util.*;
 import java.util.concurrent.locks.*;
 import sun.misc.Unsafe;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A thread-safe variant of {@link java.util.ArrayList} in which all mutative
@@ -142,7 +139,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @return the number of elements in this list
      */
-    public @NonNegative int size() {
+    public int size() {
         return getArray().length;
     }
 
@@ -171,8 +168,8 @@ public class CopyOnWriteArrayList<E>
      * @param fence one past last index to search
      * @return index of element, or -1 if absent
      */
-    private static @GTENegativeOne int indexOf(Object o, Object[] elements,
-                               @NonNegative int index, int fence) {
+    private static int indexOf(Object o, Object[] elements,
+                               int index, int fence) {
         if (o == null) {
             for (int i = index; i < fence; i++)
                 if (elements[i] == null)
@@ -192,7 +189,7 @@ public class CopyOnWriteArrayList<E>
      * @param index first index to search
      * @return index of element, or -1 if absent
      */
-    private static @GTENegativeOne int lastIndexOf(Object o, Object[] elements, @NonNegative int index) {
+    private static int lastIndexOf(Object o, Object[] elements, int index) {
         if (o == null) {
             for (int i = index; i >= 0; i--)
                 if (elements[i] == null)
@@ -222,7 +219,7 @@ public class CopyOnWriteArrayList<E>
     /**
      * {@inheritDoc}
      */
-    public @GTENegativeOne int indexOf(Object o) {
+    public int indexOf(Object o) {
         Object[] elements = getArray();
         return indexOf(o, elements, 0, elements.length);
     }
@@ -242,7 +239,7 @@ public class CopyOnWriteArrayList<E>
      *         <tt>-1</tt> if the element is not found.
      * @throws IndexOutOfBoundsException if the specified index is negative
      */
-    public @GTENegativeOne int indexOf(E e, @NonNegative int index) {
+    public int indexOf(E e, int index) {
         Object[] elements = getArray();
         return indexOf(e, elements, index, elements.length);
     }
@@ -250,7 +247,7 @@ public class CopyOnWriteArrayList<E>
     /**
      * {@inheritDoc}
      */
-    public @GTENegativeOne int lastIndexOf(Object o) {
+    public int lastIndexOf(Object o) {
         Object[] elements = getArray();
         return lastIndexOf(o, elements, elements.length - 1);
     }
@@ -271,7 +268,7 @@ public class CopyOnWriteArrayList<E>
      * @throws IndexOutOfBoundsException if the specified index is greater
      *         than or equal to the current size of this list
      */
-    public @GTENegativeOne int lastIndexOf(E e, @NonNegative int index) {
+    public int lastIndexOf(E e, int index) {
         Object[] elements = getArray();
         return lastIndexOf(e, elements, index);
     }
@@ -367,7 +364,7 @@ public class CopyOnWriteArrayList<E>
     // Positional Access Operations
 
     @SuppressWarnings("unchecked")
-    private E get(Object[] a, @NonNegative int index) {
+    private E get(Object[] a, int index) {
         return (E) a[index];
     }
 
@@ -376,7 +373,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E get(@NonNegative int index) {
+    public E get(int index) {
         return get(getArray(), index);
     }
 
@@ -386,7 +383,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E set(@NonNegative int index, E element) {
+    public E set(int index, E element) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -436,7 +433,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public void add(@NonNegative int index, E element) {
+    public void add(int index, E element) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -469,7 +466,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E remove(@NonNegative int index) {
+    public E remove(int index) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -807,7 +804,7 @@ public class CopyOnWriteArrayList<E>
      * @throws NullPointerException if the specified collection is null
      * @see #add(int,Object)
      */
-    public boolean addAll(@NonNegative int index, Collection<? extends E> c) {
+    public boolean addAll(int index, Collection<? extends E> c) {
         Object[] cs = c.toArray();
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -984,7 +981,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public ListIterator<E> listIterator(final @NonNegative int index) {
+    public ListIterator<E> listIterator(final int index) {
         Object[] elements = getArray();
         int len = elements.length;
         if (index<0 || index>len)
@@ -1112,7 +1109,7 @@ public class CopyOnWriteArrayList<E>
     {
         private final CopyOnWriteArrayList<E> l;
         private final int offset;
-        private @NonNegative int size;
+        private int size;
         private Object[] expectedArray;
 
         // only call this holding l's lock
@@ -1131,13 +1128,13 @@ public class CopyOnWriteArrayList<E>
         }
 
         // only call this holding l's lock
-        private void rangeCheck(@NonNegative int index) {
+        private void rangeCheck(int index) {
             if (index<0 || index>=size)
                 throw new IndexOutOfBoundsException("Index: "+index+
                                                     ",Size: "+size);
         }
 
-        public E set(@NonNegative int index, E element) {
+        public E set(int index, E element) {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1151,7 +1148,7 @@ public class CopyOnWriteArrayList<E>
             }
         }
 
-        public E get(@NonNegative int index) {
+        public E get(int index) {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1163,7 +1160,7 @@ public class CopyOnWriteArrayList<E>
             }
         }
 
-        public @NonNegative int size() {
+        public int size() {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1174,7 +1171,7 @@ public class CopyOnWriteArrayList<E>
             }
         }
 
-        public void add(@NonNegative int index, E element) {
+        public void add(int index, E element) {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1202,7 +1199,7 @@ public class CopyOnWriteArrayList<E>
             }
         }
 
-        public E remove(@NonNegative int index) {
+        public E remove(int index) {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1236,7 +1233,7 @@ public class CopyOnWriteArrayList<E>
             }
         }
 
-        public ListIterator<E> listIterator(final @NonNegative int index) {
+        public ListIterator<E> listIterator(final int index) {
             final ReentrantLock lock = l.lock;
             lock.lock();
             try {
@@ -1271,10 +1268,10 @@ public class CopyOnWriteArrayList<E>
         private final ListIterator<E> i;
         private final int index;
         private final int offset;
-        private final @NonNegative int size;
+        private final int size;
 
-        COWSubListIterator(List<E> l, @NonNegative int index, int offset,
-                           @NonNegative int size) {
+        COWSubListIterator(List<E> l, int index, int offset,
+                           int size) {
             this.index = index;
             this.offset = offset;
             this.size = size;
@@ -1303,11 +1300,11 @@ public class CopyOnWriteArrayList<E>
                 throw new NoSuchElementException();
         }
 
-        public @NonNegative int nextIndex() {
+        public int nextIndex() {
             return i.nextIndex() - offset;
         }
 
-        public @GTENegativeOne int previousIndex() {
+        public int previousIndex() {
             return i.previousIndex() - offset;
         }
 

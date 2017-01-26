@@ -1,34 +1,31 @@
 /*
  * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -93,8 +90,7 @@ import org.checkerframework.checker.index.qual.*;
  * from being discarded.  Note that a value object may refer indirectly to its
  * key via the <tt>WeakHashMap</tt> itself; that is, a value object may
  * strongly refer to some other key object whose associated value object, in
- * turn, strongly refers to the key of the first value object.  If the values
- * in the map do not rely on the map holding strong references to them, one way
+ * turn, strongly refers to the key of the first value object.  One way
  * to deal with this is to wrap values themselves within
  * <tt>WeakReferences</tt> before
  * inserting, as in: <tt>m.put(key, new WeakReference(value))</tt>,
@@ -188,66 +184,6 @@ public class WeakHashMap<K,V>
      */
     int modCount;
 
-    /**
-     * The default threshold of map capacity above which alternative hashing is
-     * used for String keys. Alternative hashing reduces the incidence of
-     * collisions due to weak hash code calculation for String keys.
-     * <p/>
-     * This value may be overridden by defining the system property
-     * {@code jdk.map.althashing.threshold}. A property value of {@code 1}
-     * forces alternative hashing to be used at all times whereas
-     * {@code -1} value ensures that alternative hashing is never used.
-     */
-    static final int ALTERNATIVE_HASHING_THRESHOLD_DEFAULT = Integer.MAX_VALUE;
-
-    /**
-     * holds values which can't be initialized until after VM is booted.
-     */
-    private static class Holder {
-
-        /**
-         * Table capacity above which to switch to use alternative hashing.
-         */
-        static final int ALTERNATIVE_HASHING_THRESHOLD;
-
-        static {
-            String altThreshold = java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction(
-                    "jdk.map.althashing.threshold"));
-
-            int threshold;
-            try {
-                threshold = (null != altThreshold)
-                        ? Integer.parseInt(altThreshold)
-                        : ALTERNATIVE_HASHING_THRESHOLD_DEFAULT;
-
-                // disable alternative hashing if -1
-                if (threshold == -1) {
-                    threshold = Integer.MAX_VALUE;
-                }
-
-                if (threshold < 0) {
-                    throw new IllegalArgumentException("value must be positive integer.");
-                }
-            } catch(IllegalArgumentException failed) {
-                throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
-            }
-            ALTERNATIVE_HASHING_THRESHOLD = threshold;
-        }
-    }
-
-    /**
-     * If {@code true} then perform alternate hashing to reduce the incidence of
-     * collisions due to weak hash code calculation.
-     */
-    transient boolean useAltHashing;
-
-    /**
-     * A randomizing value associated with this instance that is applied to
-     * hash code of keys to make hash collisions harder to find.
-     */
-/*    transient final int hashSeed = sun.misc.Hashing.randomHashSeed(this);
-*/
     @SuppressWarnings("unchecked")
     private Entry<K,V>[] newTable(int n) {
         return (Entry<K,V>[]) new Entry[n];
@@ -262,7 +198,7 @@ public class WeakHashMap<K,V>
      * @throws IllegalArgumentException if the initial capacity is negative,
      *         or if the load factor is nonpositive.
      */
-    public WeakHashMap(@NonNegative int initialCapacity, float loadFactor) {
+    public WeakHashMap(int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Initial Capacity: "+
                                                initialCapacity);
@@ -278,8 +214,6 @@ public class WeakHashMap<K,V>
         table = newTable(capacity);
         this.loadFactor = loadFactor;
         threshold = (int)(capacity * loadFactor);
-        useAltHashing = sun.misc.VM.isBooted() &&
-                (capacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
     }
 
     /**
@@ -289,7 +223,7 @@ public class WeakHashMap<K,V>
      * @param  initialCapacity The initial capacity of the <tt>WeakHashMap</tt>
      * @throws IllegalArgumentException if the initial capacity is negative
      */
-    public WeakHashMap(@NonNegative int initialCapacity) {
+    public WeakHashMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
@@ -298,7 +232,9 @@ public class WeakHashMap<K,V>
      * capacity (16) and load factor (0.75).
      */
     public WeakHashMap() {
-        this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
+        this.loadFactor = DEFAULT_LOAD_FACTOR;
+        threshold = DEFAULT_INITIAL_CAPACITY;
+        table = newTable(DEFAULT_INITIAL_CAPACITY);
     }
 
     /**
@@ -312,8 +248,7 @@ public class WeakHashMap<K,V>
      * @since   1.3
      */
     public WeakHashMap(Map<? extends K, ? extends V> m) {
-        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
-                DEFAULT_INITIAL_CAPACITY),
+        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1, 16),
              DEFAULT_LOAD_FACTOR);
         putAll(m);
     }
@@ -345,34 +280,6 @@ public class WeakHashMap<K,V>
      */
     private static boolean eq(Object x, Object y) {
         return x == y || x.equals(y);
-    }
-
-    /**
-     * Retrieve object hash code and applies a supplemental hash function to the
-     * result hash, which defends against poor quality hash functions.  This is
-     * critical because HashMap uses power-of-two length hash tables, that
-     * otherwise encounter collisions for hashCodes that do not differ
-     * in lower bits.
-     */
-    int hash(Object k) {
-
-        int h;
-/*        if (useAltHashing) {
-            h = hashSeed;
-            if (k instanceof String) {
-                return sun.misc.Hashing.stringHash32((String) k);
-            } else {
-                h ^= k.hashCode();
-            }
-        } else  {*/
-            h = k.hashCode();
-        /*}*/
-
-        // This function ensures that hashCodes that differ only by
-        // constant multiples at each bit position have a bounded
-        // number of collisions (approximately 8 at default load factor).
-        h ^= (h >>> 20) ^ (h >>> 12);
-        return h ^ (h >>> 7) ^ (h >>> 4);
     }
 
     /**
@@ -428,7 +335,7 @@ public class WeakHashMap<K,V>
      * entries that will be removed before next attempted access
      * because they are no longer referenced.
      */
-    public @NonNegative int size() {
+    public int size() {
         if (size == 0)
             return 0;
         expungeStaleEntries();
@@ -464,7 +371,7 @@ public class WeakHashMap<K,V>
      */
     public V get(Object key) {
         Object k = maskNull(key);
-        int h = hash(k);
+        int h = HashMap.hash(k.hashCode());
         Entry<K,V>[] tab = getTable();
         int index = indexFor(h, tab.length);
         Entry<K,V> e = tab[index];
@@ -494,7 +401,7 @@ public class WeakHashMap<K,V>
      */
     Entry<K,V> getEntry(Object key) {
         Object k = maskNull(key);
-        int h = hash(k);
+        int h = HashMap.hash(k.hashCode());
         Entry<K,V>[] tab = getTable();
         int index = indexFor(h, tab.length);
         Entry<K,V> e = tab[index];
@@ -517,7 +424,7 @@ public class WeakHashMap<K,V>
      */
     public V put(K key, V value) {
         Object k = maskNull(key);
-        int h = hash(k);
+        int h = HashMap.hash(k.hashCode());
         Entry<K,V>[] tab = getTable();
         int i = indexFor(h, tab.length);
 
@@ -561,11 +468,7 @@ public class WeakHashMap<K,V>
         }
 
         Entry<K,V>[] newTable = newTable(newCapacity);
-        boolean oldAltHashing = useAltHashing;
-        useAltHashing |= sun.misc.VM.isBooted() &&
-                (newCapacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
-        boolean rehash = oldAltHashing ^ useAltHashing;
-        transfer(oldTable, newTable, rehash);
+        transfer(oldTable, newTable);
         table = newTable;
 
         /*
@@ -577,13 +480,13 @@ public class WeakHashMap<K,V>
             threshold = (int)(newCapacity * loadFactor);
         } else {
             expungeStaleEntries();
-            transfer(newTable, oldTable, false);
+            transfer(newTable, oldTable);
             table = oldTable;
         }
     }
 
     /** Transfers all entries from src to dest tables */
-    private void transfer(Entry<K,V>[] src, Entry<K,V>[] dest, boolean rehash) {
+    private void transfer(Entry<K,V>[] src, Entry<K,V>[] dest) {
         for (int j = 0; j < src.length; ++j) {
             Entry<K,V> e = src[j];
             src[j] = null;
@@ -595,9 +498,6 @@ public class WeakHashMap<K,V>
                     e.value = null; //  "   "
                     size--;
                 } else {
-                    if (rehash) {
-                        e.hash = hash(key);
-                    }
                     int i = indexFor(e.hash, dest.length);
                     e.next = dest[i];
                     dest[i] = e;
@@ -666,7 +566,7 @@ public class WeakHashMap<K,V>
      */
     public V remove(Object key) {
         Object k = maskNull(key);
-        int h = hash(k);
+        int h = HashMap.hash(k.hashCode());
         Entry<K,V>[] tab = getTable();
         int i = indexFor(h, tab.length);
         Entry<K,V> prev = tab[i];
@@ -697,7 +597,7 @@ public class WeakHashMap<K,V>
         Entry<K,V>[] tab = getTable();
         Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
         Object k = maskNull(entry.getKey());
-        int h = hash(k);
+        int h = HashMap.hash(k.hashCode());
         int i = indexFor(h, tab.length);
         Entry<K,V> prev = tab[i];
         Entry<K,V> e = prev;
@@ -779,7 +679,7 @@ public class WeakHashMap<K,V>
      */
     private static class Entry<K,V> extends WeakReference<Object> implements Map.Entry<K,V> {
         V value;
-        int hash;
+        final int hash;
         Entry<K,V> next;
 
         /**
@@ -952,7 +852,7 @@ public class WeakHashMap<K,V>
             return new KeyIterator();
         }
 
-        public @NonNegative int size() {
+        public int size() {
             return WeakHashMap.this.size();
         }
 
@@ -997,7 +897,7 @@ public class WeakHashMap<K,V>
             return new ValueIterator();
         }
 
-        public @NonNegative int size() {
+        public int size() {
             return WeakHashMap.this.size();
         }
 
@@ -1046,7 +946,7 @@ public class WeakHashMap<K,V>
             return removeMapping(o);
         }
 
-        public @NonNegative int size() {
+        public int size() {
             return WeakHashMap.this.size();
         }
 

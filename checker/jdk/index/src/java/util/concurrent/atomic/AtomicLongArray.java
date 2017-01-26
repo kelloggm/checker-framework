@@ -1,32 +1,32 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
- *
- *
- *
- *
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
@@ -36,9 +36,6 @@
 package java.util.concurrent.atomic;
 import sun.misc.Unsafe;
 import java.util.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A {@code long} array in which elements may be updated atomically.
@@ -79,7 +76,7 @@ public class AtomicLongArray implements java.io.Serializable {
      *
      * @param length the length of the array
      */
-    public AtomicLongArray(@NonNegative int length) {
+    public AtomicLongArray(int length) {
         array = new long[length];
     }
 
@@ -100,7 +97,7 @@ public class AtomicLongArray implements java.io.Serializable {
      *
      * @return the length of the array
      */
-    public final @NonNegative int length() {
+    public final int length() {
         return array.length;
     }
 
@@ -110,7 +107,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @return the current value
      */
-    public final long get(@NonNegative int i) {
+    public final long get(int i) {
         return getRaw(checkedByteOffset(i));
     }
 
@@ -124,7 +121,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @param newValue the new value
      */
-    public final void set(@NonNegative int i, long newValue) {
+    public final void set(int i, long newValue) {
         unsafe.putLongVolatile(array, checkedByteOffset(i), newValue);
     }
 
@@ -135,7 +132,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param newValue the new value
      * @since 1.6
      */
-    public final void lazySet(@NonNegative int i, long newValue) {
+    public final void lazySet(int i, long newValue) {
         unsafe.putOrderedLong(array, checkedByteOffset(i), newValue);
     }
 
@@ -148,7 +145,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param newValue the new value
      * @return the previous value
      */
-    public final long getAndSet(@NonNegative int i, long newValue) {
+    public final long getAndSet(int i, long newValue) {
         long offset = checkedByteOffset(i);
         while (true) {
             long current = getRaw(offset);
@@ -167,7 +164,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @return true if successful. False return indicates that
      * the actual value was not equal to the expected value.
      */
-    public final boolean compareAndSet(@NonNegative int i, long expect, long update) {
+    public final boolean compareAndSet(int i, long expect, long update) {
         return compareAndSetRaw(checkedByteOffset(i), expect, update);
     }
 
@@ -188,7 +185,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param update the new value
      * @return true if successful.
      */
-    public final boolean weakCompareAndSet(@NonNegative int i, long expect, long update) {
+    public final boolean weakCompareAndSet(int i, long expect, long update) {
         return compareAndSet(i, expect, update);
     }
 
@@ -198,7 +195,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @return the previous value
      */
-    public final long getAndIncrement(@NonNegative int i) {
+    public final long getAndIncrement(int i) {
         return getAndAdd(i, 1);
     }
 
@@ -208,7 +205,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @return the previous value
      */
-    public final long getAndDecrement(@NonNegative int i) {
+    public final long getAndDecrement(int i) {
         return getAndAdd(i, -1);
     }
 
@@ -219,7 +216,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param delta the value to add
      * @return the previous value
      */
-    public final long getAndAdd(@NonNegative int i, long delta) {
+    public final long getAndAdd(int i, long delta) {
         long offset = checkedByteOffset(i);
         while (true) {
             long current = getRaw(offset);
@@ -234,7 +231,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @return the updated value
      */
-    public final long incrementAndGet(@NonNegative int i) {
+    public final long incrementAndGet(int i) {
         return addAndGet(i, 1);
     }
 
@@ -244,7 +241,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param i the index
      * @return the updated value
      */
-    public final long decrementAndGet(@NonNegative int i) {
+    public final long decrementAndGet(int i) {
         return addAndGet(i, -1);
     }
 
@@ -255,7 +252,7 @@ public class AtomicLongArray implements java.io.Serializable {
      * @param delta the value to add
      * @return the updated value
      */
-    public long addAndGet(@NonNegative int i, long delta) {
+    public long addAndGet(int i, long delta) {
         long offset = checkedByteOffset(i);
         while (true) {
             long current = getRaw(offset);

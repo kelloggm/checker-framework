@@ -1,34 +1,31 @@
 /*
- * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 1994, 2011, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 import  java.io.*;
 import  java.util.*;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * The {@code Throwable} class is the superclass of all errors and
@@ -456,10 +453,9 @@ public class Throwable implements Serializable {
      */
     public synchronized Throwable initCause(Throwable cause) {
         if (this.cause != this)
-            throw new IllegalStateException("Can't overwrite cause with " +
-                                            Objects.toString(cause, "a null"), this);
+            throw new IllegalStateException("Can't overwrite cause");
         if (cause == this)
-            throw new IllegalArgumentException("Self-causation not permitted", this);
+            throw new IllegalArgumentException("Self-causation not permitted");
         this.cause = cause;
         return this;
     }
@@ -884,7 +880,7 @@ public class Throwable implements Serializable {
      *
      * package-protection for use by SharedSecrets.
      */
-    native @NonNegative int getStackTraceDepth();
+    native int getStackTraceDepth();
 
     /**
      * Returns the specified element of the stack trace.
@@ -895,7 +891,7 @@ public class Throwable implements Serializable {
      * @throws IndexOutOfBoundsException if {@code index < 0 ||
      *         index >= getStackTraceDepth() }
      */
-    native StackTraceElement getStackTraceElement(@NonNegative int index);
+    native StackTraceElement getStackTraceElement(int index);
 
     /**
      * Reads a {@code Throwable} from a stream, enforcing
@@ -1043,7 +1039,7 @@ public class Throwable implements Serializable {
      */
     public final synchronized void addSuppressed(Throwable exception) {
         if (exception == this)
-            throw new IllegalArgumentException(SELF_SUPPRESSION_MESSAGE, exception);
+            throw new IllegalArgumentException(SELF_SUPPRESSION_MESSAGE);
 
         if (exception == null)
             throw new NullPointerException(NULL_CAUSE_MESSAGE);

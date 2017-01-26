@@ -1,32 +1,29 @@
 /*
  * Copyright (c) 1996, 2004, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.io;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 
 /**
@@ -65,7 +62,7 @@ public class StringWriter extends Writer {
      * @throws IllegalArgumentException
      *         If <tt>initialSize</tt> is negative
      */
-    public StringWriter(@NonNegative int initialSize) {
+    public StringWriter(int initialSize) {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
@@ -76,7 +73,7 @@ public class StringWriter extends Writer {
     /**
      * Write a single character.
      */
-    public void write(@NonNegative int c) {
+    public void write(int c) {
         buf.append((char) c);
     }
 
@@ -87,7 +84,7 @@ public class StringWriter extends Writer {
      * @param  off   Offset from which to start writing characters
      * @param  len   Number of characters to write
      */
-    public void write(char cbuf[], @NonNegative int off, @NonNegative int len) {
+    public void write(char cbuf[], int off, int len) {
         if ((off < 0) || (off > cbuf.length) || (len < 0) ||
             ((off + len) > cbuf.length) || ((off + len) < 0)) {
             throw new IndexOutOfBoundsException();
@@ -111,7 +108,7 @@ public class StringWriter extends Writer {
      * @param  off  Offset from which to start writing characters
      * @param  len  Number of characters to write
      */
-    public void write(String str, @NonNegative int off, @NonNegative int len)  {
+    public void write(String str, int off, int len)  {
         buf.append(str.substring(off, off + len));
     }
 
@@ -179,7 +176,7 @@ public class StringWriter extends Writer {
      *
      * @since  1.5
      */
-    public StringWriter append(CharSequence csq, @NonNegative int start, @NonNegative int end) {
+    public StringWriter append(CharSequence csq, int start, int end) {
         CharSequence cs = (csq == null ? "null" : csq);
         write(cs.subSequence(start, end).toString());
         return this;

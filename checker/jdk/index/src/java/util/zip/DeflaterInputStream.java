@@ -1,26 +1,26 @@
 /*
  * Copyright (c) 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util.zip;
@@ -28,9 +28,6 @@ package java.util.zip;
 import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.IOException;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * Implements an input stream filter for compressing data in the "deflate"
@@ -103,7 +100,7 @@ public class DeflaterInputStream extends FilterInputStream {
      * @throws IllegalArgumentException if {@code bufLen} is <= 0
      * @throws NullPointerException if {@code in} or {@code defl} is null
      */
-    public DeflaterInputStream(InputStream in, Deflater defl, @NonNegative int bufLen) {
+    public DeflaterInputStream(InputStream in, Deflater defl, int bufLen) {
         super(in);
 
         // Sanity checks
@@ -149,7 +146,7 @@ public class DeflaterInputStream extends FilterInputStream {
      * @throws IOException if an I/O error occurs or if this stream is
      * already closed
      */
-    public @GTENegativeOne int read() throws IOException {
+    public int read() throws IOException {
         // Read a single byte of compressed data
         int len = read(rbuf, 0, 1);
         if (len <= 0)
@@ -171,7 +168,7 @@ public class DeflaterInputStream extends FilterInputStream {
      * @throws IOException if an I/O error occurs or if this input stream is
      * already closed
      */
-    public @GTENegativeOne int read(byte[] b, @NonNegative int off, @NonNegative int len) throws IOException {
+    public int read(byte[] b, int off, int len) throws IOException {
         // Sanity checks
         ensureOpen();
         if (b == null) {
@@ -259,7 +256,7 @@ public class DeflaterInputStream extends FilterInputStream {
      * @throws IOException if an I/O error occurs or if this stream is
      * already closed
      */
-    public @NonNegative int available() throws IOException {
+    public int available() throws IOException {
         ensureOpen();
         if (reachEOF) {
             return 0;

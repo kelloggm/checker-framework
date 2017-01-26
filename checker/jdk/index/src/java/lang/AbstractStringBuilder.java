@@ -1,35 +1,32 @@
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 
 import sun.misc.FloatingDecimal;
 import java.util.Arrays;
-
-import org.checkerframework.checker.index.qual.*;
-
 
 /**
  * A mutable sequence of characters.
@@ -73,7 +70,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  the length of the sequence of characters currently
      *          represented by this object
      */
-    public @NonNegative int length() {
+    public int length() {
         return count;
     }
 
@@ -84,7 +81,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *
      * @return  the current capacity
      */
-    public @NonNegative int capacity() {
+    public int capacity() {
         return value.length;
     }
 
@@ -171,7 +168,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws     IndexOutOfBoundsException  if the
      *               <code>newLength</code> argument is negative.
      */
-    public void setLength(@NonNegative int newLength) {
+    public void setLength(int newLength) {
         if (newLength < 0)
             throw new StringIndexOutOfBoundsException(newLength);
         ensureCapacityInternal(newLength);
@@ -201,7 +198,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws     IndexOutOfBoundsException  if <code>index</code> is
      *             negative or greater than or equal to <code>length()</code>.
      */
-    public char charAt(@NonNegative int index) {
+    public char charAt(int index) {
         if ((index < 0) || (index >= count))
             throw new StringIndexOutOfBoundsException(index);
         return value[index];
@@ -228,7 +225,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             argument is negative or not less than the length of this
      *             sequence.
      */
-    public @NonNegative int codePointAt(@NonNegative int index) {
+    public int codePointAt(int index) {
         if ((index < 0) || (index >= count)) {
             throw new StringIndexOutOfBoundsException(index);
         }
@@ -256,7 +253,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *            argument is less than 1 or greater than the length
      *            of this sequence.
      */
-    public @NonNegative int codePointBefore(@Positive int index) {
+    public int codePointBefore(int index) {
         int i = index - 1;
         if ((i < 0) || (i >= count)) {
             throw new StringIndexOutOfBoundsException(index);
@@ -284,7 +281,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * is larger than the length of this sequence, or
      * <code>beginIndex</code> is larger than <code>endIndex</code>.
      */
-    public @NonNegative int codePointCount(@NonNegative int beginIndex, @NonNegative int endIndex) {
+    public int codePointCount(int beginIndex, int endIndex) {
         if (beginIndex < 0 || endIndex > count || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException();
         }
@@ -310,7 +307,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *   before <code>index</code> has fewer than the absolute value of
      *   <code>codePointOffset</code> code points.
      */
-    public @NonNegative int offsetByCodePoints(@NonNegative int index, int codePointOffset) {
+    public int offsetByCodePoints(int index, int codePointOffset) {
         if (index < 0 || index > count) {
             throw new IndexOutOfBoundsException();
         }
@@ -348,7 +345,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             <code>dst.length</code>
      *             </ul>
      */
-    public void getChars(@NonNegative int srcBegin, @NonNegative int srcEnd, char[] dst, @NonNegative int dstBegin)
+    public void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin)
     {
         if (srcBegin < 0)
             throw new StringIndexOutOfBoundsException(srcBegin);
@@ -373,7 +370,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws     IndexOutOfBoundsException  if <code>index</code> is
      *             negative or greater than or equal to <code>length()</code>.
      */
-    public void setCharAt(@NonNegative int index, char ch) {
+    public void setCharAt(int index, char ch) {
         if ((index < 0) || (index >= count))
             throw new StringIndexOutOfBoundsException(index);
         value[index] = ch;
@@ -472,7 +469,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             {@code start} is greater than {@code end} or
      *             {@code end} is greater than {@code s.length()}
      */
-    public AbstractStringBuilder append(CharSequence s, @NonNegative int start, @NonNegative int end) {
+    public AbstractStringBuilder append(CharSequence s, int start, int end) {
         if (s == null)
             s = "null";
         if ((start < 0) || (start > end) || (end > s.length()))
@@ -533,7 +530,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *         if {@code offset < 0} or {@code len < 0}
      *         or {@code offset+len > str.length}
      */
-    public AbstractStringBuilder append(char str[], @NonNegative int offset, @NonNegative int len) {
+    public AbstractStringBuilder append(char str[], int offset, int len) {
         if (len > 0)                // let arraycopy report AIOOBE for len < 0
             ensureCapacityInternal(count + len);
         System.arraycopy(str, offset, value, count, len);
@@ -657,7 +654,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(float f) {
-        //new FloatingDecimal(f).appendTo(this);
+        new FloatingDecimal(f).appendTo(this);
         return this;
     }
 
@@ -674,7 +671,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(double d) {
-        //new FloatingDecimal(d).appendTo(this);
+        new FloatingDecimal(d).appendTo(this);
         return this;
     }
 
@@ -692,7 +689,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             is negative, greater than {@code length()}, or
      *             greater than {@code end}.
      */
-    public AbstractStringBuilder delete(@NonNegative int start, @NonNegative int end) {
+    public AbstractStringBuilder delete(int start, int end) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
         if (end > count)
@@ -760,7 +757,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *              is negative or greater than or equal to
      *              <code>length()</code>.
      */
-    public AbstractStringBuilder deleteCharAt(@NonNegative int index) {
+    public AbstractStringBuilder deleteCharAt(int index) {
         if ((index < 0) || (index >= count))
             throw new StringIndexOutOfBoundsException(index);
         System.arraycopy(value, index+1, value, index, count-index-1);
@@ -787,7 +784,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             is negative, greater than <code>length()</code>, or
      *             greater than <code>end</code>.
      */
-    public AbstractStringBuilder replace(@NonNegative int start, @NonNegative int end, String str) {
+    public AbstractStringBuilder replace(int start, int end, String str) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
         if (start > count)
@@ -818,7 +815,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws     StringIndexOutOfBoundsException  if <code>start</code> is
      *             less than zero, or greater than the length of this object.
      */
-    public String substring(@NonNegative int start) {
+    public String substring(int start) {
         return substring(start, count);
     }
 
@@ -848,7 +845,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *          or if <tt>start</tt> is greater than <tt>end</tt>
      * @spec JSR-51
      */
-    public CharSequence subSequence(@NonNegative int start, @NonNegative int end) {
+    public CharSequence subSequence(int start, int end) {
         return substring(start, end);
     }
 
@@ -866,7 +863,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             <code>length()</code>, or <code>start</code> is
      *             greater than <code>end</code>.
      */
-    public String substring(@NonNegative int start, @NonNegative int end) {
+    public String substring(int start, int end) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
         if (end > count)
@@ -897,8 +894,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             {@code (offset+len)} is greater than
      *             {@code str.length}.
      */
-    public AbstractStringBuilder insert(@NonNegative int index, char[] str, @NonNegative int offset,
-                                        @NonNegative int len)
+    public AbstractStringBuilder insert(int index, char[] str, int offset,
+                                        int len)
     {
         if ((index < 0) || (index > length()))
             throw new StringIndexOutOfBoundsException(index);
@@ -932,7 +929,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, Object obj) {
+    public AbstractStringBuilder insert(int offset, Object obj) {
         return insert(offset, String.valueOf(obj));
     }
 
@@ -967,7 +964,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, String str) {
+    public AbstractStringBuilder insert(int offset, String str) {
         if ((offset < 0) || (offset > length()))
             throw new StringIndexOutOfBoundsException(offset);
         if (str == null)
@@ -1004,7 +1001,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, char[] str) {
+    public AbstractStringBuilder insert(int offset, char[] str) {
         if ((offset < 0) || (offset > length()))
             throw new StringIndexOutOfBoundsException(offset);
         int len = str.length;
@@ -1036,7 +1033,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     IndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int dstOffset, CharSequence s) {
+    public AbstractStringBuilder insert(int dstOffset, CharSequence s) {
         if (s == null)
             s = "null";
         if (s instanceof String)
@@ -1088,8 +1085,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *              {@code start} is greater than {@code end} or
      *              {@code end} is greater than {@code s.length()}
      */
-     public AbstractStringBuilder insert(@NonNegative int dstOffset, CharSequence s,
-                                         @NonNegative int start, @NonNegative int end) {
+     public AbstractStringBuilder insert(int dstOffset, CharSequence s,
+                                         int start, int end) {
         if (s == null)
             s = "null";
         if ((dstOffset < 0) || (dstOffset > this.length()))
@@ -1127,7 +1124,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, boolean b) {
+    public AbstractStringBuilder insert(int offset, boolean b) {
         return insert(offset, String.valueOf(b));
     }
 
@@ -1150,7 +1147,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     IndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, char c) {
+    public AbstractStringBuilder insert(int offset, char c) {
         ensureCapacityInternal(count + 1);
         System.arraycopy(value, offset, value, offset + 1, count - offset);
         value[offset] = c;
@@ -1177,7 +1174,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, int i) {
+    public AbstractStringBuilder insert(int offset, int i) {
         return insert(offset, String.valueOf(i));
     }
 
@@ -1200,7 +1197,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, long l) {
+    public AbstractStringBuilder insert(int offset, long l) {
         return insert(offset, String.valueOf(l));
     }
 
@@ -1223,7 +1220,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, float f) {
+    public AbstractStringBuilder insert(int offset, float f) {
         return insert(offset, String.valueOf(f));
     }
 
@@ -1246,7 +1243,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return     a reference to this object.
      * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(@NonNegative int offset, double d) {
+    public AbstractStringBuilder insert(int offset, double d) {
         return insert(offset, String.valueOf(d));
     }
 
@@ -1276,7 +1273,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * specified substring, starting at the specified index.  The integer
      * returned is the smallest value <tt>k</tt> for which:
      * <blockquote><pre>
-     *     k >= Math.min(fromIndex, this.length()) &&
+     *     k >= Math.min(fromIndex, str.length()) &&
      *                   this.toString().startsWith(str, k)
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then -1 is returned.
@@ -1288,7 +1285,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws  java.lang.NullPointerException if <code>str</code> is
      *            <code>null</code>.
      */
-    public @GTENegativeOne int indexOf(String str, @NonNegative int fromIndex) {
+    public int indexOf(String str, int fromIndex) {
         return String.indexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }
@@ -1311,7 +1308,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws  java.lang.NullPointerException  if <code>str</code> is
      *          <code>null</code>.
      */
-    public @GTENegativeOne int lastIndexOf(String str) {
+    public int lastIndexOf(String str) {
         return lastIndexOf(str, count);
     }
 
@@ -1320,7 +1317,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * specified substring. The integer returned is the largest value <i>k</i>
      * such that:
      * <blockquote><pre>
-     *     k <= Math.min(fromIndex, this.length()) &&
+     *     k <= Math.min(fromIndex, str.length()) &&
      *                   this.toString().startsWith(str, k)
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then -1 is returned.
@@ -1332,7 +1329,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @throws  java.lang.NullPointerException if <code>str</code> is
      *          <code>null</code>.
      */
-    public @GTENegativeOne int lastIndexOf(String str, @NonNegative int fromIndex) {
+    public int lastIndexOf(String str, int fromIndex) {
         return String.lastIndexOf(value, 0, count,
                               str.toCharArray(), 0, str.length(), fromIndex);
     }
