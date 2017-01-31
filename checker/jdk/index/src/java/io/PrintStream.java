@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -162,6 +163,7 @@ public class PrintStream extends FilterOutputStream
      *                    character or byte (<code>'\n'</code>) is written
      * @param  encoding   The name of a supported
      *                    <a href="../lang/package-summary.html#charenc">
+import org.checkerframework.checker.index.qual.*;
      *                    character encoding</a>
      *
      * @throws  UnsupportedEncodingException
@@ -473,7 +475,7 @@ public class PrintStream extends FilterOutputStream
      * @param  off   Offset from which to start taking bytes
      * @param  len   Number of bytes to write
      */
-    public void write(byte buf[], int off, int len) {
+    public void write(byte buf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) {
         try {
             synchronized (this) {
                 ensureOpen();

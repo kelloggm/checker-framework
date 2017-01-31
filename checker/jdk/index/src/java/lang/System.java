@@ -23,6 +23,7 @@
  * questions.
  */
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.*;
 import java.util.Properties;
@@ -345,7 +346,7 @@ public final class System {
      *          the current time and midnight, January 1, 1970 UTC.
      * @see     java.util.Date
      */
-    public static native long currentTimeMillis();
+    public static native /*@NonNegative*/ long currentTimeMillis();
 
     /**
      * Returns the current value of the running Java Virtual Machine's
@@ -485,9 +486,9 @@ public final class System {
      * @exception  NullPointerException if either <code>src</code> or
      *               <code>dest</code> is <code>null</code>.
      */
-    public static native void arraycopy(Object src,  int  srcPos,
-                                        Object dest, int destPos,
-                                        int length);
+    public static native void arraycopy(Object src,  /*@IndexFor("#1")*/ int  srcPos,
+                                        Object dest, /*@IndexFor("#3")*/ int destPos,
+                                        /*@IndexOrHigh({"#1", "#3"})*/ int length);
 
     /**
      * Returns the same hash code for the given object as

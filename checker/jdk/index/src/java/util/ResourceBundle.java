@@ -39,6 +39,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -2357,6 +2358,7 @@ public abstract class ResourceBundle {
                         }
                     } else if (script.length() > 0 && region.length() == 0) {
                         // Supply region(country) for users who still package Chinese
+import org.checkerframework.checker.index.qual.*;
                         // bundles using old convension.
                         if (script.equals("Hans")) {
                             region = "CN";

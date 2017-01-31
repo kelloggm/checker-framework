@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * This class allows an application to create an input stream in
@@ -108,7 +109,7 @@ class StringBufferInputStream extends InputStream {
      *             <code>-1</code> if there is no more data because the end of
      *             the stream has been reached.
      */
-    public synchronized int read(byte b[], int off, int len) {
+    public synchronized /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) {
         if (b == null) {
             throw new NullPointerException();
         } else if ((off < 0) || (off > b.length) || (len < 0) ||
@@ -140,7 +141,7 @@ class StringBufferInputStream extends InputStream {
      * @param      n   the number of bytes to be skipped.
      * @return     the actual number of bytes skipped.
      */
-    public synchronized long skip(long n) {
+    public synchronized /*@NonNegative*/ long skip(/*@NonNegative*/ long n) {
         if (n < 0) {
             return 0;
         }
@@ -158,7 +159,7 @@ class StringBufferInputStream extends InputStream {
      * @return     the value of <code>count&nbsp;-&nbsp;pos</code>, which is the
      *             number of bytes remaining to be read from the input buffer.
      */
-    public synchronized int available() {
+    public synchronized /*@NonNegative*/ int available() {
         return count - pos;
     }
 

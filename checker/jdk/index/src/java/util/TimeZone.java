@@ -37,6 +37,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.Serializable;
 import java.lang.ref.SoftReference;

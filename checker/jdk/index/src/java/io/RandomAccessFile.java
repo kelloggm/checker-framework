@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
@@ -342,7 +343,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * <code>len</code> is negative, or <code>len</code> is greater than
      * <code>b.length - off</code>
      */
-    public int read(byte b[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         return readBytes(b, off, len);
     }
 
@@ -365,7 +366,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * some other I/O error occurs.
      * @exception  NullPointerException If <code>b</code> is <code>null</code>.
      */
-    public int read(byte b[]) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[]) throws IOException {
         return readBytes(b, 0, b.length);
     }
 
@@ -399,7 +400,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      *               all the bytes.
      * @exception  IOException   if an I/O error occurs.
      */
-    public final void readFully(byte b[], int off, int len) throws IOException {
+    public final void readFully(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         int n = 0;
         do {
             int count = this.read(b, off + n, len - n);
@@ -425,7 +426,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @return     the actual number of bytes skipped.
      * @exception  IOException  if an I/O error occurs.
      */
-    public int skipBytes(int n) throws IOException {
+    public /*@NonNegative*/ int skipBytes(/*@NonNegative*/ int n) throws IOException {
         long pos;
         long len;
         long newpos;
@@ -486,7 +487,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         writeBytes(b, off, len);
     }
 
@@ -515,7 +516,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @exception  IOException  if <code>pos</code> is less than
      *                          <code>0</code> or if an I/O error occurs.
      */
-    public native void seek(long pos) throws IOException;
+    public native void seek(/*@NonNegative*/ long pos) throws IOException;
 
     /**
      * Returns the length of this file.
@@ -523,7 +524,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @return     the length of this file, measured in bytes.
      * @exception  IOException  if an I/O error occurs.
      */
-    public native long length() throws IOException;
+    public native /*@NonNegative*/ long length() throws IOException;
 
     /**
      * Sets the length of this file.
@@ -544,7 +545,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
      * @exception  IOException  If an I/O error occurs
      * @since      1.2
      */
-    public native void setLength(long newLength) throws IOException;
+    public native void setLength(/*@NonNegative*/ long newLength) throws IOException;
 
     /**
      * Closes this random access file stream and releases any system

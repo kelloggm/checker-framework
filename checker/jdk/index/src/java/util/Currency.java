@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -509,7 +510,7 @@ public final class Currency implements Serializable {
      *
      * @return the default number of fraction digits used with this currency
      */
-    public int getDefaultFractionDigits() {
+    public /*@GTENegativeOne*/ int getDefaultFractionDigits() {
         return defaultFractionDigits;
     }
 

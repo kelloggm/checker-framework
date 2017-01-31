@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * This class provides a skeletal implementation of the <tt>Collection</tt>

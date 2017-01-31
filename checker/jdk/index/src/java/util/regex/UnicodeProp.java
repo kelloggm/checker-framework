@@ -24,6 +24,7 @@
  */
 
 package java.util.regex;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.HashMap;
 import java.util.Locale;

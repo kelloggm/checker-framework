@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * This class consists of {@code static} utility methods for operating

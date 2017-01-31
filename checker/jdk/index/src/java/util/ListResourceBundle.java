@@ -39,6 +39,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import sun.util.ResourceBundleEnumeration;
 

@@ -37,6 +37,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -1113,7 +1114,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #getTime()
      * @see #setTimeInMillis(long)
      */
-    public long getTimeInMillis() {
+    public /*@NonNegative*/ long getTimeInMillis() {
         if (!isTimeSet) {
             updateTime();
         }
@@ -1127,7 +1128,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see #setTime(Date)
      * @see #getTimeInMillis()
      */
-    public void setTimeInMillis(long millis) {
+    public void setTimeInMillis(/*@NonNegative*/ long millis) {
         // If we don't need to recalculate the calendar field values,
         // do nothing.
         if (time == millis && isTimeSet && areFieldsSet && areAllFieldsSet

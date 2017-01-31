@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * A <code>FilterInputStream</code> contains
@@ -79,7 +80,7 @@ class FilterInputStream extends InputStream {
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public int read() throws IOException {
+    public /*@GTENegativeOne*/ int read() throws IOException {
         return in.read();
     }
 
@@ -103,7 +104,7 @@ class FilterInputStream extends InputStream {
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FilterInputStream#read(byte[], int, int)
      */
-    public int read(byte b[]) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[]) throws IOException {
         return read(b, 0, b.length);
     }
 
@@ -129,7 +130,7 @@ class FilterInputStream extends InputStream {
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public int read(byte b[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         return in.read(b, off, len);
     }
 
@@ -147,7 +148,7 @@ class FilterInputStream extends InputStream {
      * @exception  IOException  if the stream does not support seek,
      *                          or if some other I/O error occurs.
      */
-    public long skip(long n) throws IOException {
+    public /*@NonNegative*/ long skip(/*@NonNegative*/ long n) throws IOException {
         return in.skip(n);
     }
 
@@ -164,7 +165,7 @@ class FilterInputStream extends InputStream {
      *             over) from this input stream without blocking.
      * @exception  IOException  if an I/O error occurs.
      */
-    public int available() throws IOException {
+    public /*@NonNegative*/ int available() throws IOException {
         return in.available();
     }
 
@@ -197,7 +198,7 @@ class FilterInputStream extends InputStream {
      * @see     java.io.FilterInputStream#in
      * @see     java.io.FilterInputStream#reset()
      */
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(/*@NonNegative*/ int readlimit) {
         in.mark(readlimit);
     }
 

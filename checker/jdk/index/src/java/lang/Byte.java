@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  *
@@ -53,7 +54,7 @@ public final class Byte extends Number implements Comparable<Byte> {
      * A constant holding the maximum value a {@code byte} can
      * have, 2<sup>7</sup>-1.
      */
-    public static final byte   MAX_VALUE = 127;
+    public static final /*@Positive*/ byte   MAX_VALUE = 127;
 
     /**
      * The {@code Class} instance representing the primitive type
@@ -97,7 +98,7 @@ public final class Byte extends Number implements Comparable<Byte> {
      * @return a {@code Byte} instance representing {@code b}.
      * @since  1.5
      */
-    public static Byte valueOf(byte b) {
+    public static /*@PolyIndex*/ Byte valueOf(/*@PolyIndex*/ byte b) {
         final int offset = 128;
         return ByteCache.cache[(int)b + offset];
     }
@@ -294,7 +295,7 @@ public final class Byte extends Number implements Comparable<Byte> {
      * @param value     the value to be represented by the
      *                  {@code Byte}.
      */
-    public Byte(byte value) {
+    public /*@PolyIndex*/ Byte(/*@PolyIndex*/ byte value) {
         this.value = value;
     }
 
@@ -445,7 +446,7 @@ public final class Byte extends Number implements Comparable<Byte> {
      *
      * @since 1.5
      */
-    public static final int SIZE = 8;
+    public static final /*@Positive*/ int SIZE = 8;
 
     /** use serialVersionUID from JDK 1.1. for interoperability */
     private static final long serialVersionUID = -7183698231559129828L;

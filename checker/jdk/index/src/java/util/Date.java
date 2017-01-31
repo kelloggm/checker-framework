@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 import java.text.DateFormat;
 import java.io.IOException;
@@ -172,7 +173,7 @@ public class Date
      * @param   date   the milliseconds since January 1, 1970, 00:00:00 GMT.
      * @see     java.lang.System#currentTimeMillis()
      */
-    public Date(long date) {
+    public Date(/*@NonNegative*/ long date) {
         fastTime = date;
     }
 

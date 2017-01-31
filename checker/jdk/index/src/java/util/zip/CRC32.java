@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * A class that can be used to compute the CRC-32 of a data stream.

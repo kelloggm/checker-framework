@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
@@ -299,7 +300,7 @@ class FileOutputStream extends OutputStream
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         writeBytes(b, off, len, append);
     }
 

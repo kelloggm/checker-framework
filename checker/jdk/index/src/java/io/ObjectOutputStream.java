@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.ObjectStreamClass.WeakClassKey;
 import java.lang.ref.ReferenceQueue;
@@ -110,6 +111,7 @@ import java.io.SerialCallbackContext;
  * In this case it is the responsibility of the subclass to save and restore
  * the state of the non-serializable class. It is frequently the case that the
  * fields of that class are accessible (public, package, or protected) or that
+import org.checkerframework.checker.index.qual.*;
  * there are get and set methods that can be used to restore the state.
  *
  * <p>Serialization of an object can be prevented by implementing writeObject
@@ -694,7 +696,7 @@ public class ObjectOutputStream
      * @param   len the number of bytes that are written
      * @throws  IOException If an I/O error has occurred.
      */
-    public void write(byte[] buf, int off, int len) throws IOException {
+    public void write(byte[] buf, /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         if (buf == null) {
             throw new NullPointerException();
         }

@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * An unbounded priority {@linkplain Queue queue} based on a priority heap.

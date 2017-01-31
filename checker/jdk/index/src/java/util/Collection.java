@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * The root interface in the <i>collection hierarchy</i>.  A collection

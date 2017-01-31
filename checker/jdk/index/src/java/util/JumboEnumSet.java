@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * Private implementation class for EnumSet, for "jumbo" enum types
@@ -154,7 +155,7 @@ class JumboEnumSet<E extends Enum<E>> extends EnumSet<E> {
      *
      * @return the number of elements in this set
      */
-    public int size() {
+    public /*@NonNegative*/ int size() {
         return size;
     }
 

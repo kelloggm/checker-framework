@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.Arrays;
 
@@ -772,7 +773,7 @@ public class StreamTokenizer {
      *
      * @return  the current line number of this stream tokenizer.
      */
-    public int lineno() {
+    public /*@NonNegative*/ int lineno() {
         return LINENO;
     }
 

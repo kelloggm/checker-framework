@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -82,7 +83,7 @@ public class LineNumberReader extends BufferedReader {
      * @param  sz
      *         An int specifying the size of the buffer
      */
-    public LineNumberReader(Reader in, int sz) {
+    public LineNumberReader(Reader in, /*@NonNegative*/ int sz) {
         super(in, sz);
     }
 
@@ -159,7 +160,7 @@ public class LineNumberReader extends BufferedReader {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    public int read(char cbuf[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         synchronized (lock) {
             int n = super.read(cbuf, off, len);
 
@@ -224,7 +225,7 @@ public class LineNumberReader extends BufferedReader {
      * @throws  IllegalArgumentException
      *          If <tt>n</tt> is negative
      */
-    public long skip(long n) throws IOException {
+    public /*@NonNegative*/ long skip(/*@NonNegative*/ long n) throws IOException {
         if (n < 0)
             throw new IllegalArgumentException("skip() value is negative");
         int nn = (int) Math.min(n, maxSkipBufferSize);
@@ -255,7 +256,7 @@ public class LineNumberReader extends BufferedReader {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    public void mark(int readAheadLimit) throws IOException {
+    public void mark(/*@NonNegative*/ int readAheadLimit) throws IOException {
         synchronized (lock) {
             super.mark(readAheadLimit);
             markedLineNumber = lineNumber;

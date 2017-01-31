@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.Objects;
 import java.util.Formatter;
@@ -419,7 +420,7 @@ public class PrintWriter extends Writer {
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
      */
-    public void write(char buf[], int off, int len) {
+    public void write(char buf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) {
         try {
             synchronized (lock) {
                 ensureOpen();
@@ -449,7 +450,7 @@ public class PrintWriter extends Writer {
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
      */
-    public void write(String s, int off, int len) {
+    public void write(String s, /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) {
         try {
             synchronized (lock) {
                 ensureOpen();
@@ -1037,7 +1038,7 @@ public class PrintWriter extends Writer {
      *
      * @since  1.5
      */
-    public PrintWriter append(CharSequence csq, int start, int end) {
+    public PrintWriter append(CharSequence csq, /*@IndexFor("#1")*/ int start, /*@IndexOrHigh("#1")*/ int end) {
         CharSequence cs = (csq == null ? "null" : csq);
         write(cs.subSequence(start, end).toString());
         return this;

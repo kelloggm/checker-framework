@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.*;
 import java.nio.charset.Charset;
@@ -416,7 +417,7 @@ public final class Console implements Flushable
             return in.ready();
         }
 
-        public int read(char cbuf[], int offset, int length)
+        public /*@GTENegativeOne*/ int read(char cbuf[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length)
             throws IOException
         {
             int off = offset;

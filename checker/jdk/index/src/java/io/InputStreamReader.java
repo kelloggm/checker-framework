@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -180,7 +181,7 @@ public class InputStreamReader extends Reader {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read(char cbuf[], int offset, int length) throws IOException {
+    public /*@GTENegativeOne*/ int read(char cbuf[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length) throws IOException {
         return sd.read(cbuf, offset, length);
     }
 

@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * Class {@code Object} is the root of the class hierarchy.
@@ -380,7 +381,7 @@ public class Object {
      * @see        java.lang.Object#notify()
      * @see        java.lang.Object#notifyAll()
      */
-    public final native void wait(long timeout) throws InterruptedException;
+    public final native void wait(/*@NonNegative*/ long timeout) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until another thread invokes the
@@ -444,7 +445,7 @@ public class Object {
      *             status</i> of the current thread is cleared when
      *             this exception is thrown.
      */
-    public final void wait(long timeout, int nanos) throws InterruptedException {
+    public final void wait(/*@NonNegative*/ long timeout, /*@NonNegative*/ int nanos) throws InterruptedException {
         if (timeout < 0) {
             throw new IllegalArgumentException("timeout value is negative");
         }

@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * This class provides support for general purpose decompression using the
@@ -31,7 +32,9 @@ package java.util.zip;
  * initially developed as part of the PNG graphics standard and is not
  * protected by patents. It is fully described in the specifications at
  * the <a href="package-summary.html#package_description">java.util.zip
+import org.checkerframework.checker.index.qual.*;
  * package description</a>.
+import org.checkerframework.checker.index.qual.*;
  *
  * <p>The following code fragment demonstrates a trivial compression
  * and decompression of a string using <tt>Deflater</tt> and

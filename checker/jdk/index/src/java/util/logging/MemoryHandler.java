@@ -24,6 +24,7 @@
  */
 
 package java.util.logging;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * <tt>Handler</tt> that buffers requests in a circular buffer in memory.

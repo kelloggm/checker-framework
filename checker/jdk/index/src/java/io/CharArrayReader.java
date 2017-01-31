@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * This class implements a character buffer that can be used as a
@@ -75,7 +76,7 @@ public class CharArrayReader extends Reader {
      * @param offset    Offset of the first char to read
      * @param length    Number of chars to read
      */
-    public CharArrayReader(char buf[], int offset, int length) {
+    public CharArrayReader(char buf[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length) {
         if ((offset < 0) || (offset > buf.length) || (length < 0) ||
             ((offset + length) < 0)) {
             throw new IllegalArgumentException();
@@ -117,7 +118,7 @@ public class CharArrayReader extends Reader {
      *
      * @exception   IOException  If an I/O error occurs
      */
-    public int read(char b[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(char b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > b.length) || (len < 0) ||
@@ -154,7 +155,7 @@ public class CharArrayReader extends Reader {
      * @return       The number of characters actually skipped
      * @exception  IOException If the stream is closed, or an I/O error occurs
      */
-    public long skip(long n) throws IOException {
+    public /*@NonNegative*/ long skip(long n) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if (pos + n > count) {

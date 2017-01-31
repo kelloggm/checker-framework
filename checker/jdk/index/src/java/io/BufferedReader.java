@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -90,7 +91,7 @@ public class BufferedReader extends Reader {
      *
      * @exception  IllegalArgumentException  If sz is <= 0
      */
-    public BufferedReader(Reader in, int sz) {
+    public BufferedReader(Reader in, /*@NonNegative*/ int sz) {
         super(in);
         if (sz <= 0)
             throw new IllegalArgumentException("Buffer size <= 0");
@@ -167,7 +168,7 @@ public class BufferedReader extends Reader {
      *         end of the stream has been reached
      * @exception  IOException  If an I/O error occurs
      */
-    public int read() throws IOException {
+    public /*@NonNegative*/ int read() throws IOException {
         synchronized (lock) {
             ensureOpen();
             for (;;) {
@@ -266,7 +267,7 @@ public class BufferedReader extends Reader {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read(char cbuf[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||
@@ -392,7 +393,7 @@ public class BufferedReader extends Reader {
      * @exception  IllegalArgumentException  If <code>n</code> is negative.
      * @exception  IOException  If an I/O error occurs
      */
-    public long skip(long n) throws IOException {
+    public /*@NonNegative*/ long skip(long n) throws IOException {
         if (n < 0L) {
             throw new IllegalArgumentException("skip value is negative");
         }
@@ -480,7 +481,7 @@ public class BufferedReader extends Reader {
      * @exception  IllegalArgumentException  If readAheadLimit is < 0
      * @exception  IOException  If an I/O error occurs
      */
-    public void mark(int readAheadLimit) throws IOException {
+    public void mark(/*@NonNegative*/ int readAheadLimit) throws IOException {
         if (readAheadLimit < 0) {
             throw new IllegalArgumentException("Read-ahead limit < 0");
         }

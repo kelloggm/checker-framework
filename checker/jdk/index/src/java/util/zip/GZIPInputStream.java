@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.SequenceInputStream;
 import java.io.ByteArrayInputStream;

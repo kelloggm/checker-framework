@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
@@ -187,7 +188,7 @@ class BufferedInputStream extends FilterInputStream {
      * @param   size   the buffer size.
      * @exception IllegalArgumentException if size <= 0.
      */
-    public BufferedInputStream(InputStream in, int size) {
+    public BufferedInputStream(InputStream in, /*@NonNegative*/int size) {
         super(in);
         if (size <= 0) {
             throw new IllegalArgumentException("Buffer size <= 0");
@@ -249,7 +250,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          or an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
-    public synchronized int read() throws IOException {
+    public synchronized /*@GTENegativeOne*/ int read() throws IOException {
         if (pos >= count) {
             fill();
             if (pos >= count)
@@ -319,7 +320,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized int read(byte b[], int off, int len)
+    public synchronized /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/int off, /*@IndexOrHigh("#1")*/int len)
         throws IOException
     {
         getBufIfOpen(); // Check for closed stream
@@ -394,7 +395,7 @@ class BufferedInputStream extends FilterInputStream {
      *                          invoking its {@link #close()} method,
      *                          or an I/O error occurs.
      */
-    public synchronized int available() throws IOException {
+    public synchronized /*@NonNegative*/ int available() throws IOException {
         int n = count - pos;
         int avail = getInIfOpen().available();
         return n > (Integer.MAX_VALUE - avail)

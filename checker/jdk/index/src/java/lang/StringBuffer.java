@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -104,7 +105,7 @@ package java.lang;
      * @exception  NegativeArraySizeException  if the <code>capacity</code>
      *               argument is less than <code>0</code>.
      */
-    public StringBuffer(int capacity) {
+    public StringBuffer(/*@NonNegative*/ int capacity) {
         super(capacity);
     }
 
@@ -166,7 +167,7 @@ package java.lang;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @see        #length()
      */
-    public synchronized void setLength(int newLength) {
+    public synchronized void setLength(/*@NonNegative*/ int newLength) {
         super.setLength(newLength);
     }
 
@@ -318,7 +319,7 @@ package java.lang;
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer append(char[] str, int offset, int len) {
+    public synchronized StringBuffer append(char[] str, /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int len) {
         super.append(str, offset, len);
         return this;
     }
@@ -416,8 +417,8 @@ package java.lang;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      * @since      1.2
      */
-    public synchronized StringBuffer insert(int index, char[] str, int offset,
-                                            int len)
+    public synchronized StringBuffer insert(int index, char[] str, /*@IndexFor("#2")*/ int offset,
+                                            /*@IndexOrHigh("#2")*/ int len)
     {
         super.insert(index, str, offset, len);
         return this;

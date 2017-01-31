@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -141,7 +142,7 @@ public class PipedWriter extends Writer {
      *          {@link #connect(java.io.PipedReader) unconnected}, closed
      *          or an I/O error occurs.
      */
-    public void write(char cbuf[], int off, int len) throws IOException {
+    public void write(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         if (sink == null) {
             throw new IOException("Pipe not connected");
         } else if ((off | len | (off + len) | (cbuf.length - (off + len))) < 0) {

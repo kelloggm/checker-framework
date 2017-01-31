@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -49,7 +50,7 @@ public class PushbackReader extends FilterReader {
      * @param   size The size of the pushback buffer
      * @exception IllegalArgumentException if size is <= 0
      */
-    public PushbackReader(Reader in, int size) {
+    public PushbackReader(Reader in, /*@Positive*/ int size) {
         super(in);
         if (size <= 0) {
             throw new IllegalArgumentException("size <= 0");
@@ -103,7 +104,7 @@ public class PushbackReader extends FilterReader {
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read(char cbuf[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             try {
@@ -171,7 +172,7 @@ public class PushbackReader extends FilterReader {
      * @exception  IOException  If there is insufficient room in the pushback
      *                          buffer, or if some other I/O error occurs
      */
-    public void unread(char cbuf[], int off, int len) throws IOException {
+    public void unread(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         synchronized (lock) {
             ensureOpen();
             if (len > pos)
@@ -260,7 +261,7 @@ public class PushbackReader extends FilterReader {
      * @exception  IllegalArgumentException  If <code>n</code> is negative.
      * @exception  IOException  If an I/O error occurs
      */
-    public long skip(long n) throws IOException {
+    public /*@NonNegative*/ long skip(/*@NonNegative*/ long n) throws IOException {
         if (n < 0L)
             throw new IllegalArgumentException("skip value is negative");
         synchronized (lock) {

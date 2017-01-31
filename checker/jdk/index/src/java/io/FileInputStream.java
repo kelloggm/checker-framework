@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
@@ -183,7 +184,7 @@ class FileInputStream extends InputStream
      *             file is reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public native int read() throws IOException;
+    public native /*@GTENegativeOne*/ int read() throws IOException;
 
     /**
      * Reads a subarray as a sequence of bytes.
@@ -205,7 +206,7 @@ class FileInputStream extends InputStream
      *             the file has been reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public int read(byte b[]) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[]) throws IOException {
         return readBytes(b, 0, b.length);
     }
 
@@ -227,7 +228,7 @@ class FileInputStream extends InputStream
      * <code>b.length - off</code>
      * @exception  IOException  if an I/O error occurs.
      */
-    public int read(byte b[], int off, int len) throws IOException {
+    public /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException {
         return readBytes(b, off, len);
     }
 
@@ -253,7 +254,7 @@ class FileInputStream extends InputStream
      * @exception  IOException  if n is negative, if the stream does not
      *             support seek, or if an I/O error occurs.
      */
-    public native long skip(long n) throws IOException;
+    public native /*@NonNegative*/ long skip(/*@NonNegative*/ long n) throws IOException;
 
     /**
      * Returns an estimate of the number of remaining bytes that can be read (or
@@ -271,7 +272,7 @@ class FileInputStream extends InputStream
      * @exception  IOException  if this file input stream has been closed by calling
      *             {@code close} or an I/O error occurs.
      */
-    public native int available() throws IOException;
+    public native /*@NonNegative*/ int available() throws IOException;
 
     /**
      * Closes this file input stream and releases any system resources

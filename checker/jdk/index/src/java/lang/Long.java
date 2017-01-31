@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * The {@code Long} class wraps a value of the primitive type {@code
@@ -58,7 +59,7 @@ public final class Long extends Number implements Comparable<Long> {
      * A constant holding the maximum value a {@code long} can
      * have, 2<sup>63</sup>-1.
      */
-    public static final long MAX_VALUE = 0x7fffffffffffffffL;
+    public static final /*@Positive*/ long MAX_VALUE = 0x7fffffffffffffffL;
 
     /**
      * The {@code Class} instance representing the primitive type
@@ -681,7 +682,7 @@ public final class Long extends Number implements Comparable<Long> {
      * @param   value   the value to be represented by the
      *          {@code Long} object.
      */
-    public Long(long value) {
+    public /*@PolyIndex*/ Long(/*@PolyIndex*/ long value) {
         this.value = value;
     }
 
@@ -980,7 +981,7 @@ public final class Long extends Number implements Comparable<Long> {
      *
      * @since 1.5
      */
-    public static final int SIZE = 64;
+    public static final /*@Positive*/ int SIZE = 64;
 
     /**
      * Returns a {@code long} value with at most a single one-bit, in the
@@ -1042,7 +1043,7 @@ public final class Long extends Number implements Comparable<Long> {
      *     is equal to zero.
      * @since 1.5
      */
-    public static int numberOfLeadingZeros(long i) {
+    public static /*@NonNegative*/ int numberOfLeadingZeros(long i) {
         // HD, Figure 5-6
          if (i == 0)
             return 64;
@@ -1070,7 +1071,7 @@ public final class Long extends Number implements Comparable<Long> {
      *     to zero.
      * @since 1.5
      */
-    public static int numberOfTrailingZeros(long i) {
+    public static /*@NonNegative*/ int numberOfTrailingZeros(long i) {
         // HD, Figure 5-14
         int x, y;
         if (i == 0) return 64;
@@ -1092,7 +1093,7 @@ public final class Long extends Number implements Comparable<Long> {
      *     representation of the specified {@code long} value.
      * @since 1.5
      */
-     public static int bitCount(long i) {
+     public static /*@NonNegative*/ int bitCount(long i) {
         // HD, Figure 5-14
         i = i - ((i >>> 1) & 0x5555555555555555L);
         i = (i & 0x3333333333333333L) + ((i >>> 2) & 0x3333333333333333L);
@@ -1175,7 +1176,7 @@ public final class Long extends Number implements Comparable<Long> {
      * @return the signum function of the specified {@code long} value.
      * @since 1.5
      */
-    public static int signum(long i) {
+    public static /*@GTENegativeOne*/ int signum(long i) {
         // HD, Section 2-7
         return (int) ((i >> 63) | (-i >>> 63));
     }

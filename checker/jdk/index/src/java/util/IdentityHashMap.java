@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 import java.io.*;
 
 /**
@@ -216,7 +217,7 @@ public class IdentityHashMap<K,V>
      * @param expectedMaxSize the expected maximum size of the map
      * @throws IllegalArgumentException if <tt>expectedMaxSize</tt> is negative
      */
-    public IdentityHashMap(int expectedMaxSize) {
+    public IdentityHashMap(/*@NonNegative*/ int expectedMaxSize) {
         if (expectedMaxSize < 0)
             throw new IllegalArgumentException("expectedMaxSize is negative: "
                                                + expectedMaxSize);
@@ -279,7 +280,7 @@ public class IdentityHashMap<K,V>
      *
      * @return the number of key-value mappings in this map
      */
-    public int size() {
+    public /*@NonNegative*/ int size() {
         return size;
     }
 

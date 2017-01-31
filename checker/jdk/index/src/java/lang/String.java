@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
@@ -161,7 +162,7 @@ public final class String
      * @param  original
      *         A {@code String}
      */
-    public String(String original) {
+    public /*@PolyIndex*/ String(/*@PolyIndex*/ String original) {
         int size = original.count;
         char[] originalValue = original.value;
         char[] v;
@@ -190,7 +191,7 @@ public final class String
      * @param  value
      *         The initial value of the string
      */
-    public String(char value[]) {
+    public /*@PolyIndex*/ String(char /*@PolyIndex*/ [] value) {
         int size = value.length;
         this.offset = 0;
         this.count = size;
@@ -218,7 +219,7 @@ public final class String
      *          If the {@code offset} and {@code count} arguments index
      *          characters outside the bounds of the {@code value} array
      */
-    public String(char value[], int offset, int count) {
+    public String(char value[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int count) {
         if (offset < 0) {
             throw new StringIndexOutOfBoundsException(offset);
         }
@@ -262,7 +263,7 @@ public final class String
      *
      * @since  1.5
      */
-    public String(int[] codePoints, int offset, int count) {
+    public String(int[] codePoints, /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int count) {
         if (offset < 0) {
             throw new StringIndexOutOfBoundsException(offset);
         }
@@ -343,7 +344,7 @@ public final class String
      * @see  #String(byte[])
      */
     @Deprecated
-    public String(byte ascii[], int hibyte, int offset, int count) {
+    public String(byte ascii[], int hibyte, /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int count) {
         checkBounds(ascii, offset, count);
         char value[] = new char[count];
 
@@ -393,7 +394,7 @@ public final class String
      * @see  #String(byte[])
      */
     @Deprecated
-    public String(byte ascii[], int hibyte) {
+    public /*@PolyIndex*/ String(byte /*@PolyIndex*/ [] ascii, int hibyte) {
         this(ascii, hibyte, 0, ascii.length);
     }
 
@@ -443,7 +444,7 @@ public final class String
      *
      * @since  JDK1.1
      */
-    public String(byte bytes[], int offset, int length, String charsetName)
+    public String(byte bytes[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length, String charsetName)
         throws UnsupportedEncodingException
     {
         if (charsetName == null)
@@ -485,7 +486,7 @@ public final class String
      *
      * @since  1.6
      */
-    public String(byte bytes[], int offset, int length, Charset charset) {
+    public String(byte bytes[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length, Charset charset) {
         if (charset == null)
             throw new NullPointerException("charset");
         checkBounds(bytes, offset, length);
@@ -574,7 +575,7 @@ public final class String
      *
      * @since  JDK1.1
      */
-    public String(byte bytes[], int offset, int length) {
+    public String(byte bytes[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int length) {
         checkBounds(bytes, offset, length);
         char[] v  = StringCoding.decode(bytes, offset, length);
         this.offset = 0;
@@ -656,7 +657,7 @@ public final class String
      * @return  the length of the sequence of characters represented by this
      *          object.
      */
-    public int length() {
+    public /*@IndexOrHigh("this")*/ int length() {
         return count;
     }
 
@@ -690,7 +691,7 @@ public final class String
      *             argument is negative or not less than the length of this
      *             string.
      */
-    public char charAt(int index) {
+    public char charAt(/*@IndexFor("this")*/ int index) {
         if ((index < 0) || (index >= count)) {
             throw new StringIndexOutOfBoundsException(index);
         }
@@ -719,7 +720,7 @@ public final class String
      *             string.
      * @since      1.5
      */
-    public int codePointAt(int index) {
+    public int codePointAt(/*@IndexFor("this")*/ int index) {
         if ((index < 0) || (index >= count)) {
             throw new StringIndexOutOfBoundsException(index);
         }
@@ -748,7 +749,7 @@ public final class String
      *            of this string.
      * @since     1.5
      */
-    public int codePointBefore(int index) {
+    public int codePointBefore(/*@IndexFor("this")*/ int index) {
         int i = index - 1;
         if ((i < 0) || (i >= count)) {
             throw new StringIndexOutOfBoundsException(index);
@@ -777,7 +778,7 @@ public final class String
      * <code>beginIndex</code> is larger than <code>endIndex</code>.
      * @since  1.5
      */
-    public int codePointCount(int beginIndex, int endIndex) {
+    public int codePointCount(@/*@IndexFor("this")*/ int beginIndex, /*@IndexOrHigh("this")*/ int endIndex) {
         if (beginIndex < 0 || endIndex > count || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException();
         }
@@ -804,7 +805,7 @@ public final class String
      *   of <code>codePointOffset</code> code points.
      * @since 1.5
      */
-    public int offsetByCodePoints(int index, int codePointOffset) {
+    public int offsetByCodePoints(/*@IndexFor("this")*/ int index, int codePointOffset) {
         if (index < 0 || index > count) {
             throw new IndexOutOfBoundsException();
         }
@@ -850,7 +851,7 @@ public final class String
      *            <li><code>dstBegin+(srcEnd-srcBegin)</code> is larger than
      *                <code>dst.length</code></ul>
      */
-    public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
+    public void getChars(/*@IndexFor("this")*/ int srcBegin, /*@IndexOrHigh("this")*/ int srcEnd, char dst[], /*@IndexFor("#3")*/ int dstBegin) {
         if (srcBegin < 0) {
             throw new StringIndexOutOfBoundsException(srcBegin);
         }
@@ -908,7 +909,7 @@ public final class String
      *          </ul>
      */
     @Deprecated
-    public void getBytes(int srcBegin, int srcEnd, byte dst[], int dstBegin) {
+    public void getBytes(/*@IndexFor("this")*/ int srcBegin, /*@IndexOrHigh("#1")*/ int srcEnd, byte dst[], /*@IndexFor("#3")*/ int dstBegin) {
         if (srcBegin < 0) {
             throw new StringIndexOutOfBoundsException(srcBegin);
         }
@@ -1211,6 +1212,7 @@ public final class String
      * Note that this Comparator does <em>not</em> take locale into account,
      * and will result in an unsatisfactory ordering for certain locales.
      * The java.text package provides <em>Collators</em> to allow
+import org.checkerframework.checker.index.qual.*;
      * locale-sensitive ordering.
      *
      * @see     java.text.Collator#compare(String, String)
@@ -1258,6 +1260,7 @@ public final class String
      * Note that this method does <em>not</em> take locale into account,
      * and will result in an unsatisfactory ordering for certain locales.
      * The java.text package provides <em>collators</em> to allow
+import org.checkerframework.checker.index.qual.*;
      * locale-sensitive ordering.
      *
      * @param   str   the <code>String</code> to be compared.
@@ -1302,8 +1305,8 @@ public final class String
      *          exactly matches the specified subregion of the string argument;
      *          <code>false</code> otherwise.
      */
-    public boolean regionMatches(int toffset, String other, int ooffset,
-                                 int len) {
+    public boolean regionMatches(/*@IndexFor("this")*/ int toffset, String other, /*@IndexFor("#2")*/ int ooffset,
+                                 /*@IndexOrHigh({"this","#2"})*/ int len) {
         char ta[] = value;
         int to = offset + toffset;
         char pa[] = other.value;
@@ -1371,8 +1374,8 @@ public final class String
      *          or case insensitive depends on the <code>ignoreCase</code>
      *          argument.
      */
-    public boolean regionMatches(boolean ignoreCase, int toffset,
-                           String other, int ooffset, int len) {
+    public boolean regionMatches(boolean ignoreCase, /*@IndexFor("this")*/ int toffset,
+                           String other, /*@IndexFor("#2")*/ int ooffset, /*@IndexOrHigh({"this","#2"})*/ int len) {
         char ta[] = value;
         int to = offset + toffset;
         char pa[] = other.value;
@@ -1428,7 +1431,7 @@ public final class String
      *          this.substring(toffset).startsWith(prefix)
      *          </pre>
      */
-    public boolean startsWith(String prefix, int toffset) {
+    public boolean startsWith(String prefix, /*@IndexFor("this")*/ int toffset) {
         char ta[] = value;
         int to = offset + toffset;
         char pa[] = prefix.value;
@@ -1530,7 +1533,7 @@ public final class String
      *          character sequence represented by this object, or
      *          <code>-1</code> if the character does not occur.
      */
-    public int indexOf(int ch) {
+    public /*@GTENegativeOne*/ int indexOf(int ch) {
         return indexOf(ch, 0);
     }
 
@@ -1573,7 +1576,7 @@ public final class String
      *          than or equal to <code>fromIndex</code>, or <code>-1</code>
      *          if the character does not occur.
      */
-    public int indexOf(int ch, int fromIndex) {
+    public /*@GTENegativeOne*/ int indexOf(int ch, /*@IndexFor("this")*/ int fromIndex) {
         if (fromIndex < 0) {
             fromIndex = 0;
         } else if (fromIndex >= count) {
@@ -1640,7 +1643,7 @@ public final class String
      *          character sequence represented by this object, or
      *          <code>-1</code> if the character does not occur.
      */
-    public int lastIndexOf(int ch) {
+    public /*@GTENegativeOne*/ int lastIndexOf(int ch) {
         return lastIndexOf(ch, count - 1);
     }
 
@@ -1678,7 +1681,7 @@ public final class String
      *          than or equal to <code>fromIndex</code>, or <code>-1</code>
      *          if the character does not occur before that point.
      */
-    public int lastIndexOf(int ch, int fromIndex) {
+    public /*@GTENegativeOne*/ int lastIndexOf(int ch, /*@IndexFor("this")*/ int fromIndex) {
         if (ch < Character.MIN_SUPPLEMENTARY_CODE_POINT) {
             // handle most cases here (ch is a BMP code point or a
             // negative value (invalid code point))
@@ -1729,7 +1732,7 @@ public final class String
      * @return  the index of the first occurrence of the specified substring,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int indexOf(String str) {
+    public /*@GTENegativeOne*/ int indexOf(String str) {
         return indexOf(str, 0);
     }
 
@@ -1749,7 +1752,7 @@ public final class String
      *          starting at the specified index,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int indexOf(String str, int fromIndex) {
+    public /*@GTENegativeOne*/ int indexOf(String str, /*@IndexFor("this")*/ int fromIndex) {
         return indexOf(value, offset, count,
                        str.value, str.offset, str.count, fromIndex);
     }
@@ -1820,7 +1823,7 @@ public final class String
      * @return  the index of the last occurrence of the specified substring,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int lastIndexOf(String str) {
+    public /*@GTENegativeOne*/ int lastIndexOf(String str) {
         return lastIndexOf(str, count);
     }
 
@@ -1840,7 +1843,7 @@ public final class String
      *          searching backward from the specified index,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int lastIndexOf(String str, int fromIndex) {
+    public /*@GTENegativeOne*/ int lastIndexOf(String str, /*@IndexFor("this")*/ int fromIndex) {
         return lastIndexOf(value, offset, count,
                            str.value, str.offset, str.count, fromIndex);
     }
@@ -1921,7 +1924,7 @@ public final class String
      *             <code>beginIndex</code> is negative or larger than the
      *             length of this <code>String</code> object.
      */
-    public String substring(int beginIndex) {
+    public String substring(/*@IndexFor("this")*/ int beginIndex) {
         return substring(beginIndex, count);
     }
 
@@ -1947,7 +1950,7 @@ public final class String
      *             <code>beginIndex</code> is larger than
      *             <code>endIndex</code>.
      */
-    public String substring(int beginIndex, int endIndex) {
+    public String substring(/*@IndexFor("this")*/ int beginIndex, /*@IndexOrHigh("this")*/ int endIndex) {
         if (beginIndex < 0) {
             throw new StringIndexOutOfBoundsException(beginIndex);
         }
@@ -1989,7 +1992,7 @@ public final class String
      * @since 1.4
      * @spec JSR-51
      */
-    public CharSequence subSequence(int beginIndex, int endIndex) {
+    public CharSequence subSequence(/*@IndexFor("this")*/ int beginIndex, /*@IndexOrHigh("this")*/ int endIndex) {
         return this.substring(beginIndex, endIndex);
     }
 
@@ -2912,7 +2915,7 @@ public final class String
      * @return  a newly allocated string representing the same sequence of
      *          characters contained in the character array argument.
      */
-    public static String valueOf(char data[]) {
+    public static /*@PolyIndex*/ String valueOf(char /*@PolyIndex*/ [] data) {
         return new String(data);
     }
 
@@ -2937,7 +2940,7 @@ public final class String
      *          <code>offset+count</code> is larger than
      *          <code>data.length</code>.
      */
-    public static String valueOf(char data[], int offset, int count) {
+    public static String valueOf(char data[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int count) {
         return new String(data, offset, count);
     }
 
@@ -2951,7 +2954,7 @@ public final class String
      * @return  a <code>String</code> that contains the characters of the
      *          specified subarray of the character array.
      */
-    public static String copyValueOf(char data[], int offset, int count) {
+    public static String copyValueOf(char data[], /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int count) {
         // All public String constructors now copy the data.
         return new String(data, offset, count);
     }
@@ -2964,7 +2967,7 @@ public final class String
      * @return  a <code>String</code> that contains the characters of the
      *          character array.
      */
-    public static String copyValueOf(char data[]) {
+    public static /*@PolyIndex*/ String copyValueOf(char /*@PolyIndex*/ [] data) {
         return copyValueOf(data, 0, data.length);
     }
 
@@ -2976,7 +2979,7 @@ public final class String
      *          <code>"true"</code> is returned; otherwise, a string equal to
      *          <code>"false"</code> is returned.
      */
-    public static String valueOf(boolean b) {
+    public static /*@MinLen(4)*/ String valueOf(boolean b) {
         return b ? "true" : "false";
     }
 
@@ -2988,7 +2991,7 @@ public final class String
      * @return  a string of length <code>1</code> containing
      *          as its single character the argument <code>c</code>.
      */
-    public static String valueOf(char c) {
+    public static /*@MinLen(1)*/ String valueOf(char c) {
         char data[] = {c};
         return new String(0, 1, data);
     }
@@ -3003,7 +3006,7 @@ public final class String
      * @return  a string representation of the <code>int</code> argument.
      * @see     java.lang.Integer#toString(int, int)
      */
-    public static String valueOf(int i) {
+    public static /*@MinLen(1)*/ String valueOf(int i) {
         return Integer.toString(i);
     }
 
@@ -3017,7 +3020,7 @@ public final class String
      * @return  a string representation of the <code>long</code> argument.
      * @see     java.lang.Long#toString(long)
      */
-    public static String valueOf(long l) {
+    public static /*@MinLen(1)*/ String valueOf(long l) {
         return Long.toString(l);
     }
 
@@ -3031,7 +3034,7 @@ public final class String
      * @return  a string representation of the <code>float</code> argument.
      * @see     java.lang.Float#toString(float)
      */
-    public static String valueOf(float f) {
+    public static /*@MinLen(1)*/ String valueOf(float f) {
         return Float.toString(f);
     }
 
@@ -3045,7 +3048,7 @@ public final class String
      * @return  a  string representation of the <code>double</code> argument.
      * @see     java.lang.Double#toString(double)
      */
-    public static String valueOf(double d) {
+    public static /*@MinLen(1)*/ String valueOf(double d) {
         return Double.toString(d);
     }
 

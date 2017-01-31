@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -93,7 +94,7 @@ public final class StringBuilder
      * @throws     NegativeArraySizeException  if the <code>capacity</code>
      *               argument is less than <code>0</code>.
      */
-    public StringBuilder(int capacity) {
+    public StringBuilder(/*@NonNegative*/ int capacity) {
         super(capacity);
     }
 
@@ -200,7 +201,7 @@ public final class StringBuilder
     /**
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder append(char[] str, int offset, int len) {
+    public StringBuilder append(char[] str, /*@IndexFor("#1")*/ int offset, /*@IndexOrHigh("#1")*/ int len) {
         super.append(str, offset, len);
         return this;
     }
@@ -270,8 +271,8 @@ public final class StringBuilder
     /**
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public StringBuilder insert(int index, char[] str, int offset,
-                                int len)
+    public StringBuilder insert(int index, char[] str, /*@IndexFor("#2")*/ int offset,
+                                /*@IndexOrHigh("#2")*/ int len)
     {
         super.insert(index, str, offset, len);
         return this;

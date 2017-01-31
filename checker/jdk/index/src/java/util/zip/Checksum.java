@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * An interface representing a data checksum.

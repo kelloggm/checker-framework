@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * ObjectOutput extends the DataOutput interface to include writing of objects.
@@ -71,7 +72,7 @@ public interface ObjectOutput extends DataOutput, AutoCloseable {
      * @param len       the number of bytes that are written
      * @exception IOException If an I/O error has occurred.
      */
-    public void write(byte b[], int off, int len) throws IOException;
+    public void write(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException;
 
     /**
      * Flushes the stream. This will write any buffered

@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * ObjectInput extends the DataInput interface to include the reading of
@@ -67,7 +68,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      *          returned when the end of the stream is reached.
      * @exception IOException If an I/O error has occurred.
      */
-    public int read(byte b[]) throws IOException;
+    public /*@GTENegativeOne*/ int read(byte b[]) throws IOException;
 
     /**
      * Reads into an array of bytes.  This method will
@@ -79,7 +80,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      *          returned when the end of the stream is reached.
      * @exception IOException If an I/O error has occurred.
      */
-    public int read(byte b[], int off, int len) throws IOException;
+    public /*@GTENegativeOne*/ int read(byte b[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) throws IOException;
 
     /**
      * Skips n bytes of input.
@@ -87,7 +88,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      * @return  the actual number of bytes skipped.
      * @exception IOException If an I/O error has occurred.
      */
-    public long skip(long n) throws IOException;
+    public /*@NonNegative*/ long skip(/*@NonNegative*/ long n) throws IOException;
 
     /**
      * Returns the number of bytes that can be read
@@ -95,7 +96,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      * @return the number of available bytes.
      * @exception IOException If an I/O error has occurred.
      */
-    public int available() throws IOException;
+    public /*@NonNegative*/ int available() throws IOException;
 
     /**
      * Closes the input stream. Must be called

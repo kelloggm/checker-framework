@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 import java.io.Closeable;
 import java.io.InputStream;
@@ -254,6 +255,7 @@ class ZipFile implements ZipConstants, Closeable {
      *        The {@linkplain java.nio.charset.Charset charset} to be
      *        used to decode the ZIP entry name and comment (ignored if
      *        the <a href="package-summary.html#lang_encoding"> language
+import org.checkerframework.checker.index.qual.*;
      *        encoding bit</a> of the ZIP entry's general purpose bit
      *        flag is set).
      *

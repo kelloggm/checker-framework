@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -69,7 +70,7 @@ import sun.reflect.ReflectionFactory;
 public class ObjectStreamClass implements Serializable {
 
     /** serialPersistentFields value indicating no serializable fields */
-    public static final ObjectStreamField[] NO_FIELDS =
+    public static final ObjectStreamField /*@MinLen(1)*/ [] NO_FIELDS =
         new ObjectStreamField[0];
 
     private static final long serialVersionUID = -6120832682080437368L;
@@ -1350,6 +1351,7 @@ public class ObjectStreamClass implements Serializable {
             if ((mods & Modifier.PRIVATE) != 0 ||
                 ((mods & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0 &&
                  !packageEquals(cl, initCl)))
+import org.checkerframework.checker.index.qual.*;
             {
                 return null;
             }
@@ -1395,6 +1397,7 @@ public class ObjectStreamClass implements Serializable {
             return (cl == defCl) ? meth : null;
         } else {
             return packageEquals(cl, defCl) ? meth : null;
+import org.checkerframework.checker.index.qual.*;
         }
     }
 
@@ -1421,15 +1424,18 @@ public class ObjectStreamClass implements Serializable {
 
     /**
      * Returns true if classes are defined in the same runtime package, false
+import org.checkerframework.checker.index.qual.*;
      * otherwise.
      */
     private static boolean packageEquals(Class<?> cl1, Class<?> cl2) {
+import org.checkerframework.checker.index.qual.*;
         return (cl1.getClassLoader() == cl2.getClassLoader() &&
                 getPackageName(cl1).equals(getPackageName(cl2)));
     }
 
     /**
      * Returns package name of given class.
+import org.checkerframework.checker.index.qual.*;
      */
     private static String getPackageName(Class<?> cl) {
         String s = cl.getName();
@@ -1443,6 +1449,7 @@ public class ObjectStreamClass implements Serializable {
 
     /**
      * Compares class names for equality, ignoring package names.  Returns true
+import org.checkerframework.checker.index.qual.*;
      * if class names equal, false otherwise.
      */
     private static boolean classNamesEqual(String name1, String name2) {

@@ -24,6 +24,7 @@
  */
 
 package java.util.zip;
+import org.checkerframework.checker.index.qual.*;
 
 import java.util.Date;
 
@@ -127,6 +128,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @exception IllegalArgumentException if the specified size is less
      *            than 0, is greater than 0xFFFFFFFF when
      *            <a href="package-summary.html#zip64">ZIP64 format</a> is not supported,
+import org.checkerframework.checker.index.qual.*;
      *            or is less than 0 when ZIP64 is supported
      * @see #getSize()
      */

@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 import java.net.URI;
 import java.net.URL;
@@ -75,6 +76,7 @@ import sun.security.action.GetPropertyAction;
  * denotes.  A relative pathname, in contrast, must be interpreted in terms of
  * information taken from some other pathname.  By default the classes in the
  * <code>java.io</code> package always resolve relative pathnames against the
+import org.checkerframework.checker.index.qual.*;
  * current user directory.  This directory is named by the system property
  * <code>user.dir</code>, and is typically the directory in which the Java
  * virtual machine was invoked.
@@ -130,9 +132,12 @@ import sun.security.action.GetPropertyAction;
  * will never change.
  *
  * <h4>Interoperability with {@code java.nio.file} package</h4>
+import org.checkerframework.checker.index.qual.*;
  *
  * <p> The <a href="../../java/nio/file/package-summary.html">{@code java.nio.file}</a>
+import org.checkerframework.checker.index.qual.*;
  * package defines interfaces and classes for the Java virtual machine to access
+import org.checkerframework.checker.index.qual.*;
  * files, file attributes, and file systems. This API may be used to overcome
  * many of the limitations of the {@code java.io.File} class.
  * The {@link #toPath toPath} method may be used to obtain a {@link
@@ -193,7 +198,7 @@ public class File
      * string for convenience.  This string contains a single character, namely
      * <code>{@link #separatorChar}</code>.
      */
-    public static final String separator = "" + separatorChar;
+    public static final /*@MinLen(1)*/ String separator = "" + separatorChar;
 
     /**
      * The system-dependent path-separator character.  This field is
@@ -212,7 +217,7 @@ public class File
      * for convenience.  This string contains a single character, namely
      * <code>{@link #pathSeparatorChar}</code>.
      */
-    public static final String pathSeparator = "" + pathSeparatorChar;
+    public static final /*@MinLen()*/ String pathSeparator = "" + pathSeparatorChar;
 
 
     /* -- Constructors -- */
@@ -904,7 +909,7 @@ public class File
      *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
      *          method denies read access to the file
      */
-    public long length() {
+    public /*@NonNegative*/ long length() {
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkRead(path);
@@ -1676,7 +1681,7 @@ public class File
      *
      * @since  1.6
      */
-    public long getTotalSpace() {
+    public /*@NonNegative*/ long getTotalSpace() {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));
@@ -1711,7 +1716,7 @@ public class File
      *
      * @since  1.6
      */
-    public long getFreeSpace() {
+    public /*@NonNegative*/ long getFreeSpace() {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));
@@ -1749,7 +1754,7 @@ public class File
      *
      * @since  1.6
      */
-    public long getUsableSpace() {
+    public /*@NonNegative*/ long getUsableSpace() {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));

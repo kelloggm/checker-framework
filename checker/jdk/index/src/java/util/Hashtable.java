@@ -24,6 +24,7 @@
  */
 
 package java.util;
+import org.checkerframework.checker.index.qual.*;
 import java.io.*;
 
 /**
@@ -172,7 +173,7 @@ public class Hashtable<K,V>
      * @exception  IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
-    public Hashtable(int initialCapacity, float loadFactor) {
+    public Hashtable(/*@NonNegative*/ int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: "+
                                                initialCapacity);
@@ -194,7 +195,7 @@ public class Hashtable<K,V>
      * @exception IllegalArgumentException if the initial capacity is less
      *              than zero.
      */
-    public Hashtable(int initialCapacity) {
+    public Hashtable(/*@NonNegative*/ int initialCapacity) {
         this(initialCapacity, 0.75f);
     }
 
@@ -225,7 +226,7 @@ public class Hashtable<K,V>
      *
      * @return  the number of keys in this hashtable.
      */
-    public synchronized int size() {
+    public synchronized /*@NonNegative*/ int size() {
         return count;
     }
 

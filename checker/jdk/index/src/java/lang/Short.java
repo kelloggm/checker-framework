@@ -24,6 +24,7 @@
  */
 
 package java.lang;
+import org.checkerframework.checker.index.qual.*;
 
 /**
  * The {@code Short} class wraps a value of primitive type {@code
@@ -52,7 +53,7 @@ public final class Short extends Number implements Comparable<Short> {
      * A constant holding the maximum value a {@code short} can
      * have, 2<sup>15</sup>-1.
      */
-    public static final short   MAX_VALUE = 32767;
+    public static final /*@Positive*/ short   MAX_VALUE = 32767;
 
     /**
      * The {@code Class} instance representing the primitive type
@@ -226,7 +227,7 @@ public final class Short extends Number implements Comparable<Short> {
      * @return a {@code Short} instance representing {@code s}.
      * @since  1.5
      */
-    public static Short valueOf(short s) {
+    public static /*@PolyIndex*/ Short valueOf(/*@PolyIndex*/ short s) {
         final int offset = 128;
         int sAsInt = s;
         if (sAsInt >= -128 && sAsInt <= 127) { // must cache
@@ -299,7 +300,7 @@ public final class Short extends Number implements Comparable<Short> {
      * @param value     the value to be represented by the
      *                  {@code Short}.
      */
-    public Short(short value) {
+    public /*@PolyIndex*/ Short(/*@PolyIndex*/ short value) {
         this.value = value;
     }
 
@@ -449,7 +450,7 @@ public final class Short extends Number implements Comparable<Short> {
      * complement binary form.
      * @since 1.5
      */
-    public static final int SIZE = 16;
+    public static final /*@Positive*/ int SIZE = 16;
 
     /**
      * Returns the value obtained by reversing the order of the bytes in the

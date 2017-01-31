@@ -24,6 +24,7 @@
  */
 
 package java.io;
+import org.checkerframework.checker.index.qual.*;
 
 
 /**
@@ -62,7 +63,7 @@ public class StringWriter extends Writer {
      * @throws IllegalArgumentException
      *         If <tt>initialSize</tt> is negative
      */
-    public StringWriter(int initialSize) {
+    public StringWriter(/*@NonNegative*/ int initialSize) {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
@@ -84,7 +85,7 @@ public class StringWriter extends Writer {
      * @param  off   Offset from which to start writing characters
      * @param  len   Number of characters to write
      */
-    public void write(char cbuf[], int off, int len) {
+    public void write(char cbuf[], /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len) {
         if ((off < 0) || (off > cbuf.length) || (len < 0) ||
             ((off + len) > cbuf.length) || ((off + len) < 0)) {
             throw new IndexOutOfBoundsException();
@@ -108,7 +109,7 @@ public class StringWriter extends Writer {
      * @param  off  Offset from which to start writing characters
      * @param  len  Number of characters to write
      */
-    public void write(String str, int off, int len)  {
+    public void write(String str, /*@IndexFor("#1")*/ int off, /*@IndexOrHigh("#1")*/ int len)  {
         buf.append(str.substring(off, off + len));
     }
 
@@ -176,7 +177,7 @@ public class StringWriter extends Writer {
      *
      * @since  1.5
      */
-    public StringWriter append(CharSequence csq, int start, int end) {
+    public StringWriter append(CharSequence csq, /*@IndexFor("#1")*/ int start, /*@IndexOrHigh("#1")*/ int end) {
         CharSequence cs = (csq == null ? "null" : csq);
         write(cs.subSequence(start, end).toString());
         return this;
