@@ -2358,7 +2358,6 @@ public abstract class ResourceBundle {
                         }
                     } else if (script.length() > 0 && region.length() == 0) {
                         // Supply region(country) for users who still package Chinese
-import org.checkerframework.checker.index.qual.*;
                         // bundles using old convension.
                         if (script.equals("Hans")) {
                             region = "CN";
@@ -2666,7 +2665,7 @@ import org.checkerframework.checker.index.qual.*;
          *        if <code>baseName</code> or <code>locale</code> is
          *        <code>null</code>
          */
-        public long getTimeToLive(String baseName, Locale locale) {
+        public /*@NonNegative*/ long getTimeToLive(String baseName, Locale locale) {
             if (baseName == null || locale == null) {
                 throw new NullPointerException();
             }

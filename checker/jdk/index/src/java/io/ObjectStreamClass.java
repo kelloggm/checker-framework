@@ -1351,7 +1351,6 @@ public class ObjectStreamClass implements Serializable {
             if ((mods & Modifier.PRIVATE) != 0 ||
                 ((mods & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0 &&
                  !packageEquals(cl, initCl)))
-import org.checkerframework.checker.index.qual.*;
             {
                 return null;
             }
@@ -1397,7 +1396,6 @@ import org.checkerframework.checker.index.qual.*;
             return (cl == defCl) ? meth : null;
         } else {
             return packageEquals(cl, defCl) ? meth : null;
-import org.checkerframework.checker.index.qual.*;
         }
     }
 
@@ -1424,18 +1422,15 @@ import org.checkerframework.checker.index.qual.*;
 
     /**
      * Returns true if classes are defined in the same runtime package, false
-import org.checkerframework.checker.index.qual.*;
      * otherwise.
      */
     private static boolean packageEquals(Class<?> cl1, Class<?> cl2) {
-import org.checkerframework.checker.index.qual.*;
         return (cl1.getClassLoader() == cl2.getClassLoader() &&
                 getPackageName(cl1).equals(getPackageName(cl2)));
     }
 
     /**
      * Returns package name of given class.
-import org.checkerframework.checker.index.qual.*;
      */
     private static String getPackageName(Class<?> cl) {
         String s = cl.getName();
@@ -1449,7 +1444,6 @@ import org.checkerframework.checker.index.qual.*;
 
     /**
      * Compares class names for equality, ignoring package names.  Returns true
-import org.checkerframework.checker.index.qual.*;
      * if class names equal, false otherwise.
      */
     private static boolean classNamesEqual(String name1, String name2) {

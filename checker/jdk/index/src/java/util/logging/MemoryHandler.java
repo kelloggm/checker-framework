@@ -139,7 +139,7 @@ public class MemoryHandler extends Handler {
      *
      * @throws IllegalArgumentException if size is <= 0
      */
-    public MemoryHandler(Handler target, int size, Level pushLevel) {
+    public MemoryHandler(Handler target, /*@Positive*/ int size, Level pushLevel) {
         if (target == null || pushLevel == null) {
             throw new NullPointerException();
         }

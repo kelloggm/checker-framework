@@ -311,7 +311,7 @@ public class FileHandler extends StreamHandler {
      * @exception IllegalArgumentException if limit < 0, or count < 1.
      * @exception  IllegalArgumentException if pattern is an empty string
      */
-    public FileHandler(String pattern, int limit, int count)
+    public FileHandler(String pattern, /*@NonNegative*/ int limit, /*@Positive*/ int count)
                                         throws IOException, SecurityException {
         if (limit < 0 || count < 1 || pattern.length() < 1) {
             throw new IllegalArgumentException();
@@ -350,7 +350,7 @@ public class FileHandler extends StreamHandler {
      * @exception  IllegalArgumentException if pattern is an empty string
      *
      */
-    public FileHandler(String pattern, int limit, int count, boolean append)
+    public FileHandler(String pattern, /*@NonNegative*/ int limit, /*@Positive*/ int count, boolean append)
                                         throws IOException, SecurityException {
         if (limit < 0 || count < 1 || pattern.length() < 1) {
             throw new IllegalArgumentException();

@@ -73,7 +73,6 @@ import sun.security.util.SecurityConstants;
  *    <DT> readlink
  *    <DD> read link permission. Allows the target of a
  *         <a href="../nio/file/package-summary.html#links">symbolic link</a>
-import org.checkerframework.checker.index.qual.*;
  *         to be read by invoking the {@link java.nio.file.Files#readSymbolicLink
  *         readSymbolicLink } method.
  * </DL>
@@ -299,7 +298,6 @@ public final class FilePermission extends Permission implements Serializable {
      */
 
     // package private for use by the FilePermissionCollection add method
-import org.checkerframework.checker.index.qual.*;
     FilePermission(String path, int mask)
     {
         super(path);
