@@ -28,6 +28,7 @@ import org.checkerframework.common.value.qual.StringVal;
 import org.checkerframework.dataflow.analysis.FlowExpressions;
 import org.checkerframework.dataflow.analysis.FlowExpressions.FieldAccess;
 import org.checkerframework.dataflow.analysis.FlowExpressions.LocalVariable;
+import org.checkerframework.framework.flow.CFAbstractStore;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -334,19 +335,26 @@ public class MinLenAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // ignore parse errors.
             return 0;
         }
-        AnnotationMirror minLenAnno;
-        CFValue value = getStoreBefore(tree).getValue(array);
-        if (value != null) {
-            minLenAnno = AnnotationUtils.getAnnotationByClass(value.getAnnotations(), MinLen.class);
-        } else if (array instanceof LocalVariable) {
-            minLenAnno =
-                    getAnnotatedType(((LocalVariable) array).getElement())
-                            .getAnnotationInHierarchy(MIN_LEN_0);
-        } else if (array instanceof FieldAccess) {
-            minLenAnno =
-                    getAnnotatedType(((FieldAccess) array).getField())
-                            .getAnnotationInHierarchy(MIN_LEN_0);
-        } else {
+
+        AnnotationMirror minLenAnno = null;
+        if (CFAbstractStore.canInsertReceiver(array)) {
+            CFValue value = getStoreBefore(tree).getValue(array);
+            if (value != null) {
+                minLenAnno =
+                        AnnotationUtils.getAnnotationByClass(value.getAnnotations(), MinLen.class);
+            }
+        }
+        if (minLenAnno == null) {
+            if (array instanceof LocalVariable) {
+                Element ele = ((LocalVariable) array).getElement();
+                minLenAnno = getAnnotatedType(ele).getAnnotationInHierarchy(MIN_LEN_0);
+            } else if (array instanceof FieldAccess) {
+                Element ele = ((FieldAccess) array).getField();
+                minLenAnno = getAnnotatedType(ele).getAnnotationInHierarchy(MIN_LEN_0);
+            }
+        }
+        if (minLenAnno == null) {
+            // Could not find a more precise type, so return 0;
             return 0;
         }
 

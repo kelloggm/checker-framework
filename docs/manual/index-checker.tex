@@ -1,9 +1,14 @@
 %\htmlhr
-\chapter{Index Checker for array bounds\label{index-checker}}
+
+% Reinstate when lists are supported:
+% \chapter{Index Checker for sequence bounds (arrays, strings, lists)\label{index-checker}}
+\chapter{Index Checker for sequence bounds (arrays and strings)\label{index-checker}}
 
 The Index Checker warns about potentially out-of-bounds accesses to sequence
-data structures, such as arrays, lists, and strings.
-(Note:  Support for lists is not yet implemented.)
+data structures, such as arrays
+% , lists,
+and strings.
+>>>>>>> 15c85eab6a95994155e8a8e17149b072553bc1f6
 
 The Index Checker prevents \<IndexOutOfBoundsException>s that result from
 an index expression that might be negative or might be equal to or larger
@@ -60,7 +65,17 @@ are some annotations that give multiple types of information:
 
 \begin{description}
 \item[\refqualclasswithparams{checker/index/qual}{IndexFor}{String[] names}]
-  The value is a valid index for the named arrays.  For example, a variable
+  The value is a valid index for the named arrays.  For example, the
+  \sunjavadoc{java/lang/String.html\#charAt-int-}{String.charAt(int)}
+  method is declared as
+
+  \begin{Verbatim}
+  class String {
+    char charAt(@IndexFor("this") index) { ... }
+  }
+  \end{Verbatim}
+
+  More generally, a variable
   declared as \<@IndexFor("someArray") int i> has type
   \<@IndexFor("someArray") int> and its run-time value is guaranteed to be
   non-negative and less than the length of \<someArray>.  You could also
@@ -75,6 +90,35 @@ are some annotations that give multiple types of information:
    each named array.  This type combines
   \refqualclass{checker/index/qual}{NonNegative} and
   \refqualclass{checker/index/qual}{LTEqLengthOf}.
+
+  For example, the
+  \sunjavadoc{java/util/Arrays.html\#binarySearch-java.lang.Object:A-int-int-java.lang.Object-}{Arrays.binarySearch}
+   method is declared as
+
+  \begin{mysmall}
+  \begin{Verbatim}
+  class Arrays {
+    int binarySearch(Object[] a, @IndexFor("#1") int fromIndex, @IndexOrHigh("#1") int toIndex, Object key)
+  }
+  \end{Verbatim}
+  \end{mysmall}
+
+ \item[\refqualclasswithparams{checker/index/qual}{IndexOrLow}{String[] names}]
+   The value is -1 or is a valid index for
+   each named array.  This type combines
+  \refqualclass{checker/index/qual}{GTENegativeOne} and
+  \refqualclass{checker/index/qual}{LTEqLengthOf}.
+
+  For example, the
+  \sunjavadoc{java/lang/String.html\#indexOf-java.lang.String-}{String.indexOf(String)}
+  method is declared as
+
+  \begin{Verbatim}
+  class String {
+    @IndexOrLow("this") int indexOf(String str) { ... }
+  }
+  \end{Verbatim}
+
 \end{description}
 
 \section{Lower bounds\label{index-lowerbound}}
@@ -132,8 +176,9 @@ or \code{@LTOMLengthOf({''arr''})}.
 \item[\refqualclasswithparams{checker/index/qual}{LTLengthOf}{String[] names}]
   An expression with this type
   has value less than the length of each sequence listed in \<names>.
-  The expression may be used as an index into any of those sequences.
-  For example, an expression of type \code{@LTLengthOf("a") int} can be
+  The expression may be used as an index into any of those sequences,
+  if it is non-negative.
+  For example, an expression of type \code{@LTLengthOf("a") int} might be
   used as an index to \<a>.
   The type \code{@LTLengthOf({"a", "b"})} is a subtype of both
   \code{@LTLengthOf("a")} and \code{@LTLengthOf("b")}.
@@ -149,23 +194,28 @@ or \code{@LTOMLengthOf({''arr''})}.
 
 \item[\refqualclasswithparams{checker/index/qual}{LTOMLengthOf}{String[] names}]
   An expression with this type
-  has value less than one less than the length of each sequence listed in \<names>. This type exists to allow the checker to infer the safety of loops of
+  has value at least 2 less than the length of each sequence listed in \<names>.
+  It may always used as an index for a sequence listed in \<names>, if it is
+  non-negative.
+
+  This type exists to allow the checker to infer the safety of loops of
   the form:
 \begin{Verbatim}
   for (int i = 0; i < array.length - 1; ++i) {
     arr[i] = arr[i+1];
   }
 \end{Verbatim}
-It may always used as an index for a sequence listed in \<names>, but
-should rarely (if ever) be written by the programmer; usually
-\refqualclasswithparams{checker/index/qual}{LTLengthOf}{String[] names}
-should be written instead.
+
+  This annotation should rarely (if ever) be written by the programmer; usually
+  \refqualclasswithparams{checker/index/qual}{LTLengthOf}{String[] names}
+  should be written instead.
   \code{@LTOMLengthOf({"a", "b"})} is a subtype of both
   \code{@LTOMLengthOf("a")} and \code{@LTOMLengthOf("b")}.
-  (``\<LTOM>'' stands for ``Less Than One Minus''.)
+  (``\<LTOM>'' stands for ``Less Than One Minus'', because another way of
+  saying ``at least 2 less than \<a.length>'' is ``less than \<a.length-1>''.)
 
 \item[\refqualclass{checker/index/qual}{UpperBoundUnknown}]
-  There is no information about the value of an expression with this type.
+  There is no information about the upper bound on the value of an expression with this type.
   It may not be used as an index for a sequence, because it might be too high.
   This type is the top type, and should never need to be written by the
   programmer.
@@ -243,7 +293,7 @@ This enables it to verify that all the indexing operations are safe in code
 like the following:
 
 \begin{Verbatim}
-  boolean lessThan(double[] arr1, double @SameLen("arr1") [] arr2) {
+  boolean lessThan(double[] arr1, double @SameLen("#1") [] arr2) {
     for (int i=0; i<arr1.length; i++) {
       if (arr1[i] < arr2[i]) {
         return true;
@@ -261,7 +311,7 @@ When needed, you can specify which sequences have the same length using the foll
 \item[\refqualclasswithparams{checker/index/qual}{SameLen}{String[] names}]
   An expression with this type represents a sequence that has the
   same length as the other sequences named in \<names>. In general,
-  \code{@SameLen} types that have non-intersecting lists of names
+  \code{@SameLen} types that have non-intersecting sets of names
   are \textit{not} subtypes of each other. However, if at least one
   sequence is named by both types, the types are actually the same,
   because all the named sequences must have the same length.

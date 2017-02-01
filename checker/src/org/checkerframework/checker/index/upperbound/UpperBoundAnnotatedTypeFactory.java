@@ -2,7 +2,12 @@ package org.checkerframework.checker.index.upperbound;
 
 import static org.checkerframework.javacutil.AnnotationUtils.getElementValueArray;
 
-import com.sun.source.tree.*;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.UnaryTree;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +22,15 @@ import org.checkerframework.checker.index.lowerbound.LowerBoundAnnotatedTypeFact
 import org.checkerframework.checker.index.lowerbound.LowerBoundChecker;
 import org.checkerframework.checker.index.minlen.MinLenAnnotatedTypeFactory;
 import org.checkerframework.checker.index.minlen.MinLenChecker;
-import org.checkerframework.checker.index.qual.*;
+import org.checkerframework.checker.index.qual.IndexFor;
+import org.checkerframework.checker.index.qual.IndexOrHigh;
+import org.checkerframework.checker.index.qual.IndexOrLow;
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
+import org.checkerframework.checker.index.qual.LTLengthOf;
+import org.checkerframework.checker.index.qual.LTOMLengthOf;
+import org.checkerframework.checker.index.qual.MinLen;
+import org.checkerframework.checker.index.qual.UpperBoundBottom;
+import org.checkerframework.checker.index.qual.UpperBoundUnknown;
 import org.checkerframework.checker.index.samelen.SameLenAnnotatedTypeFactory;
 import org.checkerframework.checker.index.samelen.SameLenChecker;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
@@ -34,8 +47,8 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotationBuilder;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
-import org.checkerframework.framework.util.expressionannotations.ExpressionAnnotationHelper;
-import org.checkerframework.framework.util.expressionannotations.ExpressionAnnotationTreeAnnotator;
+import org.checkerframework.framework.util.dependenttypes.DependentTypesHelper;
+import org.checkerframework.framework.util.dependenttypes.DependentTypesTreeAnnotator;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
 
@@ -56,6 +69,7 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         UNKNOWN = AnnotationUtils.fromClass(elements, UpperBoundUnknown.class);
 
         addAliasedAnnotation(IndexFor.class, createLTLengthOfAnnotation(new String[0]));
+        addAliasedAnnotation(IndexOrLow.class, createLTLengthOfAnnotation(new String[0]));
         addAliasedAnnotation(IndexOrHigh.class, createLTEqLengthOfAnnotation(new String[0]));
 
         imf = new IndexMethodIdentifier(processingEnv);
@@ -120,22 +134,22 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
-    protected ExpressionAnnotationHelper createExpressionAnnotationHelper() {
+    protected DependentTypesHelper createDependentTypesHelper() {
         List<Class<? extends Annotation>> annos = new ArrayList<>();
         annos.add(LTLengthOf.class);
         annos.add(LTEqLengthOf.class);
         annos.add(IndexFor.class);
+        annos.add(IndexOrLow.class);
         annos.add(IndexOrHigh.class);
         annos.add(LTOMLengthOf.class);
-        return new ExpressionAnnotationHelper(this, annos) {
+        return new DependentTypesHelper(this, annos) {
             @Override
-            public TreeAnnotator createExpressionAnnotationTreeAnnotator(
-                    AnnotatedTypeFactory factory) {
-                return new ExpressionAnnotationTreeAnnotator(factory, this) {
+            public TreeAnnotator createDependentTypesTreeAnnotator(AnnotatedTypeFactory factory) {
+                return new DependentTypesTreeAnnotator(factory, this) {
                     @Override
                     public Void visitMemberSelect(MemberSelectTree tree, AnnotatedTypeMirror type) {
                         // UpperBoundTreeAnnotator changes the type of array.length to @LTEL
-                        // ("array"). If the ExpressionAnnotationTreeAnnotator tries to viewpoint
+                        // ("array"). If the DependentTypesTreeAnnotator tries to viewpoint
                         // adapt it based on the declaration of length; it will fail.
                         if (TreeUtils.isArrayLengthAccess(tree)) {
                             return null;
@@ -150,6 +164,11 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror a) {
         if (AnnotationUtils.areSameByClass(a, IndexFor.class)) {
+            List<String> stringList =
+                    AnnotationUtils.getElementValueArray(a, "value", String.class, true);
+            return createLTLengthOfAnnotation(stringList.toArray(new String[0]));
+        }
+        if (AnnotationUtils.areSameByClass(a, IndexOrLow.class)) {
             List<String> stringList =
                     AnnotationUtils.getElementValueArray(a, "value", String.class, true);
             return createLTLengthOfAnnotation(stringList.toArray(new String[0]));
