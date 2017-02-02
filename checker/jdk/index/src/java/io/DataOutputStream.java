@@ -411,7 +411,7 @@ class DataOutputStream extends FilterOutputStream implements DataOutput {
      * @return  the value of the <code>written</code> field.
      * @see     java.io.DataOutputStream#written
      */
-    public final /*@IndexOrHigh("this")*/ int size() {
+    public final int size() {
         return written;
     }
 }

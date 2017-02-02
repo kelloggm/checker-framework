@@ -252,7 +252,7 @@ class CharArrayWriter extends Writer {
      *
      * @return an int representing the current size of the buffer.
      */
-    public /*@IndexOrHigh("this")*/ int size() {
+    public int size() {
         return count;
     }
 
