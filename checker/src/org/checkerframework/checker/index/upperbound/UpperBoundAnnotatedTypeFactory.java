@@ -252,6 +252,10 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return imf.isMathMin(methodTree, processingEnv);
     }
 
+    public boolean isRandomNextInt(Tree methodTree) {
+        return imf.isRandomNextInt(methodTree, processingEnv);
+    }
+
     /**
      * Creates an annotation of the name given with the set of values given.
      *
@@ -549,10 +553,12 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         /**
-         * This exists specifically for Math.min. We need to special case Math.min because it has
-         * unusual semantics: it can be used to combine annotations for the UBC, so it needs to be
-         * special cased. Other methods should not be special-cased here unless there is a
-         * compelling reason to do so.
+         * This exists for Math.min and Random.nextInt. We need to special case Math.min because it
+         * has unusual semantics: it can be used to combine annotations for the UBC, so it needs to
+         * be special cased. Random.nextInt needs to be special cased because the resulting type is
+         * dependent on the argument, but not equal to it, so a polymorhpic qualifier is
+         * insufficient. Other methods should not be special-cased here unless there is a compelling
+         * reason to do so.
          */
         @Override
         public Void visitMethodInvocation(MethodInvocationTree tree, AnnotatedTypeMirror type) {
@@ -564,6 +570,10 @@ public class UpperBoundAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         qualHierarchy.greatestLowerBound(
                                 leftType.getAnnotationInHierarchy(UNKNOWN),
                                 rightType.getAnnotationInHierarchy(UNKNOWN)));
+            }
+            if (isRandomNextInt(tree)) {
+                AnnotatedTypeMirror argType = getAnnotatedType(tree.getArguments().get(0));
+                handleDecrement(argType, type);
             }
             return super.visitMethodInvocation(tree, type);
         }
