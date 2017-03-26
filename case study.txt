@@ -1,0 +1,14 @@
+Case Study for Handling Out of Bounds Exception--
+The tool, called the Index Checker, is not there yet but mentioned in the manual.
+The Index Checker is also not yet released.
+Until it is released,  I have used issue tracker for bug reporting as prescribed in the manual.
+Out OF bounds exception is a runtime exception. It report it during compile time we can implement the following--
+1) We can take the index of an array every time it is initialized and can then check 
+    -- if(x<0 || x>n)
+   { //give error }
+where n is the size of the array.
+2) we can either keep initializing all the values of the array till the specified element. If it is done then no error or if there is some problem then return an error.
+In this way there would no junk values in the array also.
+3) For a 2D array only one parameter is taken to be used as an argument for the function which returns the error.
+  Point 2 has a problem in implementation as for array with large sizes there will be large time taken and problems with the null pointer in the end.
+we can use boolean variables for returning whether it is an error or not.
