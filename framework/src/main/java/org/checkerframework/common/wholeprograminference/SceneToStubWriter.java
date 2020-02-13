@@ -471,9 +471,16 @@ public final class SceneToStubWriter {
             // method. A better type is printed if one is available to improve
             // the readability of the resulting stub file.
             String descriptionString = aMethod.returnType.description.toString();
+            boolean availableReturnType = false;
             if (basetypes.containsKey(descriptionString)) {
-                printWriter.print(basetypes.get(descriptionString));
-            } else {
+                String returnTypeString = basetypes.get(descriptionString).toString();
+                // do not print return types that start with a ?, because that's not valid Java
+                if (!returnTypeString.startsWith("?")) {
+                    availableReturnType = true;
+                    printWriter.print(returnTypeString);
+                }
+            }
+            if (!availableReturnType) {
                 printWriter.print("java.lang.Object");
             }
             printWriter.print(" ");
