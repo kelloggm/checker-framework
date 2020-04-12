@@ -496,6 +496,12 @@ public final class SceneToStubWriter {
      */
     private static void printField(
             AField aField, String fieldName, PrintWriter printWriter, String indentLevel) {
+        if (aField.getTypeMirror() == null) {
+            // aField has no type mirror, so there are no inferred annotations and the field need
+            // not be printed.
+            return;
+        }
+
         printWriter.print(indentLevel);
         printWriter.print(formatAFieldImpl(aField, fieldName, /*enclosing class=*/ null));
         printWriter.println(";");
