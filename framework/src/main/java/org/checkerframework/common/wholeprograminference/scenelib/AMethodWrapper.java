@@ -84,7 +84,7 @@ public class AMethodWrapper {
      */
     public AField addTypeMirrorToParameter(int i, TypeMirror type, Name simpleName) {
         AField param = theMethod.parameters.getVivify(i);
-        assert param.getName().equals(simpleName);
+        assert simpleName.contentEquals(param.getName());
         param.setTypeMirror(type);
         return param;
     }
