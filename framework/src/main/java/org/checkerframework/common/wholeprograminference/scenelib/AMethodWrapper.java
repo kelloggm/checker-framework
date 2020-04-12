@@ -9,6 +9,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.javacutil.BugInCF;
 import scenelib.annotations.el.AField;
 import scenelib.annotations.el.AMethod;
 
