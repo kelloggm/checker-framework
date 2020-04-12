@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.wholeprograminference.SceneToStubWriter;
@@ -89,6 +90,21 @@ public class AClassWrapper {
      */
     public Map<String, AMethodWrapper> getMethods() {
         return ImmutableMap.copyOf(methods);
+    }
+
+    /**
+     * Obtain the given field, which can be further operated on.
+     *
+     * <p>Results are interned.
+     *
+     * @param fieldName the name of the field
+     * @param type the type of the field, which scenelib doesn't track
+     * @return an AField object representing the field
+     */
+    public AField vivifyField(String fieldName, TypeMirror type) {
+        AField field = theClass.fields.getVivify(fieldName);
+        field.setTypeMirror(type);
+        return field;
     }
 
     /**
@@ -205,5 +221,10 @@ public class AClassWrapper {
                     "Tried printing an unprintable class to a stub file during WPI: "
                             + theClass.className);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "AClassWrapper for " + theClass.toString();
     }
 }

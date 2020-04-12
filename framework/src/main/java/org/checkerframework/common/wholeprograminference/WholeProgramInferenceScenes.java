@@ -280,8 +280,7 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
         AClassWrapper clazz = storage.getAClass(className, jaifPath, enclosingClass);
 
         AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(lhs.getTree());
-        AField field = clazz.getFields().get(lhs.getFieldName());
-        field.setTypeMirror(lhsATM.getUnderlyingType());
+        AField field = clazz.vivifyField(lhs.getFieldName(), lhsATM.getUnderlyingType());
         // TODO: For a primitive such as long, this is yielding just @GuardedBy rather than
         // @GuardedBy({}).
         AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(rhs.getTree());
