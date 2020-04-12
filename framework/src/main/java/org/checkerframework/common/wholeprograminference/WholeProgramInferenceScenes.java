@@ -14,7 +14,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.common.wholeprograminference.scenelib.AClassWrapper;
-import org.checkerframework.common.wholeprograminference.scenelib.AFieldWrapper;
 import org.checkerframework.common.wholeprograminference.scenelib.AMethodWrapper;
 import org.checkerframework.dataflow.cfg.node.FieldAccessNode;
 import org.checkerframework.dataflow.cfg.node.LocalVariableNode;
@@ -160,15 +159,11 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
                 continue;
             }
             AnnotatedTypeMirror argATM = atf.getAnnotatedType(treeNode);
-            AFieldWrapper param =
-                    method.vivifyParameter(i, argATM.getUnderlyingType(), ve.getSimpleName());
+            AField param =
+                    method.addTypeMirrorToParameter(
+                            i, argATM.getUnderlyingType(), ve.getSimpleName());
             storage.updateAnnotationSetInScene(
-                    param.getTheField().type,
-                    atf,
-                    jaifPath,
-                    argATM,
-                    paramATM,
-                    TypeUseLocation.PARAMETER);
+                    param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);
         }
     }
 
@@ -195,16 +190,11 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
             AnnotatedTypeMirror paramATM = atf.getAnnotatedType(ve);
 
             AnnotatedTypeMirror argATM = overriddenMethod.getParameterTypes().get(i);
-            AFieldWrapper param =
-                    methodWrapper.vivifyParameter(
+            AField param =
+                    methodWrapper.addTypeMirrorToParameter(
                             i, argATM.getUnderlyingType(), ve.getSimpleName());
             storage.updateAnnotationSetInScene(
-                    param.getTheField().type,
-                    atf,
-                    jaifPath,
-                    argATM,
-                    paramATM,
-                    TypeUseLocation.PARAMETER);
+                    param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);
         }
 
         AnnotatedDeclaredType argADT = overriddenMethod.getReceiverType();
@@ -253,15 +243,11 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
                 AnnotatedTypeMirror paramATM = atf.getAnnotatedType(vt);
                 AnnotatedTypeMirror argATM = atf.getAnnotatedType(treeNode);
                 VariableElement ve = TreeUtils.elementFromDeclaration(vt);
-                AFieldWrapper param =
-                        method.vivifyParameter(i, argATM.getUnderlyingType(), ve.getSimpleName());
+                AField param =
+                        method.addTypeMirrorToParameter(
+                                i, argATM.getUnderlyingType(), ve.getSimpleName());
                 storage.updateAnnotationSetInScene(
-                        param.getTheField().type,
-                        atf,
-                        jaifPath,
-                        argATM,
-                        paramATM,
-                        TypeUseLocation.PARAMETER);
+                        param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);
                 break;
             }
         }
@@ -294,12 +280,13 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
         AClassWrapper clazz = storage.getAClass(className, jaifPath, enclosingClass);
 
         AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(lhs.getTree());
-        AFieldWrapper field = clazz.vivifyField(lhs.getFieldName(), lhsATM.getUnderlyingType());
+        AField field = clazz.getFields().get(lhs.getFieldName());
+        field.setTypeMirror(lhsATM.getUnderlyingType());
         // TODO: For a primitive such as long, this is yielding just @GuardedBy rather than
         // @GuardedBy({}).
         AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(rhs.getTree());
         storage.updateAnnotationSetInScene(
-                field.getTheField().type, atf, jaifPath, rhsATM, lhsATM, TypeUseLocation.FIELD);
+                field.type, atf, jaifPath, rhsATM, lhsATM, TypeUseLocation.FIELD);
     }
 
     /**

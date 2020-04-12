@@ -11,13 +11,13 @@ import java.util.Map;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.wholeprograminference.SceneToStubWriter;
 import org.checkerframework.javacutil.BugInCF;
 import scenelib.annotations.Annotation;
 import scenelib.annotations.el.AClass;
+import scenelib.annotations.el.AField;
 import scenelib.annotations.util.JVMNames;
 
 /**
@@ -42,12 +42,6 @@ public class AClassWrapper {
      * objects. Mirrors the "methods" field of AClass.
      */
     private final Map<String, AMethodWrapper> methods = new HashMap<>();
-
-    /**
-     * The fields of the class. Keys are the names of the fields, entries are AFieldWrapper objects.
-     * Mirrors the "fields" field of AClass.
-     */
-    private final Map<String, AFieldWrapper> fields = new HashMap<>();
 
     /** The enum constants of the class, or null if this class is not an enum. */
     private @MonotonicNonNull List<VariableElement> enumConstants = null;
@@ -98,31 +92,12 @@ public class AClassWrapper {
     }
 
     /**
-     * Obtain the given field, which can be further operated on.
-     *
-     * <p>Results are interned.
-     *
-     * @param fieldName the name of the field
-     * @param type the type of the field, which scenelib doesn't track
-     * @return an AField object representing the field
-     */
-    public AFieldWrapper vivifyField(String fieldName, TypeMirror type) {
-        if (fields.containsKey(fieldName)) {
-            return fields.get(fieldName);
-        } else {
-            AFieldWrapper wrapper = new AFieldWrapper(theClass.fields.getVivify(fieldName), type);
-            fields.put(fieldName, wrapper);
-            return wrapper;
-        }
-    }
-
-    /**
      * Get all the fields that have been vivified on a class.
      *
      * @return a map from field name to the object representing the field
      */
-    public Map<String, AFieldWrapper> getFields() {
-        return ImmutableMap.copyOf(fields);
+    public Map<String, AField> getFields() {
+        return ImmutableMap.copyOf(theClass.fields);
     }
 
     /**

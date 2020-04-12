@@ -26,11 +26,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.DotSeparatedIdentifiers;
 import org.checkerframework.common.wholeprograminference.scenelib.AClassWrapper;
-import org.checkerframework.common.wholeprograminference.scenelib.AFieldWrapper;
 import org.checkerframework.common.wholeprograminference.scenelib.AMethodWrapper;
 import org.checkerframework.common.wholeprograminference.scenelib.ASceneWrapper;
 import org.checkerframework.javacutil.BugInCF;
 import scenelib.annotations.Annotation;
+import scenelib.annotations.el.AField;
 import scenelib.annotations.el.AMethod;
 import scenelib.annotations.el.AScene;
 import scenelib.annotations.el.ATypeElement;
@@ -52,7 +52,7 @@ import scenelib.annotations.io.IndexFileWriter;
  * <p>This class works by taking as input a scene-lib representation of a type augmented with
  * additional information, stored in javac's format (e.g. as TypeMirrors or Elements). The A*Wrapper
  * classes ({@link ASceneWrapper}, {@link AClassWrapper}, {@link AMethodWrapper}, and {@link
- * AFieldWrapper}) store this additional information. This class walks the scene-lib representation
+ * AField}) store this additional information. This class walks the scene-lib representation
  * structurally and outputs the stub file as a string, by combining the information scene-lib stores
  * with the information gathered elsewhere.
  *
@@ -284,7 +284,7 @@ public final class SceneToStubWriter {
     /**
      * Formats a single formal parameter declaration.
      *
-     * @param param the AFieldWrapper that represents the parameter
+     * @param param the AField that represents the parameter
      * @param parameterName the name of the parameter to display in the stub file. Stub files
      *     disregard formal parameter names, so this is aesthetic in almost all cases. The exception
      *     is the receiver parameter, whose name must be "this".
@@ -292,8 +292,7 @@ public final class SceneToStubWriter {
      *     argument is exactly the String "this".
      * @return the formatted formal parameter, as if it were written in Java source code
      */
-    private static String formatParameter(
-            AFieldWrapper param, String parameterName, String basename) {
+    private static String formatParameter(AField param, String parameterName, String basename) {
         return formatAFieldImpl(param, parameterName, basename);
     }
 
@@ -302,10 +301,9 @@ public final class SceneToStubWriter {
      *
      * <p>This method does not add a trailing semicolon or comma.
      *
-     * <p>Usually, {@link #formatParameter(AFieldWrapper, String, String)} should be called to
-     * format method parameters, and {@link #printField(AFieldWrapper, String, PrintWriter, String)}
-     * should be called to print field declarations. Both use this method as their underlying
-     * implementation.
+     * <p>Usually, {@link #formatParameter(AField, String, String)} should be called to format
+     * method parameters, and {@link #printField(AField, String, PrintWriter, String)} should be
+     * called to print field declarations. Both use this method as their underlying implementation.
      *
      * @param aField the field declaration or formal parameter declaration to format; should not
      *     represent a local variable
@@ -315,12 +313,11 @@ public final class SceneToStubWriter {
      *     type of an explicit receiver parameter (i.e., a parameter named "this").
      * @return a String suitable to print in a stub file
      */
-    private static String formatAFieldImpl(
-            AFieldWrapper aField, String fieldName, String className) {
+    private static String formatAFieldImpl(AField aField, String fieldName, String className) {
         if ("this".equals(fieldName)) {
-            return formatType(aField.getTheField().type, null, className) + fieldName;
+            return formatType(aField.type, null, className) + fieldName;
         } else {
-            return formatType(aField.getTheField().type, aField.getType()) + fieldName;
+            return formatType(aField.type, aField.getTypeMirror()) + fieldName;
         }
     }
 
@@ -482,9 +479,9 @@ public final class SceneToStubWriter {
 
         printWriter.println(indentLevel + "// fields:");
         printWriter.println();
-        for (Map.Entry<String, AFieldWrapper> fieldEntry : aClass.getFields().entrySet()) {
+        for (Map.Entry<String, AField> fieldEntry : aClass.getFields().entrySet()) {
             String fieldName = fieldEntry.getKey();
-            AFieldWrapper aField = fieldEntry.getValue();
+            AField aField = fieldEntry.getValue();
             printField(aField, fieldName, printWriter, indentLevel);
         }
     }
@@ -498,7 +495,7 @@ public final class SceneToStubWriter {
      * @param indentLevel the indent string
      */
     private static void printField(
-            AFieldWrapper aField, String fieldName, PrintWriter printWriter, String indentLevel) {
+            AField aField, String fieldName, PrintWriter printWriter, String indentLevel) {
         printWriter.print(indentLevel);
         printWriter.print(formatAFieldImpl(aField, fieldName, /*enclosing class=*/ null));
         printWriter.println(";");
@@ -540,15 +537,11 @@ public final class SceneToStubWriter {
         StringJoiner parameters = new StringJoiner(", ");
         if (!aMethod.receiver.type.tlAnnotationsHere.isEmpty()) {
             // Only output the receiver if it has an annotation.
-            parameters.add(
-                    formatParameter(
-                            AFieldWrapper.createReceiverParameter(aMethod.receiver),
-                            "this",
-                            basename));
+            parameters.add(formatParameter(aMethod.receiver, "this", basename));
         }
         for (Integer index : aMethodWrapper.getParameters().keySet()) {
-            AFieldWrapper param = aMethodWrapper.getParameters().get(index);
-            parameters.add(formatParameter(param, param.getParameterName(), basename));
+            AField param = aMethodWrapper.getParameters().get(index);
+            parameters.add(formatParameter(param, param.getName(), basename));
         }
         printWriter.print(parameters.toString());
         printWriter.println(");");
