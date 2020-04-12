@@ -9,7 +9,6 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.javacutil.BugInCF;
 import scenelib.annotations.el.AField;
 import scenelib.annotations.el.AMethod;
 
@@ -85,9 +84,7 @@ public class AMethodWrapper {
      */
     public AField addTypeMirrorToParameter(int i, TypeMirror type, Name simpleName) {
         AField param = theMethod.parameters.getVivify(i);
-        if (!simpleName.contentEquals(param.getName())) {
-            throw new BugInCF("simpleName=%s, param.getName()=%s", simpleName, param.getName());
-        }
+        param.setName(simpleName.toString());
         param.setTypeMirror(type);
         return param;
     }
