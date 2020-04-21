@@ -2,7 +2,6 @@ package org.checkerframework.javacutil;
 
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +28,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
-import javax.tools.JavaFileObject.Kind;
+import javax.tools.JavaFileObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** A Utility class for analyzing {@code Element}s. */
@@ -277,8 +276,8 @@ public class ElementUtils {
         if (element == null) {
             return false;
         }
-        if (element instanceof ClassSymbol) {
-            return isElementFromSourceCodeImpl((ClassSymbol) element);
+        if (element instanceof Symbol.ClassSymbol) {
+            return isElementFromSourceCodeImpl((Symbol.ClassSymbol) element);
         }
         return isElementFromSourceCode(element.getEnclosingElement());
     }
@@ -292,12 +291,12 @@ public class ElementUtils {
      * @param symbol the class to check
      * @return true if a source file containing the class is being compiled
      */
-    private static boolean isElementFromSourceCodeImpl(ClassSymbol symbol) {
+    private static boolean isElementFromSourceCodeImpl(Symbol.ClassSymbol symbol) {
         // This is a bit of a hack to avoid treating JDK as source files. JDK files' toUri() method
         // returns just the name of the file (e.g. "Object.java"), but any file actually being
         // compiled returns a file URI to the source file.
         return symbol.sourcefile != null
-                && symbol.sourcefile.getKind() == Kind.SOURCE
+                && symbol.sourcefile.getKind() == JavaFileObject.Kind.SOURCE
                 && symbol.sourcefile.toUri().toString().startsWith("file:");
     }
 

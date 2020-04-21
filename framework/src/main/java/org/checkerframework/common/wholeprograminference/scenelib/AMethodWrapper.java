@@ -22,10 +22,10 @@ public class AMethodWrapper {
     private final AMethod theMethod;
 
     /** The return type of the method, or null if the method's return type is unknown or void. */
-    private @Nullable TypeMirror returnType;
+    private final @Nullable TypeMirror returnType;
 
     /** The type parameters of this method. */
-    private List<? extends TypeParameterElement> typeParameters;
+    private final List<? extends TypeParameterElement> typeParameters;
 
     /**
      * Wrap an AMethod. Package-private, because it should only be called from AClassWrapper.

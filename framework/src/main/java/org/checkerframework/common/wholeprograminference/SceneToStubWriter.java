@@ -5,7 +5,6 @@ import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntry;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,13 +41,15 @@ import scenelib.annotations.el.InnerTypeLocation;
 import scenelib.annotations.field.AnnotationFieldType;
 import scenelib.annotations.io.IndexFileWriter;
 
-// In this file, "base type" means "type without its package part".
+// In this file, "base name" means "type without its package part in binary name format".
+// For example, "Outer$Inner" is a base name.
 
 /**
- * SceneToStubWriter provides static methods that write a {@link AScene} in stub file format, to a
- * {@link Writer} {@link #write(ASceneWrapper, Writer)} or to a file {@link #write(ASceneWrapper,
- * String)}. This class is the equivalent of {@code IndexFileWriter} from the Annotation File
- * Utilities, but outputs the results in the stub file format instead of jaif format.
+ * SceneToStubWriter provides a static method that writes an {@link AScene} in stub file format to a
+ * file {@link #write(ASceneWrapper,String)}. This class is the equivalent of {@code
+ * IndexFileWriter} from the Annotation File Utilities, but outputs the results in the stub file
+ * format instead of jaif format. This class is not part of the Annotation File Utilities, a library
+ * for manipulating .jaif files, because it has nothing to do with .jaif files.
  *
  * <p>This class works by taking as input a scene-lib representation of a type augmented with
  * additional information, stored in javac's format (e.g. as TypeMirrors or Elements). The A*Wrapper
@@ -66,6 +67,13 @@ import scenelib.annotations.io.IndexFileWriter;
 public final class SceneToStubWriter {
 
     /**
+     * The entry point to this class is {@link #write(ASceneWrapper, String)}.
+     *
+     * <p>This is a utility class with only static methods. It is not instantiable.
+     */
+    private SceneToStubWriter() {}
+
+    /**
      * A pattern matching the name of an anonymous inner class, or a class nested within one. An
      * anonymous inner class has a basename like Outer$1.
      */
@@ -78,22 +86,10 @@ public final class SceneToStubWriter {
      * Writes the annotations in {@code scene} to {@code out} in stub file format.
      *
      * @param scene the scene to write out
-     * @param out the Writer to output to
+     * @param filename the name of the file to write (must end with .astub)
      */
-    public static void write(ASceneWrapper scene, Writer out) {
-        writeImpl(scene, new PrintWriter(out));
-    }
-
-    /**
-     * Writes the annotations in {@code scene} to the file {@code filename} in stub file format.
-     *
-     * @param scene the scene to write out
-     * @param filename the path of the file to write
-     * @throws IOException if there is trouble writing the file
-     * @see #write(ASceneWrapper, Writer)
-     */
-    public static void write(ASceneWrapper scene, String filename) throws IOException {
-        write(scene, new FileWriter(filename));
+    public static void write(ASceneWrapper scene, String filename) {
+        writeImpl(scene, filename);
     }
 
     /**
@@ -529,14 +525,14 @@ public final class SceneToStubWriter {
      * Prints a method declaration in stub file format (i.e., without a method body).
      *
      * @param aMethodWrapper the method to print
-     * @param basename the simple name of the enclosing class, for receiver parameters and
+     * @param simplename the simple name of the enclosing class, for receiver parameters and
      *     constructor names
      * @param printWriter where to print the method signature
      * @param indentLevel the indent string
      */
     private static void printMethodDeclaration(
             AMethodWrapper aMethodWrapper,
-            String basename,
+            String simplename,
             PrintWriter printWriter,
             String indentLevel) {
 
@@ -550,7 +546,7 @@ public final class SceneToStubWriter {
         // Use Java syntax for constructors.
         if ("<init>".equals(methodName)) {
             // Set methodName, but don't output a return type.
-            methodName = basename;
+            methodName = simplename;
         } else {
             printWriter.print(formatType(aMethod.returnType, aMethodWrapper.getReturnType()));
         }
@@ -560,11 +556,11 @@ public final class SceneToStubWriter {
         StringJoiner parameters = new StringJoiner(", ");
         if (!aMethod.receiver.type.tlAnnotationsHere.isEmpty()) {
             // Only output the receiver if it has an annotation.
-            parameters.add(formatParameter(aMethod.receiver, "this", basename));
+            parameters.add(formatParameter(aMethod.receiver, "this", simplename));
         }
         for (Integer index : aMethodWrapper.getParameters().keySet()) {
             AField param = aMethodWrapper.getParameters().get(index);
-            parameters.add(formatParameter(param, param.getName(), basename));
+            parameters.add(formatParameter(param, param.getName(), simplename));
         }
         printWriter.print(parameters.toString());
         printWriter.println(");");
@@ -572,24 +568,13 @@ public final class SceneToStubWriter {
     }
 
     /**
-     * The implementation of {@link #write(ASceneWrapper, Writer)} and {@link #write(ASceneWrapper,
-     * String)}. Prints imports, classes, method signatures, and fields in stub file format, all
-     * with appropriate annotations.
+     * The implementation of {@link #write(ASceneWrapper, String)}. Prints imports, classes, method
+     * signatures, and fields in stub file format, all with appropriate annotations.
      *
      * @param scene the scene to write
-     * @param printWriter where to write the scene to
+     * @param filename the name of the file to write (must end in .astub)
      */
-    private static void writeImpl(ASceneWrapper scene, PrintWriter printWriter) {
-        // Write out all imports
-        ImportDefWriter importDefWriter;
-        try {
-            importDefWriter = new ImportDefWriter(scene, printWriter);
-        } catch (DefException e) {
-            throw new BugInCF(e);
-        }
-        importDefWriter.visit();
-        printWriter.println();
-
+    private static void writeImpl(ASceneWrapper scene, String filename) {
         // Sort by package name first so that output is deterministic and default package
         // comes first; within package sort by class name.
         List<@BinaryName String> classes = new ArrayList<>(scene.getClasses().keySet());
@@ -605,15 +590,71 @@ public final class SceneToStubWriter {
                     }
                 });
 
+        boolean anyClassPrintable = false;
+
+        // The writer is not initialized until it is certain that at
+        // least one class can be written, to avoid empty stub files.
+        PrintWriter printWriter = null;
+
         // For each class
         for (String clazz : classes) {
-            printClass(clazz, scene.getClasses().get(clazz), printWriter);
+            if (isPrintable(clazz, scene.getClasses().get(clazz))) {
+                if (!anyClassPrintable) {
+                    try {
+                        printWriter = new PrintWriter(new FileWriter(filename));
+                    } catch (IOException e) {
+                        throw new BugInCF("error writing file during WPI: " + filename);
+                    }
+
+                    // Write out all imports
+                    ImportDefWriter importDefWriter;
+                    try {
+                        importDefWriter = new ImportDefWriter(scene, printWriter);
+                    } catch (DefException e) {
+                        throw new BugInCF(e);
+                    }
+                    importDefWriter.visit();
+                    printWriter.println();
+                    anyClassPrintable = true;
+                }
+                printClass(clazz, scene.getClasses().get(clazz), printWriter);
+            }
         }
-        printWriter.flush();
+        if (printWriter != null) {
+            printWriter.flush();
+        }
     }
 
     /**
-     * Print the class body, or nothing if this is an anonymous inner class.
+     * Returns true if the class is printable in a stub file. A printable class is a class or enum
+     * (not a package or module) and is not anonymous.
+     *
+     * @param classname the class name
+     * @param aClassWrapper the representation of the class
+     * @return whether the class is printable, by the definition above
+     */
+    private static boolean isPrintable(@BinaryName String classname, AClassWrapper aClassWrapper) {
+        String basename = basenamePart(classname);
+
+        if ("package-info".equals(basename) || "module-info".equals(basename)) {
+            return false;
+        }
+
+        // Do not attempt to print stubs for anonymous inner classes or their inner classes, because
+        // the stub parser cannot read them.
+        if (anonymousInnerClassPattern.matcher(basename).find()) {
+            return false;
+        }
+
+        aClassWrapper.checkIfPrintable();
+
+        return true;
+    }
+
+    /**
+     * Print the class body, or nothing if this is an anonymous inner class. Call {@link
+     * #isPrintable(String, AClassWrapper)} and check that it returns true before calling this
+     * method.
      *
      * @param classname the class name
      * @param aClassWrapper the representation of the class
@@ -623,25 +664,12 @@ public final class SceneToStubWriter {
             @BinaryName String classname, AClassWrapper aClassWrapper, PrintWriter printWriter) {
 
         String basename = basenamePart(classname);
-
-        if ("package-info".equals(basename) || "module-info".equals(basename)) {
-            return;
-        }
-
-        // Do not attempt to print stubs for anonymous inner classes or their inner classes, because
-        // the stub parser cannot read them.
-        if (anonymousInnerClassPattern.matcher(basename).find()) {
-            return;
-        }
-
-        aClassWrapper.checkIfPrintable();
-
         String innermostClassname =
                 basename.contains("$")
                         ? basename.substring(basename.lastIndexOf('$') + 1)
                         : basename;
-
         String pkg = packagePart(classname);
+
         if (pkg != null) {
             printWriter.println("package " + pkg + ";");
         }
