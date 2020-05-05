@@ -161,7 +161,7 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
             }
             AnnotatedTypeMirror argATM = atf.getAnnotatedType(treeNode);
             AField param =
-                    method.addTypeMirrorToParameter(
+                    method.vivifyAndAddTypeMirrorToParameter(
                             i, argATM.getUnderlyingType(), ve.getSimpleName());
             storage.updateAnnotationSetInScene(
                     param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);
@@ -192,7 +192,7 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
 
             AnnotatedTypeMirror argATM = overriddenMethod.getParameterTypes().get(i);
             AField param =
-                    methodWrapper.addTypeMirrorToParameter(
+                    methodWrapper.vivifyAndAddTypeMirrorToParameter(
                             i, argATM.getUnderlyingType(), ve.getSimpleName());
             storage.updateAnnotationSetInScene(
                     param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);
@@ -245,7 +245,7 @@ public class WholeProgramInferenceScenes implements WholeProgramInference {
                 AnnotatedTypeMirror argATM = atf.getAnnotatedType(treeNode);
                 VariableElement ve = TreeUtils.elementFromDeclaration(vt);
                 AField param =
-                        method.addTypeMirrorToParameter(
+                        method.vivifyAndAddTypeMirrorToParameter(
                                 i, argATM.getUnderlyingType(), ve.getSimpleName());
                 storage.updateAnnotationSetInScene(
                         param.type, atf, jaifPath, argATM, paramATM, TypeUseLocation.PARAMETER);

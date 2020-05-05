@@ -37,7 +37,7 @@ public class AMethodWrapper {
         this.theMethod = theMethod;
         this.returnType = methodElt.getReturnType();
         this.typeParameters = methodElt.getTypeParameters();
-        addTypeMirrorToParameters(methodElt);
+        vivifyAndAddTypeMirrorToParameters(methodElt);
     }
 
     /**
@@ -64,12 +64,12 @@ public class AMethodWrapper {
      *
      * @param methodElt the method whose parameters should be vivified
      */
-    private void addTypeMirrorToParameters(ExecutableElement methodElt) {
+    private void vivifyAndAddTypeMirrorToParameters(ExecutableElement methodElt) {
         for (int i = 0; i < methodElt.getParameters().size(); i++) {
             VariableElement ve = methodElt.getParameters().get(i);
             TypeMirror type = ve.asType();
             Name name = ve.getSimpleName();
-            addTypeMirrorToParameter(i, type, name);
+            vivifyAndAddTypeMirrorToParameter(i, type, name);
         }
     }
 
@@ -82,7 +82,7 @@ public class AMethodWrapper {
      * @param simpleName the name of the parameter
      * @return an AFieldWrapper representing the parameter
      */
-    public AField addTypeMirrorToParameter(int i, TypeMirror type, Name simpleName) {
+    public AField vivifyAndAddTypeMirrorToParameter(int i, TypeMirror type, Name simpleName) {
         AField param = theMethod.parameters.getVivify(i);
         param.setName(simpleName.toString());
         param.setTypeMirror(type);
