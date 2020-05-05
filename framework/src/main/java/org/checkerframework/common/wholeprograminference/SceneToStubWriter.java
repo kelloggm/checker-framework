@@ -53,10 +53,10 @@ import scenelib.annotations.io.IndexFileWriter;
  *
  * <p>This class works by taking as input a scene-lib representation of a type augmented with
  * additional information, stored in javac's format (e.g. as TypeMirrors or Elements). The A*Wrapper
- * classes ({@link ASceneWrapper}, {@link AClassWrapper}, {@link AMethodWrapper}, and {@link
- * AField}) store this additional information. This class walks the scene-lib representation
- * structurally and outputs the stub file as a string, by combining the information scene-lib stores
- * with the information gathered elsewhere.
+ * classes ({@link ASceneWrapper}, {@link AClassWrapper}, and {@link AMethodWrapper}) store this
+ * additional information. This class walks the scene-lib representation structurally and outputs
+ * the stub file as a string, by combining the information scene-lib stores with the information
+ * gathered elsewhere.
  *
  * <p>The additional information is necessary because the scene-lib representation of a type does
  * not have enough information to print full types.
