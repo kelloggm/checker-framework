@@ -185,9 +185,12 @@ Here is an explanation of the arguments:
   Arguments that are passed directly to
   \ahref{https://github.com/kelloggm/do-like-javac}{do-like-javac}'s
   \<dljc> program without
-  modification.  One argument is required: \<-\relax-checker>, which indicates
+  modification.  One argument is usually required: \<-\relax-checker>, which indicates
   what type-checker(s) to run (in the format described in Section~\ref{shorthand-for-checkers}).
-  The \ahreforurl{https://github.com/kelloggm/do-like-javac}{documentation of do-like-javac}
+  If no \<-\relax-checker> argument is supplied, then the standard annotation processor discovery
+  mechanism is used by javac; see the \ahreforurl{https://github.com/kelloggm/do-like-javac}{documentation of do-like-javac}
+  for details.
+  The \ahreforurl{https://github.com/kelloggm/do-like-javac}{documentation of do-like-javac} also
   describes the other commands that its WPI tool supports.
 \end{description}
 
