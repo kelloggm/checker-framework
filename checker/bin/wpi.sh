@@ -6,6 +6,7 @@
 # section of the Checker Framework manual:
 # https://checkerframework.org/manual/#whole-program-inference
 
+set -x
 
 while getopts "d:t:b:g:" opt; do
   case $opt in

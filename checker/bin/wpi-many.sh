@@ -6,9 +6,11 @@
 # section of the Checker Framework manual:
 # https://checkerframework.org/manual/#whole-program-inference
 
-DEBUG=0
+set -x
+
+#DEBUG=0
 # To enable debugging, uncomment the following line.
-# DEBUG=1
+DEBUG=1
 
 while getopts "o:i:u:t:g:s" opt; do
   case $opt in
