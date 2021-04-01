@@ -651,11 +651,24 @@ task wpiManyTests(group: "Verification") {
 
     doLast {
         // Run wpi-many.sh
-        exec {
-            commandLine 'bin/wpi-many.sh',
-                    '-i', "${project.projectDir}/tests/wpi-many/testin.txt",
-                    '-o', "${project.projectDir}/build/wpi-many-tests",
-                    '--', '--checker', 'nullness,interning,lock,regex,signature'
+        try {
+            exec {
+                commandLine 'bin/wpi-many.sh',
+                        '-i', "${project.projectDir}/tests/wpi-many/testin.txt",
+                        '-o', "${project.projectDir}/build/wpi-many-tests",
+                        '--', '--checker', 'nullness,interning,lock,regex,signature'
+            }
+        } catch (Exception e) {
+            // Running WPI failed, so try to produce useful output that explains why.
+            def dljcOutFiles = fileTree("${project.projectDir}/build/wpi-many-tests").matching {
+                include "**/dljc-out/*"
+            }
+            dljcOutFiles.visit { FileVisitDetails details ->
+                def file = details.getFile()
+                println "====== Start of contents of " + file.getAbsolutePath() + " ======"
+                file.eachLine { line -> println line }
+                println "====== End of contents of " + file.getAbsolutePath() + " ======"
+            }
         }
         def typecheckFilesDir = "${project.projectDir}/build/wpi-many-tests-results/"
         // collect the logs from running WPI
