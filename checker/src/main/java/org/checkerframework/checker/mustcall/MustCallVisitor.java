@@ -55,7 +55,7 @@ public class MustCallVisitor extends BaseTypeVisitor<MustCallAnnotatedTypeFactor
         ExecutableElement methodElt = TreeUtils.elementFromDeclaration(enclosingMethod);
         AnnotationMirror notOwningAnno = atypeFactory.getDeclAnnotation(methodElt, NotOwning.class);
         if (notOwningAnno != null) {
-          // Skip return type subtyping check, because not-owning pointer means Object Construction
+          // Skip return type subtyping check, because not-owning pointer means Resource Leak
           // Checker won't check anyway.
           return null;
         }
@@ -101,7 +101,10 @@ public class MustCallVisitor extends BaseTypeVisitor<MustCallAnnotatedTypeFactor
   public boolean isValidUse(
       AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
     // MustCallAlias annotations are always permitted on type uses, despite not technically being a
-    // part of the type hierarchy. It's necessary to get the annotation from the
+    // part of the type hierarchy. Without this change, every use of a MustCallAlias annotation
+    // produces a spurious `annotations.on.use` error.
+    //
+    // It's necessary to get the annotation from the
     // element because MustCallAlias is aliased to PolyMustCall, which is what useType
     // would contain. Note that isValidUse does not need to consider component types,
     // on which it should be called separately.

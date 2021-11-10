@@ -420,6 +420,11 @@ public class MustCallAnnotatedTypeFactory extends BaseAnnotatedTypeFactory
           && (checker.hasOption(MustCallChecker.NO_LIGHTWEIGHT_OWNERSHIP)
               || getDeclAnnotation(elt, Owning.class) == null)) {
         type.replaceAnnotation(BOTTOM);
+//        // Do not replace MustCallAlias annotations with bottom, because that would
+//        // prevent the necessary polymorphic checks and create an unsoundness.
+//        if (getDeclAnnotation(elt, MustCallAlias.class) == null) {
+//          type.replaceAnnotation(BOTTOM);
+//        }
       }
       if (isResourceVariable(TreeUtils.elementFromTree(node))) {
         type.replaceAnnotation(withoutClose(type.getAnnotationInHierarchy(TOP)));
