@@ -841,6 +841,10 @@ public class WholeProgramInferenceImplementation<T> implements WholeProgramInfer
 
     switch (sourceCodeATM.getKind()) {
       case TYPEVAR:
+        if (!(ajavaATM instanceof AnnotatedTypeVariable)) {
+          assert TypesUtils.isObject(ajavaATM.getUnderlyingType());
+          break;
+        }
         updateAtmWithLub(
             ((AnnotatedTypeVariable) sourceCodeATM).getLowerBound(),
             ((AnnotatedTypeVariable) ajavaATM).getLowerBound());

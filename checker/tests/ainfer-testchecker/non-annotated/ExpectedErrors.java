@@ -144,57 +144,6 @@ public class ExpectedErrors {
     @AinferBottom Object bot = o;
   }
 
-  public class SuppressWarningsTest {
-    // Tests that whole-program inference in a @SuppressWarnings block is ignored.
-    private int i;
-    private int i2;
-
-    @SuppressWarnings("all")
-    public void suppressWarningsTest() {
-      i = (@Sibling1 int) 0;
-      i2 = getSibling1();
-    }
-
-    public void suppressWarningsTest2() {
-      SuppressWarningsInner.i = (@Sibling1 int) 0;
-      SuppressWarningsInner.i2 = getSibling1();
-    }
-
-    public void suppressWarningsValidation() {
-      // :: warning: (argument)
-      expectsSibling1(i);
-      // :: warning: (argument)
-      expectsSibling1(i2);
-      // :: warning: (argument)
-      expectsSibling1(SuppressWarningsInner.i);
-      // :: warning: (argument)
-      expectsSibling1(SuppressWarningsInner.i2);
-      // :: warning: (argument)
-      expectsSibling1(suppressWarningsMethodReturn());
-
-      suppressWarningsMethodParams(getSibling1());
-    }
-
-    @SuppressWarnings("all")
-    public int suppressWarningsMethodReturn() {
-      return getSibling1();
-    }
-
-    // It is problematic to automatically test whole-program inference for method params when
-    // suppressing warnings.
-    // Since we must use @SuppressWarnings() for the method, we won't be able to catch any error
-    // inside the method body.  Verified manually that in the "annotated" folder param's type wasn't
-    // updated.
-    @SuppressWarnings("all")
-    public void suppressWarningsMethodParams(int param) {}
-  }
-
-  @SuppressWarnings("all")
-  static class SuppressWarningsInner {
-    public static int i;
-    public static int i2;
-  }
-
   class NullTest {
     // The default type for fields is @DefaultType.
     private String privateField;
