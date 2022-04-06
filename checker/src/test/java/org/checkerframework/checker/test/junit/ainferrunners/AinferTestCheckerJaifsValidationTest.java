@@ -23,6 +23,9 @@ public class AinferTestCheckerJaifsValidationTest extends AinferValidatePerDirec
         "-Anomsgtext",
         "-Awarns",
         "-AskipDefs=TestPure");
+    // IndexFileParser cannot handle scientific notation. TODO: Fix that bug and
+    // then re-enable this test.
+    doNotTypecheck("Planet.java");
   }
 
   @Parameters

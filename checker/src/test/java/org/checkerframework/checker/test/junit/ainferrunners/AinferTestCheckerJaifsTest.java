@@ -31,6 +31,9 @@ public class AinferTestCheckerJaifsTest extends AinferGeneratePerDirectoryTest {
     // checkers). Instead, a copy of the file with the expected warning (rather than error)
     // has been added to the ainfer non-annotated suite.
     doNotTypecheck("all-systems/java8/memberref/Purity.java");
+    // IndexFileParser cannot handle scientific notation. TODO: Fix that bug and
+    // then re-enable this test.
+    doNotTypecheck("Planet.java");
   }
 
   @Parameters
