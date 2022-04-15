@@ -37,18 +37,6 @@ public class OverriddenMethodsTest {
       @Sibling2 Object o = obj;
     }
 
-    @SuppressWarnings("all")
-    @Override
-    public void barz(Object obj) {}
-
-    public void callbarz(Object obj) {
-      // If the @SuppressWarnings("all") on the overridden version of barz above is not
-      // respected, and the annotations on the receiver and parameter of barz are
-      // inferred, then the following call to barz will result in a method.invocation
-      // and an argument type checking errors.
-      barz(obj);
-    }
-
     public void callqux(@Sibling1 Object obj1, @Sibling2 Object obj2) {
       qux(obj1, obj2);
     }
