@@ -15,8 +15,8 @@ public class UnwantedECMInference {
 
   class Bar extends Foo {
     void doStuff() {
-      // not toString(), so an @EnsuresCalledMethods annotation on either this
-      // method or on the super class about field is an error!
+      // This method does not call toString(), so an @EnsuresCalledMethods("toString") annotation on
+      // either this method or on the overridden method is an error!
       field.hashCode();
     }
   }
