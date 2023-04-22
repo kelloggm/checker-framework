@@ -5583,8 +5583,7 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
 
   /**
    * Side-effects the method or constructor annotations to make any desired changes before writing
-   * to an annotation file. There is another hook that is called later that can change what is
-   * written to disk, without side-effecting the types inferred by WPI.
+   * to an annotation file.
    *
    * @param methodAnnos the method or constructor annotations to modify
    */
@@ -5594,8 +5593,7 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
 
   /**
    * Side-effects the method or constructor annotations to make any desired changes before writing
-   * to an ajava file. There is another hook that is called later that can change what is written to
-   * disk, without side-effecting the types inferred by WPI.
+   * to an ajava file.
    *
    * @param methodAnnos the method or constructor annotations to modify
    */

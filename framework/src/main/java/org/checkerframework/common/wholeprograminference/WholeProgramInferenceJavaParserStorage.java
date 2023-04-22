@@ -167,6 +167,14 @@ public class WholeProgramInferenceJavaParserStorage
     modifiedFiles.add(path);
   }
 
+  /** For every modified file, consider its subclasses and superclasses modified, too. */
+  public void setSuperclassesAndSubclassesModified() {
+    for (String path : modifiedFiles) {
+      CompilationUnitAnnos cuAnnos = sourceToAnnos(path);
+      // TODO
+    }
+  }
+
   ///
   /// Reading stored annotations
   ///
@@ -862,6 +870,8 @@ public class WholeProgramInferenceJavaParserStorage
     if (!outputDir.exists()) {
       outputDir.mkdirs();
     }
+
+    setSuperclassesAndSubclassesModified();
 
     for (String path : modifiedFiles) {
       CompilationUnitAnnos root = sourceToAnnos.get(path);
