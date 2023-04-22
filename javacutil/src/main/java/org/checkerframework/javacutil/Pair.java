@@ -22,6 +22,15 @@ public class Pair<V1, V2> {
     return new Pair<>(v1, v2);
   }
 
+  // Makes a deep copy
+  @SuppressWarnings("nullness") // generics problem with clone()
+  @Override
+  public Pair<V1, V2> clone() {
+    // Cannot modify result of super.clone() because fields are final.
+
+    return of(CollectionUtils.clone(first), CollectionUtils.clone(second));
+  }
+
   @SideEffectFree
   @Override
   public String toString() {

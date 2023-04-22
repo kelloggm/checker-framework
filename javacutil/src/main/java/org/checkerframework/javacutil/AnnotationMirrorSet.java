@@ -38,7 +38,7 @@ public class AnnotationMirrorSet implements NavigableSet<@KeyFor("this") Annotat
   /** The canonical unmodifiable empty set. */
   private static AnnotationMirrorSet emptySet = unmodifiableSet(Collections.emptySet());
 
-  /// Constructors
+  /// Constructors and factory methods
 
   /** Default constructor. */
   public AnnotationMirrorSet() {}
@@ -61,6 +61,18 @@ public class AnnotationMirrorSet implements NavigableSet<@KeyFor("this") Annotat
    */
   public AnnotationMirrorSet(Collection<? extends AnnotationMirror> annos) {
     this.addAll(annos);
+  }
+
+  @SuppressWarnings({
+    "nullness:type.argument",
+    "keyfor:type.argument"
+  }) // generics problem with deepCopy()/clone()
+  @Override
+  public AnnotationMirrorSet clone() throws CloneNotSupportedException {
+    AnnotationMirrorSet result = (AnnotationMirrorSet) super.clone();
+    result.shadowSet =
+        CollectionUtils.deepCopy((TreeSet<@KeyFor("result") AnnotationMirror>) shadowSet);
+    return result;
   }
 
   /**

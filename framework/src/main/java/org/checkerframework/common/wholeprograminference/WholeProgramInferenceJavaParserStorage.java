@@ -79,6 +79,7 @@ import org.checkerframework.framework.type.GenericAnnotatedTypeFactory;
 import org.checkerframework.framework.util.JavaParserUtil;
 import org.checkerframework.javacutil.AnnotationMirrorSet;
 import org.checkerframework.javacutil.BugInCF;
+import org.checkerframework.javacutil.CollectionUtils;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
@@ -1039,7 +1040,7 @@ public class WholeProgramInferenceJavaParserStorage
     /** Compilation unit being wrapped. */
     public final CompilationUnit compilationUnit;
     /** Wrappers for classes and interfaces in {@code compilationUnit}. */
-    public final List<ClassOrInterfaceAnnos> types = new ArrayList<>();
+    public final List<ClassOrInterfaceAnnos> types;
 
     /**
      * Constructs a wrapper around the given compilation unit.
@@ -1048,6 +1049,29 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public CompilationUnitAnnos(CompilationUnit compilationUnit) {
       this.compilationUnit = compilationUnit;
+      this.types = new ArrayList<>();
+    }
+
+    /**
+     * Private constructor for use by clone().
+     *
+     * @param compilationUnit compilation unit to wrap
+     * @param types wrappers for classes and interfaces in {@code compilationUnit}
+     */
+    private CompilationUnitAnnos(
+        CompilationUnit compilationUnit, List<ClassOrInterfaceAnnos> types) {
+      this.compilationUnit = compilationUnit;
+      this.types = CollectionUtils.deepCopy(types);
+    }
+
+    // Makes a deep copy.
+    @Override
+    public CompilationUnitAnnos clone() {
+      /// Calling super.clone() does not work because field `types` is final.
+      // CompilationUnitAnnos result = (CompilationUnitAnnos) super.clone();
+      // result.types = CollectionUtils.deepCopy(types);
+      // return result;
+      return new CompilationUnitAnnos(compilationUnit, CollectionUtils.deepCopy(types));
     }
 
     /**
@@ -1113,6 +1137,23 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public ClassOrInterfaceAnnos(@Nullable TypeDeclaration<?> javaParserNode) {
       classDeclaration = javaParserNode;
+    }
+
+    // Makes a deep copy
+    @Override
+    public ClassOrInterfaceAnnos clone() {
+      try {
+        ClassOrInterfaceAnnos result = (ClassOrInterfaceAnnos) super.clone();
+        result.callableDeclarations = CollectionUtils.deepCopyValues(result.callableDeclarations);
+        result.fields = CollectionUtils.deepCopyValues(result.fields);
+        result.enumConstants =
+            CollectionUtils.clone(result.enumConstants); // no deep copy: elements are strings
+        result.classAnnotations = result.classAnnotations.clone();
+        // no need to change classDeclaration
+        return result;
+      } catch (CloneNotSupportedException e) {
+        throw new Error("this can't happen", e);
+      }
     }
 
     /**
@@ -1211,6 +1252,37 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public CallableDeclarationAnnos(CallableDeclaration<?> declaration) {
       this.declaration = declaration;
+    }
+
+    // Makes a deep copy.
+    @Override
+    public CallableDeclarationAnnos clone() {
+      try {
+        CallableDeclarationAnnos result = (CallableDeclarationAnnos) super.clone();
+        // nothing to be done for declaration
+        if (result.returnType != null) {
+          result.returnType = result.returnType.clone();
+        }
+        if (result.receiverType != null) {
+          result.receiverType = result.receiverType.clone();
+        }
+        if (result.parameterTypes != null) {
+          result.parameterTypes = CollectionUtils.deepCopy(result.parameterTypes);
+        }
+        if (result.declarationAnnotations != null) {
+          result.declarationAnnotations = result.declarationAnnotations.clone();
+        }
+        if (result.paramsDeclAnnos != null) {
+          result.paramsDeclAnnos =
+              CollectionUtils.deepCopy(
+                  (ArraySet<Pair<Integer, AnnotationMirror>>) result.paramsDeclAnnos);
+        }
+        result.preconditions = CollectionUtils.deepCopyValues(result.preconditions);
+        result.postconditions = CollectionUtils.deepCopyValues(result.postconditions);
+        return result;
+      } catch (CloneNotSupportedException e) {
+        throw new Error("this can't happen", e);
+      }
     }
 
     /**
