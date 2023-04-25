@@ -36,6 +36,7 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationMirrorSet;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
+import org.checkerframework.javacutil.DeepCopyable;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.TypeKindUtils;
 import org.plumelib.util.CollectionsPlume;
@@ -49,11 +50,9 @@ import org.plumelib.util.CollectionsPlume;
  * <p>To implement operations based on the class of an {@code AnnotatedTypeMirror} object, either
  * use a visitor or use the result of the {@link #getKind()} method.
  *
- * <p>This class is mutable.
- *
  * @see TypeMirror
  */
-public abstract class AnnotatedTypeMirror {
+public abstract class AnnotatedTypeMirror implements DeepCopyable {
 
   protected static final EqualityAtmComparer EQUALITY_COMPARER = new EqualityAtmComparer();
   protected static final HashcodeAtmVisitor HASHCODE_VISITOR = new HashcodeAtmVisitor();
@@ -61,11 +60,11 @@ public abstract class AnnotatedTypeMirror {
   /** The factory to use for lazily creating annotated types. */
   protected final AnnotatedTypeFactory atypeFactory;
 
-  /** The actual type wrapped by this AnnotatedTypeMirror. */
+  /** Actual type wrapped with this AnnotatedTypeMirror. */
   protected final TypeMirror underlyingType;
 
   /**
-   * Saves the result of {@code underlyingType.toString().hashCode()} to use when computing the hash
+   * Saves the result of {@code underlyingType.toString().hashcode()} to use when computing the hash
    * code of this. (Because AnnotatedTypeMirrors are mutable, the hash code for this cannot be
    * saved.) Call {@link #getUnderlyingTypeHashCode()} rather than using the field directly.
    */
@@ -75,10 +74,9 @@ public abstract class AnnotatedTypeMirror {
   // AnnotationMirror doesn't override Object.hashCode, .equals, so we use
   // the class name of Annotation instead.
   // Caution: Assumes that a type can have at most one AnnotationMirror for any Annotation type.
-  // Not final so clone() can assign it; no other method should assign it.
-  protected /*final*/ AnnotationMirrorSet annotations = new AnnotationMirrorSet();
+  protected final AnnotationMirrorSet annotations = new AnnotationMirrorSet();
 
-  // /** The explicitly written annotations on this type. */
+  /** The explicitly written annotations on this type. */
   // TODO: use this to cache the result once computed? For generic types?
   // protected final AnnotationMirrorSet explicitannotations =
   // new AnnotationMirrorSet();
@@ -96,20 +94,9 @@ public abstract class AnnotatedTypeMirror {
     this.atypeFactory = atypeFactory;
   }
 
-  @Override
-  public AnnotatedTypeMirror clone() {
-    /// I cannot call a constructor, because AnnotatedTypeMirror is abstract.
-    // return new AnnotatedTypeMirror(
-    //     underlyingType, atypeFactory, underlyingTypeHashCode, annotations.clone());
-
-    try {
-      AnnotatedTypeMirror result = (AnnotatedTypeMirror) super.clone();
-      result.annotations = annotations.clone();
-      return result;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("this can't happen", e);
-    }
-  }
+  /// This class doesn't customize the clone() method; use deepCopy() instead.
+  // @Override
+  // public AnnotatedTypeMirror clone() { ... }
 
   /**
    * Creates an AnnotatedTypeMirror for the provided type. The result contains no annotations.
@@ -811,6 +798,7 @@ public abstract class AnnotatedTypeMirror {
    * @return a deep copy of this type with annotations
    * @see #deepCopy(boolean)
    */
+  @Override
   public abstract AnnotatedTypeMirror deepCopy();
 
   /**

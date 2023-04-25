@@ -22,13 +22,62 @@ public class Pair<V1, V2> {
     return new Pair<>(v1, v2);
   }
 
-  // Makes a deep copy
-  @SuppressWarnings("nullness") // generics problem with clone()
-  @Override
-  public Pair<V1, V2> clone() {
+  /**
+   * Returns a copy of this in which each element is a clone of the corresponding element of this.
+   * {@code clone()} may or may not itself make a deep copy of the elements.
+   *
+   * @param orig a pair
+   * @return a copy of {@code orig}, with all elements cloned
+   */
+  @SuppressWarnings("nullness") // generics problem with deepCopy()
+  public static <V1 extends Cloneable, V2 extends Cloneable> Pair<V1, V2> cloneElements(
+      Pair<V1, V2> orig) {
     // Cannot modify result of super.clone() because fields are final.
 
-    return of(CollectionUtils.clone(first), CollectionUtils.clone(second));
+    V1 oldFirst = orig.first;
+    V1 newFirst = oldFirst == null ? oldFirst : CollectionUtils.clone(oldFirst);
+    V2 oldSecond = orig.second;
+    V2 newSecond = oldSecond == null ? oldSecond : CollectionUtils.clone(oldSecond);
+    return of(newFirst, newSecond);
+  }
+
+  /**
+   * Returns a deep copy of this: each element is a deep copy of the corresponding element of this.
+   *
+   * @param orig a pair
+   * @return a deep copy of {@code orig}
+   */
+  @SuppressWarnings("nullness") // generics problem with deepCopy()
+  public static <V1 extends DeepCopyable, V2 extends DeepCopyable> Pair<V1, V2> deepCopy(
+      Pair<V1, V2> orig) {
+    // Cannot modify result of super.clone() because fields are final.
+
+    V1 oldFirst = orig.first;
+    @SuppressWarnings("unchecked")
+    V1 newFirst = oldFirst == null ? oldFirst : (V1) oldFirst.deepCopy();
+    V2 oldSecond = orig.second;
+    @SuppressWarnings("unchecked")
+    V2 newSecond = oldSecond == null ? oldSecond : (V2) oldSecond.deepCopy();
+    return of(newFirst, newSecond);
+  }
+
+  /**
+   * Returns a copy, where the {@code second} element is deep: {@code first} elements are identical
+   * to the argument, and {@code} second elements are deep copies.
+   *
+   * @param orig a pair
+   * @return a copy of {@code orig}, where the second element is a deep copy
+   */
+  @SuppressWarnings("nullness") // generics problem with deepCopy()
+  public static <V1, V2 extends DeepCopyable> Pair<V1, V2> deepCopySecond(Pair<V1, V2> orig) {
+    // Cannot modify result of super.clone() because fields are final.
+
+    V1 oldFirst = orig.first;
+    V1 newFirst = oldFirst;
+    V2 oldSecond = orig.second;
+    @SuppressWarnings("unchecked")
+    V2 newSecond = oldSecond == null ? oldSecond : (V2) oldSecond.deepCopy();
+    return of(newFirst, newSecond);
   }
 
   @SideEffectFree
