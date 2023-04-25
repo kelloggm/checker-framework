@@ -71,6 +71,29 @@ public class Pair<V1, V2> {
    * Returns a copy, where the {@code first} element is deep: the {@code first} element is a deep
    * copy, and the {@code} second element is identical to the argument.
    *
+   * @param <V1> the type of the first element of the pair
+   * @param <V2> the type of the second element of the pair
+   * @param orig a pair
+   * @return a copy of {@code orig}, where the first element is a deep copy
+   */
+  @SuppressWarnings("nullness") // generics problem with deepCopy()
+  public static <V1 extends DeepCopyable, V2> Pair<V1, V2> deepCopyFirst(Pair<V1, V2> orig) {
+    // Cannot modify result of super.clone() because fields are final.
+
+    V1 oldFirst = orig.first;
+    @SuppressWarnings("unchecked")
+    V1 newFirst = oldFirst == null ? oldFirst : (V1) oldFirst.deepCopy();
+    V2 oldSecond = orig.second;
+    V2 newSecond = oldSecond;
+    return of(newFirst, newSecond);
+  }
+
+  /**
+   * Returns a copy, where the {@code second} element is deep: the {@code first} element is
+   * identical to the argument, and the {@code} second element is a deep copy.
+   *
+   * @param <V1> the type of the first element of the pair
+   * @param <V2> the type of the second element of the pair
    * @param orig a pair
    * @return a copy of {@code orig}, where the first element is a deep copy
    */
