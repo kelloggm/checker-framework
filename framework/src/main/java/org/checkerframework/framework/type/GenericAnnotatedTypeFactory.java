@@ -2434,7 +2434,7 @@ public abstract class GenericAnnotatedTypeFactory<
    * Return the contract annotations (that is, pre- and post-conditions) for the given AMethod. Does
    * not modify the AMethod.
    *
-   * <p>This ovelroad must only be called when using WholeProgramInferenceScenes.
+   * <p>This overload must only be called when using WholeProgramInferenceScenes.
    *
    * @param m AFU representation of a method
    * @return contract annotations for the method
