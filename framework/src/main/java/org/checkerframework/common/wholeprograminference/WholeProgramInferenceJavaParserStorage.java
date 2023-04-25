@@ -172,10 +172,10 @@ public class WholeProgramInferenceJavaParserStorage
 
   /** For every modified file, consider its subclasses and superclasses modified, too. */
   public void setSuperclassesAndSubclassesModified() {
-    for (String path : modifiedFiles) {
-      CompilationUnitAnnos cuAnnos = sourceToAnnos(path);
-      // TODO
-    }
+    // TODO
+    // for (String path : modifiedFiles) {
+    //   CompilationUnitAnnos cuAnnos = sourceToAnnos(path);
+    // }
   }
 
   ///
