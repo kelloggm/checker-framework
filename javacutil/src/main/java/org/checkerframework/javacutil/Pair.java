@@ -5,7 +5,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
-/** Simple pair class for multiple returns. */
+/**
+ * Simple immutable pair class for multiple returns.
+ *
+ * @param <V1> the type of the first element of the pair
+ * @param <V2> the type of the second element of the pair
+ */
 // TODO: as class is immutable, use @Covariant annotation.
 public class Pair<V1, V2> {
   /** The first element in the pair. */
@@ -55,16 +60,9 @@ public class Pair<V1, V2> {
    * @return a deep copy of {@code orig}
    */
   @SuppressWarnings("nullness") // generics problem with deepCopy()
-  public static <V1 extends DeepCopyable, V2 extends DeepCopyable> Pair<V1, V2> deepCopy(
+  public static <V1 extends DeepCopyable<V1>, V2 extends DeepCopyable<V2>> Pair<V1, V2> deepCopy(
       Pair<V1, V2> orig) {
-
-    V1 oldFirst = orig.first;
-    @SuppressWarnings("unchecked")
-    V1 newFirst = oldFirst == null ? oldFirst : (V1) oldFirst.deepCopy();
-    V2 oldSecond = orig.second;
-    @SuppressWarnings("unchecked")
-    V2 newSecond = oldSecond == null ? oldSecond : (V2) oldSecond.deepCopy();
-    return of(newFirst, newSecond);
+    return of(DeepCopyable.deepCopyOrNull(orig.first), DeepCopyable.deepCopyOrNull(orig.second));
   }
 
   /**
@@ -77,15 +75,8 @@ public class Pair<V1, V2> {
    * @return a copy of {@code orig}, where the first element is a deep copy
    */
   @SuppressWarnings("nullness") // generics problem with deepCopy()
-  public static <V1 extends DeepCopyable, V2> Pair<V1, V2> deepCopyFirst(Pair<V1, V2> orig) {
-    // Cannot modify result of super.clone() because fields are final.
-
-    V1 oldFirst = orig.first;
-    @SuppressWarnings("unchecked")
-    V1 newFirst = oldFirst == null ? oldFirst : (V1) oldFirst.deepCopy();
-    V2 oldSecond = orig.second;
-    V2 newSecond = oldSecond;
-    return of(newFirst, newSecond);
+  public static <V1 extends DeepCopyable<V1>, V2> Pair<V1, V2> deepCopyFirst(Pair<V1, V2> orig) {
+    return of(DeepCopyable.deepCopyOrNull(orig.first), orig.second);
   }
 
   /**
@@ -98,14 +89,8 @@ public class Pair<V1, V2> {
    * @return a copy of {@code orig}, where the second element is a deep copy
    */
   @SuppressWarnings("nullness") // generics problem with deepCopy()
-  public static <V1, V2 extends DeepCopyable> Pair<V1, V2> deepCopySecond(Pair<V1, V2> orig) {
-
-    V1 oldFirst = orig.first;
-    V1 newFirst = oldFirst;
-    V2 oldSecond = orig.second;
-    @SuppressWarnings("unchecked")
-    V2 newSecond = oldSecond == null ? oldSecond : (V2) oldSecond.deepCopy();
-    return of(newFirst, newSecond);
+  public static <V1, V2 extends DeepCopyable<V2>> Pair<V1, V2> deepCopySecond(Pair<V1, V2> orig) {
+    return of(orig.first, DeepCopyable.deepCopyOrNull(orig.second));
   }
 
   @SideEffectFree
