@@ -5598,7 +5598,9 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * @param methodAnnos the method or constructor annotations to modify
    */
   public void wpiPrepareMethodForWriting(
-      WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos) {
+      WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
+      Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSupertypes,
+      Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSubtypes) {
     // This implementation does nothing.
   }
 
