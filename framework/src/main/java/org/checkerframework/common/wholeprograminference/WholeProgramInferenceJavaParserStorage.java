@@ -188,7 +188,11 @@ public class WholeProgramInferenceJavaParserStorage
     modifiedFiles.add(path);
   }
 
-  /** For every modified file, consider its subclasses and superclasses modified, too. */
+  /**
+   * For every modified file, consider its subclasses and superclasses modified, too. The reason is
+   * that an annotation change in a class might require annotations in its superclasses and
+   * supclasses to be modified, in order to preserve subtyping.
+   */
   public void setSuperclassesAndSubclassesModified() {
     for (String path : modifiedFiles) {
       CompilationUnitAnnos cuAnnos = sourceToAnnos.get(path);

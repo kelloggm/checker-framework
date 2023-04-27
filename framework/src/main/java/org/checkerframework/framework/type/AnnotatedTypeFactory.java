@@ -5605,7 +5605,110 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSupertypes,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSubtypes) {
-    // This implementation does nothing.
+
+    // TODO: Formal parameters need to be similarly treated.
+    AnnotationMirrorSet declAnnos = methodAnnos.getDeclarationAnnotations();
+    if (!declAnnos.isEmpty()) {
+      for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :
+          inSupertypes) {
+        AnnotationMirrorSet supertypeAnnos = inSupertype.getDeclarationAnnotations();
+        if (!supertypeAnnos.isEmpty()) {
+          makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, supertypeAnnos, true);
+        }
+      }
+      for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSubtype : inSubtypes) {
+        AnnotationMirrorSet subtypeAnnos = inSubtype.getDeclarationAnnotations();
+        if (!subtypeAnnos.isEmpty()) {
+          makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, subtypeAnnos, false);
+        }
+      }
+    }
+  }
+
+  /**
+   * Side-effects {@code declAnnos} so that it obeys behavioral subtyping constraints with {@code
+   * otherDeclAnnos}.
+   *
+   * @param declAnnos declaration annotations on a method M; side-effected
+   * @param otherDeclAnnos declaration annotations on a method that M overrides or that overrides M;
+   *     that is, on a method in the same "method family" as M
+   * @param otherIsSupertype true if supertypeAnos is from a method that M overrides
+   */
+  public void makeMethodDeclAnnosConsistentWithOtherMethod(
+      AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
+    // Iterate over a copy to avoid ConcurrentModificationException.
+    for (AnnotationMirror declAnno : new ArrayList<AnnotationMirror>(declAnnos)) {
+      boolean isPrecondition = isPreconditionAnno(declAnno);
+      boolean isPostcondition = isPostconditionAnno(declAnno);
+      for (AnnotationMirror supertypeAnno : otherDeclAnnos) {
+        AnnotationMirror newDeclAnno;
+        boolean bothPrecondition = isPrecondition && isPreconditionAnno(supertypeAnno);
+        boolean bothPostcondition = isPostcondition && isPostconditionAnno(supertypeAnno);
+        if (otherIsSupertype ? bothPrecondition : bothPostcondition) {
+          // other is a supertype & compare preconditions, or
+          // other is a subtype & compare postconditions
+          newDeclAnno = declLub(declAnno, supertypeAnno);
+        } else if (otherIsSupertype ? bothPostcondition : bothPrecondition) {
+          // other is a supertype & compare postconditions, or
+          // other is a subtype & compare preconditions
+          newDeclAnno = declGlb(declAnno, supertypeAnno);
+        } else {
+          newDeclAnno = null;
+        }
+        if (newDeclAnno != null && !newDeclAnno.equals(declAnno)) {
+          declAnnos.remove(declAnno);
+          declAnnos.add(newDeclAnno);
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns true if the given declaration annotation is a precondition annotation.
+   *
+   * @param am a declaration annotation
+   * @return if the annotation is a precondition annotation
+   */
+  public boolean isPreconditionAnno(AnnotationMirror am) {
+    // Subclasses of AnnotatedTypeFactory should implement this, if needed.
+    return false;
+  }
+
+  /**
+   * Returns true if the given declaration annotation is a postcondition annotation.
+   *
+   * @param am a declaration annotation
+   * @return if the annotation is a postcondition annotation
+   */
+  public boolean isPostconditionAnno(AnnotationMirror am) {
+    // Subclasses of AnnotatedTypeFactory should implement this, if needed.
+    return false;
+  }
+
+  /**
+   * Returns the "least upper bound" of two declaration annotations. If they are comparable, this is
+   * the weaker of the two.
+   *
+   * @param am1 a declaration annotation
+   * @param am2 a declaration annotation
+   * @return the least uppper bound of the annotations
+   */
+  public AnnotationMirror declLub(AnnotationMirror am1, AnnotationMirror am2) {
+    // Subclasses of AnnotatedTypeFactory should implement this, if needed.
+    return null;
+  }
+
+  /**
+   * Returns the "least upper bound" of two declaration annotations. If they are comparable, this is
+   * the weaker of the two.
+   *
+   * @param am1 a declaration annotation
+   * @param am2 a declaration annotation
+   * @return the least uppper bound of the annotations
+   */
+  public AnnotationMirror declGlb(AnnotationMirror am1, AnnotationMirror am2) {
+    // Subclasses of AnnotatedTypeFactory should implement this, if needed.
+    return null;
   }
 
   /**
