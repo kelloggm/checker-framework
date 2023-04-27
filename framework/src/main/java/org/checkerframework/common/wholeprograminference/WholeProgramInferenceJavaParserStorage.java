@@ -604,7 +604,8 @@ public class WholeProgramInferenceJavaParserStorage
    */
   private static void addDeclaredTypes(
       TypeDeclaration<?> td, String prefix, List<@BinaryName String> result) {
-    String typeName = prefix + td.getName().asString();
+    @SuppressWarnings("signature:assignment") // string concatenation
+    @BinaryName String typeName = prefix + td.getName().asString();
     result.add(typeName);
     for (BodyDeclaration<?> member : td.getMembers()) {
       if (member.isTypeDeclaration()) {
@@ -720,9 +721,11 @@ public class WholeProgramInferenceJavaParserStorage
 
               for (TypeElement supertypeElement : ElementUtils.getSuperTypes(classElt, elements)) {
                 String supertypeName = ElementUtils.getBinaryName(supertypeElement);
+                @SuppressWarnings({"signature:assignment", "signature:return"}) // #979?
                 Set<String> supertypeSet =
                     supertypesMap.computeIfAbsent(className, k -> new TreeSet<>());
                 supertypeSet.add(supertypeName);
+                @SuppressWarnings({"signature:assignment", "signature:return"}) // #979?
                 Set<String> subtypeSet =
                     subtypesMap.computeIfAbsent(supertypeName, k -> new TreeSet<>());
                 subtypeSet.add(className);
@@ -959,8 +962,10 @@ public class WholeProgramInferenceJavaParserStorage
    * to a file.
    *
    * @param methodAnnos the method or constructor annotations to modify
-   * @param inSupertypes the method or constructor annotations for all overridden methods
-   * @param inSubtypes the method or constructor annotations for all overriding methods
+   * @param inSupertypes the method or constructor annotations for all overridden methods; not
+   *     side-effected
+   * @param inSubtypes the method or constructor annotations for all overriding methods; not
+   *     side-effected
    */
   // TODO: The type factory implementation must consider both inferred annotations *and* those
   // written by the programmer.  Handle annotations in elements later.
