@@ -5638,12 +5638,12 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
       AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
     // Iterate over a copy to avoid ConcurrentModificationException.
     for (AnnotationMirror declAnno : new ArrayList<AnnotationMirror>(declAnnos)) {
-      boolean isPrecondition = isPreconditionAnno(declAnno);
-      boolean isPostcondition = isPostconditionAnno(declAnno);
+      boolean isPrecondition = isPreconditionAnnotation(declAnno);
+      boolean isPostcondition = isPostconditionAnnotation(declAnno);
       for (AnnotationMirror supertypeAnno : otherDeclAnnos) {
         AnnotationMirror newDeclAnno;
-        boolean bothPrecondition = isPrecondition && isPreconditionAnno(supertypeAnno);
-        boolean bothPostcondition = isPostcondition && isPostconditionAnno(supertypeAnno);
+        boolean bothPrecondition = isPrecondition && isPreconditionAnnotation(supertypeAnno);
+        boolean bothPostcondition = isPostcondition && isPostconditionAnnotation(supertypeAnno);
         if (otherIsSupertype ? bothPrecondition : bothPostcondition) {
           // other is a supertype & compare preconditions, or
           // other is a subtype & compare postconditions
@@ -5669,7 +5669,7 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * @param am a declaration annotation
    * @return if the annotation is a precondition annotation
    */
-  public boolean isPreconditionAnno(AnnotationMirror am) {
+  public boolean isPreconditionAnnotation(AnnotationMirror am) {
     // Subclasses of AnnotatedTypeFactory should implement this, if needed.
     return false;
   }
@@ -5680,7 +5680,7 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * @param am a declaration annotation
    * @return if the annotation is a postcondition annotation
    */
-  public boolean isPostconditionAnno(AnnotationMirror am) {
+  public boolean isPostconditionAnnotation(AnnotationMirror am) {
     // Subclasses of AnnotatedTypeFactory should implement this, if needed.
     return false;
   }

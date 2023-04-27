@@ -37,9 +37,11 @@ import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.UserError;
+import org.plumelib.util.CollectionsPlume;
 
 /** The annotated type factory for the Called Methods Checker. */
 public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedTypeFactory {
@@ -67,6 +69,14 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
   /** The {@link CalledMethods#value} element/argument. */
   /*package-private*/ final ExecutableElement calledMethodsValueElement =
       TreeUtils.getMethod(CalledMethods.class, "value", 0, processingEnv);
+
+  /** The {@link EnsuresCalledMethods#value} element/argument (for the Java expressions). */
+  /*package-private*/ final ExecutableElement ensuresCalledMethodsValueElement =
+      TreeUtils.getMethod(EnsuresCalledMethods.class, "value", 0, processingEnv);
+
+  /** The {@link EnsuresCalledMethods#methods} element/argument. */
+  /*package-private*/ final ExecutableElement ensuresCalledMethodsMethodsElement =
+      TreeUtils.getMethod(EnsuresCalledMethods.class, "methods", 0, processingEnv);
 
   /** The {@link EnsuresCalledMethodsVarArgs#value} element/argument. */
   /*package-private*/ final ExecutableElement ensuresCalledMethodsVarArgsValueElement =
@@ -411,10 +421,114 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
    * @return a {@code @EnsuresCalledMethods("...")} annotation for the given expression
    */
   private AnnotationMirror ensuresCMAnno(String expression, List<String> calledMethods) {
+    return ensuresCMAnno(new String[] {expression}, calledMethods);
+  }
+
+  /**
+   * Returns a {@code @EnsuresCalledMethods("...")} annotation for the given expressions.
+   *
+   * @param expressions the expressions to put in the value field of the EnsuresCalledMethods
+   *     annotation
+   * @param calledMethods the methods that were definitely called on the expression
+   * @return a {@code @EnsuresCalledMethods("...")} annotation for the given expression
+   */
+  private AnnotationMirror ensuresCMAnno(String[] expressions, List<String> calledMethods) {
     AnnotationBuilder builder = new AnnotationBuilder(processingEnv, EnsuresCalledMethods.class);
-    builder.setValue("value", new String[] {expression});
+    builder.setValue("value", expressions);
     builder.setValue("methods", calledMethods.toArray(new String[calledMethods.size()]));
     AnnotationMirror am = builder.build();
     return am;
+  }
+
+  // Very partial handling of pre- and post-condition annotations, to be able to run tests.
+
+  @Override
+  public boolean isPreconditionAnnotation(AnnotationMirror am) {
+    // Subclasses of AnnotatedTypeFactory should implement this, if needed.
+    return false;
+  }
+
+  @Override
+  public boolean isPostconditionAnnotation(AnnotationMirror am) {
+    return isEnsuresCalledMethods(am);
+  }
+
+  @Override
+  public @Nullable AnnotationMirror declLub(AnnotationMirror am1, AnnotationMirror am2) {
+    return declLubOrGlb(am1, am2, true);
+  }
+
+  @Override
+  public @Nullable AnnotationMirror declGlb(AnnotationMirror am1, AnnotationMirror am2) {
+    return declLubOrGlb(am1, am2, false);
+  }
+
+  private @Nullable AnnotationMirror declLubOrGlb(
+      AnnotationMirror am1, AnnotationMirror am2, boolean isLub) {
+    if (isEnsuresCalledMethods(am1) && isEnsuresCalledMethods(am2)) {
+
+      // Ensure that the Java expressions are the same.
+      List<String> exprs1 =
+          AnnotationUtils.getElementValueArray(am1, ensuresCalledMethodsValueElement, String.class);
+      List<String> exprs2 =
+          AnnotationUtils.getElementValueArray(am2, ensuresCalledMethodsValueElement, String.class);
+      if (!exprs1.equals(exprs2)) {
+        exprs1.sort(null);
+        exprs2.sort(null);
+        if (!exprs1.equals(exprs2)) {
+          if (CollectionsPlume.listIntersection(exprs1, exprs2).isEmpty()) {
+            return null;
+          } else {
+            throw new BugInCF(
+                String.format(
+                    "Can't yet deal with non-disjoint Java expressions: %s %s", am1, am2));
+          }
+        }
+      }
+
+      List<String> calledMethods1 =
+          AnnotationUtils.getElementValueArray(am1, calledMethodsValueElement, String.class);
+      List<String> calledMethods2 =
+          AnnotationUtils.getElementValueArray(am2, calledMethodsValueElement, String.class);
+      if (calledMethods1.equals(calledMethods2)) {
+        return am1;
+      }
+      calledMethods1.sort(null);
+      calledMethods1.sort(null);
+      int size1 = calledMethods1.size();
+      int size2 = calledMethods1.size();
+      if (size1 == size2 && calledMethods1.equals(calledMethods2)) {
+        return am1;
+      }
+      if (size1 > size2 && calledMethods1.containsAll(calledMethods2)) {
+        return isLub ? am2 : am1;
+      }
+      if (size2 > size1 && calledMethods2.containsAll(calledMethods1)) {
+        return isLub ? am1 : am2;
+      }
+      List<String> calledMethodsResult =
+          isLub
+              ? CollectionsPlume.listIntersection(calledMethods1, calledMethods2)
+              : CollectionsPlume.listUnion(calledMethods1, calledMethods2);
+
+      return ensuresCMAnno(exprs1.toArray(new String[exprs1.size()]), calledMethodsResult);
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns true if the given annotation is {@code @EnsuresCalledMethods}.
+   *
+   * @param am an annotation
+   * @return true if the given annotation is {@code @EnsuresCalledMethods}
+   */
+  private boolean isEnsuresCalledMethods(AnnotationMirror am) {
+    // There must be a better way to do this.
+    return am.getAnnotationType()
+        .asElement()
+        .getSimpleName()
+        .toString()
+        .equals("EnsuresCalledMethods");
   }
 }
