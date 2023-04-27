@@ -906,8 +906,8 @@ public class WholeProgramInferenceJavaParserStorage
    * <p>Because of the side effect, clients may want to pass a copy into this method.
    *
    * @param classAnnos the class annotations to modify
-   * @param supertypes the binary names of all supertypes
-   * @param subtypes the binary names of all subtypes
+   * @param supertypes the binary names of all supertypes; not side-effected
+   * @param subtypes the binary names of all subtypes; not side-effected
    */
   public void wpiPrepareClassForWriting(
       ClassOrInterfaceAnnos classAnnos,
@@ -916,8 +916,6 @@ public class WholeProgramInferenceJavaParserStorage
     if (classAnnos.callableDeclarations.isEmpty()) {
       return;
     }
-
-    // TODO: collect all the CallableDeclarationAnnos for the supertypes and subtypes.
 
     for (Map.Entry<String, CallableDeclarationAnnos> methodEntry :
         classAnnos.callableDeclarations.entrySet()) {
