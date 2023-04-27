@@ -5595,6 +5595,8 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * Side-effects the method or constructor annotations to make any desired changes before writing
    * to an ajava file.
    *
+   * <p>Overriding implementations should call {@code super.wpiPrepareMethodForWriting()}.
+   *
    * @param methodAnnos the method or constructor annotations to modify
    * @param inSupertypes the method or constructor annotations for all overridden methods; not
    *     side-effected
