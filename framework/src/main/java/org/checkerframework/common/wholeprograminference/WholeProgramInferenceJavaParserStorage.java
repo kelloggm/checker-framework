@@ -903,7 +903,11 @@ public class WholeProgramInferenceJavaParserStorage
   /**
    * Side-effects the class annotations to make any desired changes before writing to a file.
    *
+   * <p>Because of the side effect, clients may want to pass a copy into this method.
+   *
    * @param classAnnos the class annotations to modify
+   * @param supertypes the binary names of all supertypes
+   * @param subtypes the binary names of all subtypes
    */
   public void wpiPrepareClassForWriting(
       ClassOrInterfaceAnnos classAnnos,
@@ -957,6 +961,8 @@ public class WholeProgramInferenceJavaParserStorage
    * to a file.
    *
    * @param methodAnnos the method or constructor annotations to modify
+   * @param inSupertypes the method or constructor annotations for all overridden methods
+   * @param inSubtypes the method or constructor annotations for all overriding methods
    */
   // TODO: The type factory implementation must consider both inferred annotations *and* those
   // written by the programmer.  Handle annotations in elements later.

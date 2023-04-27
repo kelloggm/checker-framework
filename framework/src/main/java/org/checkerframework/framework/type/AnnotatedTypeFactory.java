@@ -5596,6 +5596,8 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * to an ajava file.
    *
    * @param methodAnnos the method or constructor annotations to modify
+   * @param inSupertypes the method or constructor annotations for all overridden methods
+   * @param inSubtypes the method or constructor annotations for all overriding methods
    */
   public void wpiPrepareMethodForWriting(
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
