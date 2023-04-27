@@ -189,15 +189,49 @@ public class WholeProgramInferenceJavaParserStorage
   }
 
   /**
+   * Set the source file as modified, for the given class.
+   *
+   * @param className the binary name of a class that should be written to disk
+   */
+  private void setClassModified(@Nullable @BinaryName String className) {
+    if (className == null) {
+      return;
+    }
+    String path = classToSource.get(className);
+    if (path != null) {
+      setFileModified(path);
+    }
+  }
+
+  /**
+   * Set the source files as modified, for all the given classes.
+   *
+   * @param classNames the binary names of classes that should be written to disk
+   */
+  private void setClassesModified(@Nullable Collection<@BinaryName String> classNames) {
+    if (classNames == null) {
+      return;
+    }
+    for (String className : classNames) {
+      setClassModified(className);
+    }
+  }
+
+  /**
    * For every modified file, consider its subclasses and superclasses modified, too. The reason is
    * that an annotation change in a class might require annotations in its superclasses and
-   * supclasses to be modified, in order to preserve subtyping.
+   * supclasses to be modified, in order to preserve behavioral subtyping. Setting it modified will
+   * cause it to be written out, and while writing out, the annotations will be made consistent
+   * across the class hierarchy by {@link #wpiPrepareCompilationUnitForWriting}.
    */
-  public void setSuperclassesAndSubclassesModified() {
+  public void setSupertypesAndSubtypesModified() {
     for (String path : modifiedFiles) {
       CompilationUnitAnnos cuAnnos = sourceToAnnos.get(path);
-      // TODO
-      System.out.println(cuAnnos);
+      for (ClassOrInterfaceAnnos classAnnos : cuAnnos.types) {
+        String className = classAnnos.className;
+        setClassesModified(supertypesMap.get(className));
+        setClassesModified(subtypesMap.get(className));
+      }
     }
   }
 
@@ -991,7 +1025,7 @@ public class WholeProgramInferenceJavaParserStorage
       outputDir.mkdirs();
     }
 
-    setSuperclassesAndSubclassesModified();
+    setSupertypesAndSubtypesModified();
 
     for (String path : modifiedFiles) {
       CompilationUnitAnnos root = sourceToAnnos.get(path);
