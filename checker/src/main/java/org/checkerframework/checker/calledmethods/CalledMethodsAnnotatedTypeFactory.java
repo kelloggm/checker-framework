@@ -463,6 +463,15 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
     return declLubOrGlb(am1, am2, false);
   }
 
+  /**
+   * Compute either the LUB or GLB of two declaration annotations. if the annotations are unrelated
+   * (not just incomparable, in which case a LUB or GLB can be computed), returns null
+   *
+   * @param am1 a declaration annotation
+   * @param am2 a declaration annotation
+   * @param isLub true to compute LUB, false to compute GLB
+   * @return the LUB or GLB or null
+   */
   private @Nullable AnnotationMirror declLubOrGlb(
       AnnotationMirror am1, AnnotationMirror am2, boolean isLub) {
     if (isEnsuresCalledMethods(am1) && isEnsuresCalledMethods(am2)) {

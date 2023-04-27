@@ -5687,24 +5687,28 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
 
   /**
    * Returns the "least upper bound" of two declaration annotations. If they are comparable, this is
-   * the weaker of the two.
+   * the weaker of the two. If they are related (in the same "declaration annotation hierarchy") but
+   * incomparable, this is different than either of the arguments. If they are unrelated, returns
+   * null.
    *
    * @param am1 a declaration annotation
    * @param am2 a declaration annotation
    * @return the least uppper bound of the annotations
    */
-  public AnnotationMirror declLub(AnnotationMirror am1, AnnotationMirror am2) {
+  public @Nullable AnnotationMirror declLub(AnnotationMirror am1, AnnotationMirror am2) {
     // Subclasses of AnnotatedTypeFactory should implement this, if needed.
     return null;
   }
 
   /**
-   * Returns the "least upper bound" of two declaration annotations. If they are comparable, this is
-   * the weaker of the two.
+   * Returns the "greatest lower bound" of two declaration annotations. If they are comparable, this
+   * is the stronger of the two. If they are related (in the same "declaration annotation
+   * hierarchy") but incomparable, this is different than either of the arguments. If they are
+   * unrelated, returns null.
    *
    * @param am1 a declaration annotation
    * @param am2 a declaration annotation
-   * @return the least uppper bound of the annotations
+   * @return the greatest lower bound of the annotations
    */
   public AnnotationMirror declGlb(AnnotationMirror am1, AnnotationMirror am2) {
     // Subclasses of AnnotatedTypeFactory should implement this, if needed.
