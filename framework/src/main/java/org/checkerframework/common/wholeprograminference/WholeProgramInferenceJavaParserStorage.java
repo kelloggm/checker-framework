@@ -1028,7 +1028,7 @@ public class WholeProgramInferenceJavaParserStorage
     setSupertypesAndSubtypesModified();
 
     for (String path : modifiedFiles) {
-      CompilationUnitAnnos root = sourceToAnnos.get(path);
+      CompilationUnitAnnos root = sourceToAnnos.get(path).deepCopy();
       wpiPrepareCompilationUnitForWriting(root);
       File packageDir;
       if (!root.compilationUnit.getPackageDeclaration().isPresent()) {
