@@ -85,12 +85,21 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
       TreeUtils.getMethod(EnsuresCalledMethodsVarArgs.class, "value", 0, processingEnv);
 
   /**
+   * An EnsuresCalledMethods annotation that means that an empty set of EnsuresCalledMethods
+   * postconditions were inferred. This distinguishes between two cases: inference of the empty set,
+   * or no inference done yet.
+   */
+  /*package-private*/ final AnnotationMirror EMPTY_ECM_INFERENCE;
+
+  /**
    * Create a new CalledMethodsAnnotatedTypeFactory.
    *
    * @param checker the checker
    */
   public CalledMethodsAnnotatedTypeFactory(BaseTypeChecker checker) {
     super(checker, CalledMethods.class, CalledMethodsBottom.class, CalledMethodsPredicate.class);
+    this.EMPTY_ECM_INFERENCE = ensuresCMAnno("every expression", Collections.emptyList());
+
     this.builderFrameworkSupports = new ArrayList<>(2);
     String[] disabledFrameworks;
     if (checker.hasOption(CalledMethodsChecker.DISABLE_BUILDER_FRAMEWORK_SUPPORTS)) {
@@ -456,7 +465,7 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
       List<AnnotationMirror> preconds) {
     List<AnnotationMirror> result = super.getPostconditionAnnotations(methodAnnos, preconds);
     if (!containsEnsuresCalledMethods(result)) {
-      result.add(ensuresCMAnno("this", Collections.emptyList()));
+      result.add(EMPTY_ECM_INFERENCE);
     }
     return result;
   }
@@ -496,12 +505,23 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
   private @Nullable AnnotationMirror declLubOrGlb(
       AnnotationMirror am1, AnnotationMirror am2, boolean isLub) {
     if (isEnsuresCalledMethods(am1) && isEnsuresCalledMethods(am2)) {
-
       // Ensure that the Java expressions are the same.
       List<String> exprs1 =
           AnnotationUtils.getElementValueArray(am1, ensuresCalledMethodsValueElement, String.class);
       List<String> exprs2 =
           AnnotationUtils.getElementValueArray(am2, ensuresCalledMethodsValueElement, String.class);
+
+      boolean emptySet1 = exprs1.size() == 1 && exprs1.get(0).equals("every expression");
+      boolean emptySet2 = exprs2.size() == 1 && exprs2.get(0).equals("every expression");
+      if (emptySet1 && emptySet2) {
+        // The "methods" element of each annotation is the empty set.
+        return am1;
+      } else if (emptySet1) {
+        exprs1 = exprs2;
+      } else if (emptySet2) {
+        exprs2 = exprs1;
+      }
+
       if (!exprs1.equals(exprs2)) {
         exprs1.sort(null);
         exprs2.sort(null);
