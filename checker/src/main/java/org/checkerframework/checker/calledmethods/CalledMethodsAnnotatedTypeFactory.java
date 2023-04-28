@@ -6,6 +6,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -27,6 +28,7 @@ import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueChecker;
 import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.wholeprograminference.WholeProgramInferenceJavaParserStorage;
 import org.checkerframework.dataflow.analysis.Analysis;
 import org.checkerframework.dataflow.analysis.Analysis.BeforeOrAfter;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
@@ -401,14 +403,21 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
       AnnotatedTypeMirror declaredType,
       Analysis.BeforeOrAfter preOrPost,
       @Nullable List<AnnotationMirror> preconds) {
+    System.out.printf(
+        "CMATF.createRequiresOrEnsuresQualifier(%s, %s, %s, %s, %s)%n",
+        expression, qualifier, declaredType, preOrPost, preconds);
     if (preOrPost == BeforeOrAfter.AFTER && isAccumulatorAnnotation(qualifier)) {
       List<String> calledMethods =
           AnnotationUtils.getElementValueArray(qualifier, calledMethodsValueElement, String.class);
       // Create the annotation even if `calledMethods` is empty.  wpiPrepareMethodForWriting needs
       // @EnsuresCalledMethods({}) methods in order to make annotations consistent with those on
       // superclasses and subclasses.
-      return ensuresCMAnno(expression, calledMethods);
+
+      AnnotationMirror result = ensuresCMAnno(expression, calledMethods);
+      System.out.printf("CMATF.createRequiresOrEnsuresQualifier() => %s%n", result);
+      return result;
     }
+    System.out.printf("CMATF.createRequiresOrEnsuresQualifier() => super%n");
     return super.createRequiresOrEnsuresQualifier(
         expression, qualifier, declaredType, preOrPost, preconds);
   }
@@ -439,6 +448,17 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
     builder.setValue("methods", calledMethods.toArray(new String[calledMethods.size()]));
     AnnotationMirror am = builder.build();
     return am;
+  }
+
+  @Override
+  public List<AnnotationMirror> getPostconditionAnnotations(
+      WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
+      List<AnnotationMirror> preconds) {
+    List<AnnotationMirror> result = super.getPostconditionAnnotations(methodAnnos, preconds);
+    if (!containsEnsuresCalledMethods(result)) {
+      result.add(ensuresCMAnno("this", Collections.emptyList()));
+    }
+    return result;
   }
 
   // Very partial handling of pre- and post-condition annotations, to be able to run tests.
@@ -528,12 +548,22 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
   }
 
   /**
+   * Returns true if the given list contains {@code @EnsuresCalledMethods}.
+   *
+   * @param amList a list of annotations
+   * @return true if the given list contains {@code @EnsuresCalledMethods}
+   */
+  private static boolean containsEnsuresCalledMethods(List<AnnotationMirror> amList) {
+    return amList.stream().anyMatch(CalledMethodsAnnotatedTypeFactory::isEnsuresCalledMethods);
+  }
+
+  /**
    * Returns true if the given annotation is {@code @EnsuresCalledMethods}.
    *
    * @param am an annotation
    * @return true if the given annotation is {@code @EnsuresCalledMethods}
    */
-  private boolean isEnsuresCalledMethods(AnnotationMirror am) {
+  private static boolean isEnsuresCalledMethods(AnnotationMirror am) {
     // There must be a better way to do this.
     return am.getAnnotationType()
         .asElement()
