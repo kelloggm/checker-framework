@@ -5595,6 +5595,9 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * Side-effects the method or constructor annotations to make any desired changes before writing
    * to an ajava file.
    *
+   * <p>This implementation makes inferred annotations consistent with one another between
+   * superclasses and subclasses.
+   *
    * <p>Overriding implementations should call {@code super.wpiPrepareMethodForWriting()}.
    *
    * @param methodAnnos the method or constructor annotations to modify
@@ -5608,7 +5611,7 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSupertypes,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSubtypes) {
 
-    // TODO: Formal parameters need to be similarly treated.
+    // TODO: Formal parameters and return types need to be similarly treated.
     AnnotationMirrorSet declAnnos = methodAnnos.getDeclarationAnnotations();
     if (!declAnnos.isEmpty()) {
       for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :

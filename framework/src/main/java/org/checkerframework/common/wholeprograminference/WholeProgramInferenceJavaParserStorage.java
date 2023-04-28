@@ -1297,18 +1297,14 @@ public class WholeProgramInferenceJavaParserStorage
 
     @Override
     public ClassOrInterfaceAnnos deepCopy() {
-      try {
-        ClassOrInterfaceAnnos result = (ClassOrInterfaceAnnos) super.clone();
-        result.callableDeclarations = CollectionUtils.deepCopyValues(result.callableDeclarations);
-        result.fields = CollectionUtils.deepCopyValues(result.fields);
-        result.enumConstants =
-            CollectionUtils.clone(result.enumConstants); // no deep copy: elements are strings
-        result.classAnnotations = result.classAnnotations.deepCopy();
-        // no need to change classDeclaration
-        return result;
-      } catch (CloneNotSupportedException e) {
-        throw new Error("this can't happen", e);
-      }
+      ClassOrInterfaceAnnos result = new ClassOrInterfaceAnnos(classDeclaration);
+      result.callableDeclarations = CollectionUtils.deepCopyValues(callableDeclarations);
+      result.fields = CollectionUtils.deepCopyValues(fields);
+      result.enumConstants =
+          CollectionUtils.clone(enumConstants); // no deep copy: elements are strings
+      result.classAnnotations = classAnnotations.deepCopy();
+      // no need to change classDeclaration
+      return result;
     }
 
     /**
