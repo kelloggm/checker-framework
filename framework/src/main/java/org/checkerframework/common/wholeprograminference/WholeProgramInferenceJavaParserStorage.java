@@ -230,6 +230,7 @@ public class WholeProgramInferenceJavaParserStorage
       CompilationUnitAnnos cuAnnos = sourceToAnnos.get(path);
       for (ClassOrInterfaceAnnos classAnnos : cuAnnos.types) {
         String className = classAnnos.className;
+        System.out.printf("setSupertypesAndSubtypesModified: iteration %s%n", className);
         setClassesModified(supertypesMap.get(className));
         setClassesModified(subtypesMap.get(className));
       }
@@ -753,11 +754,21 @@ public class WholeProgramInferenceJavaParserStorage
               ClassTree tree,
               @Nullable @BinaryName String classNameKey,
               @Nullable TypeDeclaration<?> javaParserNode) {
+            /*
+            System.out.printf(
+                "addClass entered: simpleName=%s classNameKey=%s%n",
+                tree.getSimpleName(), classNameKey);
+            */
             String className;
             if (classNameKey == null) {
               TypeElement classElt = TreeUtils.elementFromDeclaration(tree);
               className = ElementUtils.getBinaryName(classElt);
 
+              /*
+              System.out.printf(
+                  "addClass(%s) supertypes: %s%n",
+                  className, ElementUtils.getSuperTypes(classElt, elements));
+              */
               for (TypeElement supertypeElement : ElementUtils.getSuperTypes(classElt, elements)) {
                 String supertypeName = ElementUtils.getBinaryName(supertypeElement);
                 @SuppressWarnings({"signature:assignment", "signature:return"}) // #979?
@@ -772,7 +783,8 @@ public class WholeProgramInferenceJavaParserStorage
             } else {
               className = classNameKey;
             }
-            ClassOrInterfaceAnnos typeWrapper = new ClassOrInterfaceAnnos(javaParserNode);
+            ClassOrInterfaceAnnos typeWrapper =
+                new ClassOrInterfaceAnnos(className, javaParserNode);
             if (!classToAnnos.containsKey(className)) {
               classToAnnos.put(className, typeWrapper);
             }
@@ -937,6 +949,14 @@ public class WholeProgramInferenceJavaParserStorage
    */
   public void wpiPrepareCompilationUnitForWriting(CompilationUnitAnnos compilationUnitAnnos) {
     for (ClassOrInterfaceAnnos type : compilationUnitAnnos.types) {
+      /*
+      System.out.printf("wpiPrepareCompilationUnitForWriting: type.className=%s%n", type.className);
+      System.out.printf("  known types in supertypesMap: %s%n", supertypesMap.keySet());
+      System.out.printf("    supertypesMap: %s%n", supertypesMap);
+      System.out.printf("  known types in subtypesMap: %s%n", subtypesMap.keySet());
+      System.out.printf("    subtypesMap: %s%n", subtypesMap);
+      System.out.printf("  classToSource: %s%n", classToSource);
+      */
       wpiPrepareClassForWriting(
           type, supertypesMap.get(type.className), subtypesMap.get(type.className));
     }
@@ -955,6 +975,9 @@ public class WholeProgramInferenceJavaParserStorage
       ClassOrInterfaceAnnos classAnnos,
       Collection<@BinaryName String> supertypes,
       Collection<@BinaryName String> subtypes) {
+    System.out.printf(
+        "wpiPrepareClassForWriting entered:%n  classAnnos=%s%n  supertypes=%s%n  subtypes=%s%n",
+        classAnnos.classDeclaration.getName(), supertypes, subtypes);
     if (classAnnos.callableDeclarations.isEmpty()) {
       return;
     }
@@ -1291,13 +1314,15 @@ public class WholeProgramInferenceJavaParserStorage
      * @param javaParserNode the JavaParser node corresponding to the class declaration, which is
      *     used for placing annotations on the class declaration
      */
-    public ClassOrInterfaceAnnos(@Nullable TypeDeclaration<?> javaParserNode) {
-      classDeclaration = javaParserNode;
+    public ClassOrInterfaceAnnos(
+        @BinaryName String className, @Nullable TypeDeclaration<?> javaParserNode) {
+      this.classDeclaration = javaParserNode;
+      this.className = className;
     }
 
     @Override
     public ClassOrInterfaceAnnos deepCopy() {
-      ClassOrInterfaceAnnos result = new ClassOrInterfaceAnnos(classDeclaration);
+      ClassOrInterfaceAnnos result = new ClassOrInterfaceAnnos(className, classDeclaration);
       result.callableDeclarations = CollectionUtils.deepCopyValues(callableDeclarations);
       result.fields = CollectionUtils.deepCopyValues(fields);
       result.enumConstants =

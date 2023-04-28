@@ -404,9 +404,10 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
     if (preOrPost == BeforeOrAfter.AFTER && isAccumulatorAnnotation(qualifier)) {
       List<String> calledMethods =
           AnnotationUtils.getElementValueArray(qualifier, calledMethodsValueElement, String.class);
-      if (!calledMethods.isEmpty()) {
-        return ensuresCMAnno(expression, calledMethods);
-      }
+      // Create the annotation even if `calledMethods` is empty.  wpiPrepareMethodForWriting needs
+      // @EnsuresCalledMethods({}) methods in order to make annotations consistent with those on
+      // superclasses and subclasses.
+      return ensuresCMAnno(expression, calledMethods);
     }
     return super.createRequiresOrEnsuresQualifier(
         expression, qualifier, declaredType, preOrPost, preconds);

@@ -5610,6 +5610,9 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSupertypes,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSubtypes) {
+    System.out.printf(
+        "ATF.wpiPrepareMethodForWriting entered: %s%n  %s%n  inSupertypes=%s%n  inSubtypes=%s%n",
+        methodAnnos.declaration.getName(), methodAnnos, inSupertypes, inSubtypes);
 
     // TODO: Formal parameters and return types need to be similarly treated.
     AnnotationMirrorSet declAnnos = methodAnnos.getDeclarationAnnotations();
@@ -5641,6 +5644,8 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    */
   public void makeMethodDeclAnnosConsistentWithOtherMethod(
       AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
+    System.out.printf(
+        "mMDACWOM entered: %s%n  %s%n  %s%n", declAnnos, otherDeclAnnos, otherIsSupertype);
     // Iterate over a copy to avoid ConcurrentModificationException.
     for (AnnotationMirror declAnno : new ArrayList<AnnotationMirror>(declAnnos)) {
       boolean isPrecondition = isPreconditionAnnotation(declAnno);
@@ -5657,10 +5662,14 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
           // other is a supertype & compare postconditions, or
           // other is a subtype & compare preconditions
           newDeclAnno = declGlb(declAnno, supertypeAnno);
+          // Don't want to strengthen postconditions based on supertype!
+          // TODO: Worry about preconditions later.
+          newDeclAnno = null;
         } else {
           newDeclAnno = null;
         }
         if (newDeclAnno != null && !newDeclAnno.equals(declAnno)) {
+          System.out.printf("mMDACWOM: changing %s to %s%n", declAnno, newDeclAnno);
           declAnnos.remove(declAnno);
           declAnnos.add(newDeclAnno);
         }

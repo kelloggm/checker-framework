@@ -2442,6 +2442,7 @@ public abstract class GenericAnnotatedTypeFactory<
   public List<AnnotationMirror> getContractAnnotations(AMethod m) {
     List<AnnotationMirror> preconds = getPreconditionAnnotations(m);
     List<AnnotationMirror> postconds = getPostconditionAnnotations(m, preconds);
+
     List<AnnotationMirror> result = preconds;
     result.addAll(postconds);
     return result;
@@ -2526,6 +2527,7 @@ public abstract class GenericAnnotatedTypeFactory<
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos) {
     List<AnnotationMirror> preconds = getPreconditionAnnotations(methodAnnos);
     List<AnnotationMirror> postconds = getPostconditionAnnotations(methodAnnos, preconds);
+
     List<AnnotationMirror> result = preconds;
     result.addAll(postconds);
     return result;
@@ -2550,6 +2552,7 @@ public abstract class GenericAnnotatedTypeFactory<
               entry.getKey(), entry.getValue().first, entry.getValue().second));
     }
     Collections.sort(result, Ordering.usingToString());
+    System.out.printf("getPreconditionAnnotations(%s) => %s%n", methodAnnos, result);
     return result;
   }
 
@@ -2575,6 +2578,7 @@ public abstract class GenericAnnotatedTypeFactory<
               entry.getKey(), entry.getValue().first, entry.getValue().second, preconds));
     }
     Collections.sort(result, Ordering.usingToString());
+    System.out.printf("getPostconditionAnnotations(%s) => %s%n", methodAnnos, result);
     return result;
   }
 
@@ -2654,6 +2658,8 @@ public abstract class GenericAnnotatedTypeFactory<
       AnnotatedTypeMirror declaredType,
       Analysis.BeforeOrAfter preOrPost,
       @Nullable List<AnnotationMirror> preconds) {
+    System.out.printf("getPreOrPostconditionAnnotations(%s) entered%n", expression);
+
     assert (preOrPost == BeforeOrAfter.BEFORE) == (preconds == null);
 
     if (getWholeProgramInference() == null) {
@@ -2662,6 +2668,7 @@ public abstract class GenericAnnotatedTypeFactory<
 
     // TODO: should this only check the top-level annotations?
     if (declaredType.equals(inferredType)) {
+      System.out.printf("getPreOrPostconditionAnnotations(%s) => empty list%n", expression);
       return Collections.emptyList();
     }
 
@@ -2674,6 +2681,9 @@ public abstract class GenericAnnotatedTypeFactory<
       AnnotationMirror anno =
           createRequiresOrEnsuresQualifier(
               expression, inferredAm, declaredType, preOrPost, preconds);
+      System.out.printf(
+          "getPreOrPostconditionAnnotations(%s): createRequiresOrEnsuresQualifier => %s%n",
+          expression, anno);
       if (anno != null) {
         result.add(anno);
       }
