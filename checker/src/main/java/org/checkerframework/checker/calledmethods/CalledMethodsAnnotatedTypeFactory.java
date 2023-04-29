@@ -460,6 +460,18 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
     return am;
   }
 
+  /**
+   * Returns a {@code @EnsuresCalledMethods("...")} annotation for the given expressions.
+   *
+   * @param expressions the expressions to put in the value field of the EnsuresCalledMethods
+   *     annotation
+   * @param calledMethods the methods that were definitely called on the expression
+   * @return a {@code @EnsuresCalledMethods("...")} annotation for the given expression
+   */
+  private AnnotationMirror ensuresCMAnno(List<String> expressions, List<String> calledMethods) {
+    return ensuresCMAnno(expressions.toArray(new String[expressions.size()]), calledMethods);
+  }
+
   @Override
   public List<AnnotationMirror> getPostconditionAnnotations(
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
@@ -596,12 +608,12 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
       AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
     for (AnnotationMirror otherDeclAnno : otherDeclAnnos) {
       if (isEnsuresCalledMethods(otherDeclAnno)) {
-        List<String> otheDeclExpressions =
+        List<String> otherDeclExpressions =
             AnnotationUtils.getElementValueArray(
                 otherDeclAnno, ensuresCalledMethodsValueElement, String.class);
-        ecmAnno = getEnsuresCalledMethods(declAnnos, declExpressions);
+        AnnotationMirror ecmAnno = getEnsuresCalledMethods(declAnnos, otherDeclExpressions);
         if (ecmAnno == null) {
-          declAnos.add(ensuresCMAnno(otherDeclExpressions, Collections.emptyList()));
+          declAnnos.add(ensuresCMAnno(otherDeclExpressions, Collections.emptyList()));
         }
       }
     }
@@ -613,8 +625,8 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
    * @param amList a list of annotations
    * @return true if the given list contains {@code @EnsuresCalledMethods}
    */
-  private static boolean containsEnsuresCalledMethods(List<AnnotationMirror> amList) {
-    return amList.stream().anyMatch(CalledMethodsAnnotatedTypeFactory::isEnsuresCalledMethods);
+  private boolean containsEnsuresCalledMethods(List<AnnotationMirror> amList) {
+    return amList.stream().anyMatch(this::isEnsuresCalledMethods);
   }
 
   /**
@@ -623,7 +635,7 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
    * @param am an annotation
    * @return true if the given annotation is {@code @EnsuresCalledMethods}
    */
-  private static boolean isEnsuresCalledMethods(AnnotationMirror am) {
+  private boolean isEnsuresCalledMethods(AnnotationMirror am) {
     // There must be a better way to do this.
     return am.getAnnotationType()
         .asElement()
@@ -641,8 +653,8 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
    * @return true if the given annotation is {@code @EnsuresCalledMethods} with exactly the given
    *     value element
    */
-  private static boolean isEnsuresCalledMethods(AnnotationMirror am, List<String> expressions) {
-    if (!isEnsuresCalledMethods()) {
+  private boolean isEnsuresCalledMethods(AnnotationMirror am, List<String> expressions) {
+    if (!isEnsuresCalledMethods(am)) {
       return false;
     }
     List<String> amExpressions =
@@ -663,13 +675,13 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
    * Returns an {@code @EnsuresCalledMethods} annotation with the given value element, if it appears
    * in the list.
    *
-   * @param am an annotation
+   * @param amSet a set of annotations
    * @param expressions a list of Java expressions
    * @return an {@code @EnsuresCalledMethods} annotation with the given value element, or null
    */
-  private static @Nullable Annotation getEnsuresCalledMethods(
-      List<AnnotationMirror> amList, List<String> expressions) {
-    for (AnnotationMirror am : amList) {
+  private @Nullable AnnotationMirror getEnsuresCalledMethods(
+      AnnotationMirrorSet amSet, List<String> expressions) {
+    for (AnnotationMirror am : amSet) {
       if (isEnsuresCalledMethods(am, expressions)) {
         return am;
       }

@@ -1403,11 +1403,15 @@ public class WholeProgramInferenceJavaParserStorage
      * parameter is accessed, and each parameter is initialized the first time it's accessed.
      */
     private @MonotonicNonNull List<@Nullable AnnotatedTypeMirror> parameterTypes = null;
-    /** Annotations on the callable declaration. */
-    private @MonotonicNonNull AnnotationMirrorSet declarationAnnotations = null;
 
     /** Declaration annotations on the parameters. */
     private @MonotonicNonNull Set<Pair<Integer, AnnotationMirror>> paramsDeclAnnos = null;
+
+    /**
+     * Annotations on the callable declaration. This does not include preconditions and
+     * postconditions.
+     */
+    private @MonotonicNonNull AnnotationMirrorSet declarationAnnotations = null;
 
     /**
      * Mapping from expression strings to pairs of (inferred precondition, declared type). The keys
@@ -1632,6 +1636,24 @@ public class WholeProgramInferenceJavaParserStorage
     }
 
     /**
+     * Returns the inferred preconditions for this callable declaration.
+     *
+     * <p><b>Note:</b> The returned set is mutable, and changes to it are reflected in the receiver
+     * CallableDeclarationAnnos object.
+     *
+     * @return a mapping from expression string to pairs of (inferred precondition, declared type).
+     *     The keys of this map use the same string formatting as the {@link
+     *     org.checkerframework.framework.qual.RequiresQualifier} annotation, e.g. "#1" for the
+     *     first parameter.
+     */
+    public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getMutablePreconditions() {
+      if (preconditions == null) {
+        preconditions = new HashMap<>(1);
+      }
+      return preconditions;
+    }
+
+    /**
      * Returns the inferred postconditions for this callable declaration.
      *
      * @return a mapping from expression string to pairs of (inferred postcondition, declared type).
@@ -1640,6 +1662,28 @@ public class WholeProgramInferenceJavaParserStorage
      *     parameter.
      */
     public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getPostconditions() {
+      if (postconditions == null) {
+        postconditions = new HashMap<>(1);
+      }
+      return postconditions;
+    }
+
+    /**
+     * Returns the inferred postconditions for this callable declaration.
+     *
+     * <p><b>Note:</b> The returned set is mutable, and changes to it are reflected in the receiver
+     * CallableDeclarationAnnos object.
+     *
+     * @return a mapping from expression string to pairs of (inferred postcondition, declared type).
+     *     The keys of this map use the same string formatting as the {@link
+     *     org.checkerframework.framework.qual.EnsuresQualifier} annotation, e.g. "#1" for the first
+     *     parameter.
+     */
+    public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getMutablePostconditions() {
+      if (postconditions == null) {
+        postconditions = new AnnotationMirrorSet();
+      }
+
       if (postconditions == null) {
         return Collections.emptyMap();
       }
@@ -1667,6 +1711,8 @@ public class WholeProgramInferenceJavaParserStorage
       if (!preconditions.containsKey(expression)) {
         AnnotatedTypeMirror preconditionsType =
             AnnotatedTypeMirror.createType(declaredType.getUnderlyingType(), atf, false);
+        // TODO: Why does this side-effect preconditions rather than just returning
+        // preconditionsType?
         preconditions.put(expression, Pair.of(preconditionsType, declaredType));
       }
 

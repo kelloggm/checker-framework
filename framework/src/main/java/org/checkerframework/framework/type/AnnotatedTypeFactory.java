@@ -5610,71 +5610,86 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
       WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos methodAnnos,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSupertypes,
       Collection<WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos> inSubtypes) {
-    System.out.printf(
-        "ATF.wpiPrepareMethodForWriting entered: %s%n  %s%n  inSupertypes=%s%n  inSubtypes=%s%n",
-        methodAnnos.declaration.getName(), methodAnnos, inSupertypes, inSubtypes);
+    String message =
+        String.format(
+            "ATF.wpiPrepareMethodForWriting entered: %s%n  %s%n  inSupertypes=%s%n "
+                + " inSubtypes=%s%n",
+            methodAnnos.declaration.getName(),
+            StringsPlume.indentLinesExceptFirst(4, methodAnnos),
+            StringsPlume.indentLinesExceptFirst(4, inSupertypes),
+            StringsPlume.indentLinesExceptFirst(4, inSubtypes));
+    if (message.contains("EnsuresCalledMethods")) {
+      System.out.println("HIT!");
+    }
+    System.out.printf("%s", message);
 
     // TODO: Formal parameters and return types need to be similarly treated.
-    AnnotationMirrorSet declAnnos = methodAnnos.getMutableDeclarationAnnotations();
-    if (!declAnnos.isEmpty()) {
-      for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :
-          inSupertypes) {
-        AnnotationMirrorSet supertypeAnnos = inSupertype.getMutableDeclarationAnnotations();
-        if (!supertypeAnnos.isEmpty()) {
-          makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, supertypeAnnos, true);
-        }
-      }
-      for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSubtype : inSubtypes) {
-        AnnotationMirrorSet subtypeAnnos = inSubtype.getMutableDeclarationAnnotations();
-        if (!subtypeAnnos.isEmpty()) {
-          makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, subtypeAnnos, false);
-        }
-      }
+    AnnotationMirrorSet precondAnnos = methodAnnos.getMutablePreconditions();
+    AnnotationMirrorSet postcondAnnos = methodAnnos.getMutablePostconditions();
+    for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :
+        inSupertypes) {
+      AnnotationMirrorSet supertypePrecondAnnos = inSupertype.getMutablePreconditions();
+      makeMethodDeclAnnosConsistentWithOtherMethod(precondAnnos, supertypePrecondAnnos, true, true);
+      AnnotationMirrorSet supertypePostcondAnnos = inSupertype.getMutablePostconditions();
+      makeMethodDeclAnnosConsistentWithOtherMethod(
+          postcondAnnos, supertypePostcondAnnos, false, true);
+    }
+    for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSubtype : inSubtypes) {
+      AnnotationMirrorSet subtypePrecondAnnos = inSubtype.getMutablePreconditions();
+      makeMethodDeclAnnosConsistentWithOtherMethod(precondAnnos, subtypePrecondAnnos, true, false);
+      AnnotationMirrorSet subtypePostcondAnnos = inSubtype.getMutablePostconditions();
+      makeMethodDeclAnnosConsistentWithOtherMethod(
+          postcondAnnos, subtypePostcondAnnos, false, false);
     }
   }
 
   /**
-   * Side-effects {@code declAnnos} so that it obeys behavioral subtyping constraints with {@code
-   * otherDeclAnnos}.
+   * Performs side effects to make {@code conditionAnnos} obey behavioral subtyping constraints with
+   * {@code otherConditionAnnos}.
    *
-   * @param declAnnos declaration annotations on a method M; may be side-effected
-   * @param otherDeclAnnos declaration annotations on a method that M overrides or that overrides M;
-   *     that is, on a method in the same "method family" as M; may be side-effected
+   * @param conditionAnnos pre- or post-condition annotations on a method M; may be side-effected
+   * @param otherConditionAnnos pre- or post-condition annotations on a method that M overrides or
+   *     that overrides M; that is, on a method in the same "method family" as M; may be
+   *     side-effected
+   * @param boolean isPrecondition true if the annotations are pre-condition annotations, false if
+   *     they are post-condition annotations
+   * @param boolean otherIsSupertype true if {@code otherConditionAnnos} are on a supertype; false
+   *     if they are on a subtype
    * @param otherIsSupertype true if supertypeAnos is from a method that M overrides
    */
   public void makeMethodDeclAnnosConsistentWithOtherMethod(
-      AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
+      AnnotationMirrorSet conditionAnnos,
+      AnnotationMirrorSet otherConditionAnnos,
+      boolean isPrecondition,
+      boolean otherIsSupertype) {
     System.out.printf(
-        "mMDACWOM entered: %s%n  %s%n  %s%n", declAnnos, otherDeclAnnos, otherIsSupertype);
+        "mMDACWOM entered: %s%n  %s%n  isPre=%s%n  otherIsSuper=%s%n",
+        conditionAnnos, otherConditionAnnos, isPrecondition, otherIsSupertype);
     // Iterate over a copy to avoid ConcurrentModificationException.
-    for (AnnotationMirror declAnno : new ArrayList<AnnotationMirror>(declAnnos)) {
-      boolean isPrecondition = isPreconditionAnnotation(declAnno);
-      boolean isPostcondition = isPostconditionAnnotation(declAnno);
-      for (AnnotationMirror supertypeAnno : otherDeclAnnos) {
-        AnnotationMirror newDeclAnno;
-        boolean bothPrecondition = isPrecondition && isPreconditionAnnotation(supertypeAnno);
-        boolean bothPostcondition = isPostcondition && isPostconditionAnnotation(supertypeAnno);
-        if (otherIsSupertype ? bothPrecondition : bothPostcondition) {
+    for (AnnotationMirror condAnno : new ArrayList<AnnotationMirror>(conditionAnnos)) {
+      for (AnnotationMirror otherCondAnno : otherConditionAnnos) {
+        AnnotationMirror newCondAnno;
+        if (otherIsSupertype ? isPrecondition : !isPrecondition) {
           // other is a supertype & compare preconditions, or
-          // other is a subtype & compare postconditions
-          newDeclAnno = declLub(declAnno, supertypeAnno);
-        } else if (otherIsSupertype ? bothPostcondition : bothPrecondition) {
-          // other is a supertype & compare postconditions, or
-          // other is a subtype & compare preconditions
-          newDeclAnno = declGlb(declAnno, supertypeAnno);
-          // Don't want to strengthen postconditions based on supertype!
-          // TODO: Worry about preconditions later.
-          newDeclAnno = null;
+          // other is a subtype & compare postconditions.
+          newCondAnno = declLub(condAnno, otherCondAnno);
         } else {
-          newDeclAnno = null;
+          // other is a supertype & compare postconditions, or
+          // other is a subtype & compare preconditions.
+          // We probably never want to strengthen pre- or post- conditions.
+          // newCondAnno = declGlb(condAnno, otherCondAnno);
+          // Here, should we weaken the otherConditionAnnos instead?
+          newCondAnno = null;
         }
-        if (newDeclAnno != null && !newDeclAnno.equals(declAnno)) {
-          System.out.printf("mMDACWOM: changing %s to %s%n", declAnno, newDeclAnno);
-          declAnnos.remove(declAnno);
-          declAnnos.add(newDeclAnno);
+        if (newCondAnno != null && !newCondAnno.equals(condAnno)) {
+          System.out.printf("mMDACWOM: changing %s to %s%n", condAnno, newCondAnno);
+          conditionAnnos.remove(condAnno);
+          conditionAnnos.add(newCondAnno);
         }
       }
     }
+    System.out.printf(
+        "mMDACWOM exited: %s%n  %s%n  %s%n", conditionAnnos, otherConditionAnnos, otherIsSupertype);
   }
 
   /**
