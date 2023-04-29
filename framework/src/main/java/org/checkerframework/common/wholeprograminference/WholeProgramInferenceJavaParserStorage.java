@@ -1503,10 +1503,28 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public AnnotationMirrorSet getDeclarationAnnotations() {
       if (declarationAnnotations == null) {
-        return AnnotationMirrorSet.emptySet();
+        declarationAnnotations = new AnnotationMirrorSet();
       }
 
       return AnnotationMirrorSet.unmodifiableSet(declarationAnnotations);
+    }
+
+    /**
+     * Returns the inferred declaration annotations on this field, or an empty set if there are no
+     * annotations.
+     *
+     * <p><b>Note:</b> The returned set is mutable, and changes to it are reflected in the receiver
+     * CallableDeclarationAnnos object.
+     *
+     * @return the declaration annotations for this field declaration
+     */
+    @SuppressWarnings("UnusedMethod")
+    public AnnotationMirrorSet getMutableDeclarationAnnotations() {
+      if (declarationAnnotations == null) {
+        declarationAnnotations = new AnnotationMirrorSet();
+      }
+
+      return declarationAnnotations;
     }
 
     /**
@@ -1840,6 +1858,22 @@ public class WholeProgramInferenceJavaParserStorage
 
       return this.type;
     }
+
+    /**
+     * Returns the inferred declaration annotations on this field, or an empty set if there are no
+     * annotations.
+     *
+     * @return the declaration annotations for this field declaration
+     */
+    @SuppressWarnings("UnusedMethod")
+    public AnnotationMirrorSet getDeclarationAnnotations() {
+      if (declarationAnnotations == null) {
+        declarationAnnotations = new AnnotationMirrorSet();
+      }
+
+      return AnnotationMirrorSet.unmodifiableSet(declarationAnnotations);
+    }
+
     /**
      * Adds a declaration annotation to this field declaration and returns whether it was a new
      * annotation.
@@ -1853,21 +1887,6 @@ public class WholeProgramInferenceJavaParserStorage
       }
 
       return declarationAnnotations.add(annotation);
-    }
-
-    /**
-     * Returns the inferred declaration annotations on this field, or an empty set if there are no
-     * annotations.
-     *
-     * @return the declaration annotations for this field declaration
-     */
-    @SuppressWarnings("UnusedMethod")
-    public AnnotationMirrorSet getDeclarationAnnotations() {
-      if (declarationAnnotations == null) {
-        return AnnotationMirrorSet.emptySet();
-      }
-
-      return AnnotationMirrorSet.unmodifiableSet(declarationAnnotations);
     }
 
     /**

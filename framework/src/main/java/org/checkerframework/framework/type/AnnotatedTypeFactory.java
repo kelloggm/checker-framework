@@ -5615,17 +5615,17 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
         methodAnnos.declaration.getName(), methodAnnos, inSupertypes, inSubtypes);
 
     // TODO: Formal parameters and return types need to be similarly treated.
-    AnnotationMirrorSet declAnnos = methodAnnos.getDeclarationAnnotations();
+    AnnotationMirrorSet declAnnos = methodAnnos.getMutableDeclarationAnnotations();
     if (!declAnnos.isEmpty()) {
       for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :
           inSupertypes) {
-        AnnotationMirrorSet supertypeAnnos = inSupertype.getDeclarationAnnotations();
+        AnnotationMirrorSet supertypeAnnos = inSupertype.getMutableDeclarationAnnotations();
         if (!supertypeAnnos.isEmpty()) {
           makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, supertypeAnnos, true);
         }
       }
       for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSubtype : inSubtypes) {
-        AnnotationMirrorSet subtypeAnnos = inSubtype.getDeclarationAnnotations();
+        AnnotationMirrorSet subtypeAnnos = inSubtype.getMutableDeclarationAnnotations();
         if (!subtypeAnnos.isEmpty()) {
           makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, subtypeAnnos, false);
         }
@@ -5637,9 +5637,9 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * Side-effects {@code declAnnos} so that it obeys behavioral subtyping constraints with {@code
    * otherDeclAnnos}.
    *
-   * @param declAnnos declaration annotations on a method M; side-effected
+   * @param declAnnos declaration annotations on a method M; may be side-effected
    * @param otherDeclAnnos declaration annotations on a method that M overrides or that overrides M;
-   *     that is, on a method in the same "method family" as M
+   *     that is, on a method in the same "method family" as M; may be side-effected
    * @param otherIsSupertype true if supertypeAnos is from a method that M overrides
    */
   public void makeMethodDeclAnnosConsistentWithOtherMethod(

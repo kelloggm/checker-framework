@@ -38,6 +38,7 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.javacutil.AnnotationBuilder;
+import org.checkerframework.javacutil.AnnotationMirrorSet;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.ElementUtils;
@@ -568,6 +569,45 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
   }
 
   /**
+   * {@inheritDoc}
+   *
+   * <p>Ensure that for each @EnsuresCalledMethods annotation in either set, one with the same
+   * expressions appears in the other set.
+   */
+  @Override
+  public void makeMethodDeclAnnosConsistentWithOtherMethod(
+      AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
+    makeMethodDeclAnnosConsistentWithOtherMethodOneWay(declAnnos, otherDeclAnnos, otherIsSupertype);
+    makeMethodDeclAnnosConsistentWithOtherMethodOneWay(
+        otherDeclAnnos, declAnnos, !otherIsSupertype);
+    super.makeMethodDeclAnnosConsistentWithOtherMethod(declAnnos, otherDeclAnnos, otherIsSupertype);
+  }
+
+  /**
+   * Side-effects {@code declAnnos} so that it obeys behavioral subtyping constraints with {@code
+   * otherDeclAnnos}.
+   *
+   * @param declAnnos declaration annotations on a method M; may be side-effected
+   * @param otherDeclAnnos declaration annotations on a method that M overrides or that overrides M;
+   *     that is, on a method in the same "method family" as M; <b>not</b> side-effected
+   * @param otherIsSupertype true if supertypeAnos is from a method that M overrides
+   */
+  public void makeMethodDeclAnnosConsistentWithOtherMethodOneWay(
+      AnnotationMirrorSet declAnnos, AnnotationMirrorSet otherDeclAnnos, boolean otherIsSupertype) {
+    for (AnnotationMirror otherDeclAnno : otherDeclAnnos) {
+      if (isEnsuresCalledMethods(otherDeclAnno)) {
+        List<String> otheDeclExpressions =
+            AnnotationUtils.getElementValueArray(
+                otherDeclAnno, ensuresCalledMethodsValueElement, String.class);
+        ecmAnno = getEnsuresCalledMethods(declAnnos, declExpressions);
+        if (ecmAnno == null) {
+          declAnos.add(ensuresCMAnno(otherDeclExpressions, Collections.emptyList()));
+        }
+      }
+    }
+  }
+
+  /**
    * Returns true if the given list contains {@code @EnsuresCalledMethods}.
    *
    * @param amList a list of annotations
@@ -590,5 +630,50 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
         .getSimpleName()
         .toString()
         .equals("EnsuresCalledMethods");
+  }
+
+  /**
+   * Returns true if the given annotation is {@code @EnsuresCalledMethods} with the given value
+   * element.
+   *
+   * @param am an annotation
+   * @param expressions a list of Java expressions
+   * @return true if the given annotation is {@code @EnsuresCalledMethods} with exactly the given
+   *     value element
+   */
+  private static boolean isEnsuresCalledMethods(AnnotationMirror am, List<String> expressions) {
+    if (!isEnsuresCalledMethods()) {
+      return false;
+    }
+    List<String> amExpressions =
+        AnnotationUtils.getElementValueArray(am, ensuresCalledMethodsValueElement, String.class);
+    if (expressions.size() != amExpressions.size()) {
+      return false;
+    }
+    if (expressions.equals(amExpressions)) {
+      return true;
+    }
+    if (expressions.containsAll(amExpressions) && amExpressions.containsAll(expressions)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns an {@code @EnsuresCalledMethods} annotation with the given value element, if it appears
+   * in the list.
+   *
+   * @param am an annotation
+   * @param expressions a list of Java expressions
+   * @return an {@code @EnsuresCalledMethods} annotation with the given value element, or null
+   */
+  private static @Nullable Annotation getEnsuresCalledMethods(
+      List<AnnotationMirror> amList, List<String> expressions) {
+    for (AnnotationMirror am : amList) {
+      if (isEnsuresCalledMethods(am, expressions)) {
+        return am;
+      }
+    }
+    return null;
   }
 }
