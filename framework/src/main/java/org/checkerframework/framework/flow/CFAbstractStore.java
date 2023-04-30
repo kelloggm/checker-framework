@@ -906,7 +906,7 @@ public abstract class CFAbstractStore<V extends CFAbstractValue<V>, S extends CF
         if (canAlias(fieldAccess.getReceiver(), otherFieldAccess.getReceiver())) {
           if (!otherFieldAccess.isFinal()) {
             if (val != null) {
-              V newVal = val.oleastUpperBound(otherVal);
+              V newVal = val.leastUpperBound(otherVal);
               entry.setValue(newVal);
             } else {
               // remove information completely
