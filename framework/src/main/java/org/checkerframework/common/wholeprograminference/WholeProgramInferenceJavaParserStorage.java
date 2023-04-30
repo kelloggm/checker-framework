@@ -1501,68 +1501,6 @@ public class WholeProgramInferenceJavaParserStorage
     }
 
     /**
-     * Returns the inferred declaration annotations on this executable, or null if there are no
-     * annotations.
-     *
-     * @return the declaration annotations for this callable declaration
-     */
-    public AnnotationMirrorSet getDeclarationAnnotations() {
-      if (declarationAnnotations == null) {
-        declarationAnnotations = new AnnotationMirrorSet();
-      }
-
-      return AnnotationMirrorSet.unmodifiableSet(declarationAnnotations);
-    }
-
-    /**
-     * Returns the inferred declaration annotations on this field, or an empty set if there are no
-     * annotations.
-     *
-     * <p><b>Note:</b> The returned set is mutable, and changes to it are reflected in the receiver
-     * CallableDeclarationAnnos object.
-     *
-     * @return the declaration annotations for this field declaration
-     */
-    @SuppressWarnings("UnusedMethod")
-    public AnnotationMirrorSet getMutableDeclarationAnnotations() {
-      if (declarationAnnotations == null) {
-        declarationAnnotations = new AnnotationMirrorSet();
-      }
-
-      return declarationAnnotations;
-    }
-
-    /**
-     * Adds a declaration annotation to this callable declaration and returns whether it was a new
-     * annotation.
-     *
-     * @param annotation declaration annotation to add
-     * @return true if {@code annotation} wasn't previously stored for this callable declaration
-     */
-    public boolean addDeclarationAnnotation(AnnotationMirror annotation) {
-      if (declarationAnnotations == null) {
-        declarationAnnotations = new AnnotationMirrorSet();
-      }
-
-      return declarationAnnotations.add(annotation);
-    }
-
-    /**
-     * Attempts to remove the given declaration annotation from this callable declaration and
-     * returns whether an annotation was successfully removed.
-     *
-     * @param anno an annotation
-     * @return true if {@code anno} was removed; false if it was not present or otherwise couldn't
-     *     be removed
-     */
-    /*package-private*/ boolean removeDeclarationAnnotation(AnnotationMirror anno) {
-      if (declarationAnnotations == null) {
-        return false;
-      }
-      return declarationAnnotations.remove(anno);
-    }
-
-    /**
      * Adds a declaration annotation to this parameter and returns whether it was a new annotation.
      *
      * @param annotation declaration annotation to add
@@ -1618,6 +1556,70 @@ public class WholeProgramInferenceJavaParserStorage
 
       return returnType;
     }
+    /**
+     * Returns the inferred declaration annotations on this executable. This does not include
+     * preconditions and postconditions.
+     *
+     * @return the declaration annotations for this callable declaration
+     * @see #getPreconditions
+     */
+    public AnnotationMirrorSet getDeclarationAnnotations() {
+      if (declarationAnnotations == null) {
+        declarationAnnotations = new AnnotationMirrorSet();
+      }
+
+      return AnnotationMirrorSet.unmodifiableSet(declarationAnnotations);
+    }
+
+    /**
+     * Returns the inferred declaration annotations on this field. This does not include
+     * preconditions and postconditions.
+     *
+     * <p><b>Note:</b> The returned set is mutable, and changes to it are reflected in the receiver
+     * CallableDeclarationAnnos object.
+     *
+     * @return the declaration annotations for this field declaration
+     * @see #getPreconditions
+     */
+    @SuppressWarnings("UnusedMethod")
+    public AnnotationMirrorSet getMutableDeclarationAnnotations() {
+      if (declarationAnnotations == null) {
+        declarationAnnotations = new AnnotationMirrorSet();
+      }
+
+      return declarationAnnotations;
+    }
+
+    /**
+     * Adds a declaration annotation to this callable declaration and returns whether it was a new
+     * annotation. Do not use this for preconditions and postconditions.
+     *
+     * @param annotation declaration annotation to add
+     * @return true if {@code annotation} wasn't previously stored for this callable declaration
+     */
+    public boolean addDeclarationAnnotation(AnnotationMirror annotation) {
+      if (declarationAnnotations == null) {
+        declarationAnnotations = new AnnotationMirrorSet();
+      }
+
+      return declarationAnnotations.add(annotation);
+    }
+
+    /**
+     * Attempts to remove the given declaration annotation from this callable declaration and
+     * returns whether an annotation was successfully removed. Do not use this for preconditions and
+     * postconditions.
+     *
+     * @param anno an annotation
+     * @return true if {@code anno} was removed; false if it was not present or otherwise couldn't
+     *     be removed
+     */
+    /*package-private*/ boolean removeDeclarationAnnotation(AnnotationMirror anno) {
+      if (declarationAnnotations == null) {
+        return false;
+      }
+      return declarationAnnotations.remove(anno);
+    }
 
     /**
      * Returns the inferred preconditions for this callable declaration.
@@ -1626,7 +1628,7 @@ public class WholeProgramInferenceJavaParserStorage
      *     expression, declared type of the expression). The keys of this map use the same string
      *     formatting as the {@link org.checkerframework.framework.qual.RequiresQualifier}
      *     annotation, e.g. "#1" for the first parameter.
-     * @see getPreconditionsForExpression
+     * @see #getPreconditionsForExpression
      */
     public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getPreconditions() {
       if (preconditions == null) {
@@ -1647,7 +1649,7 @@ public class WholeProgramInferenceJavaParserStorage
      *     expression, declared type of the expression). The keys of this map use the same string
      *     formatting as the {@link org.checkerframework.framework.qual.RequiresQualifier}
      *     annotation, e.g. "#1" for the first parameter.
-     * @see getPreconditionsForExpression
+     * @see #getPreconditionsForExpression
      */
     public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getMutablePreconditions() {
       if (preconditions == null) {
@@ -1663,7 +1665,7 @@ public class WholeProgramInferenceJavaParserStorage
      *     expression, declared type of the expression). The keys of this map use the same string
      *     formatting as the {@link org.checkerframework.framework.qual.EnsuresQualifier}
      *     annotation, e.g. "#1" for the first parameter.
-     * @see getPostconditionsForExpression
+     * @see #getPostconditionsForExpression
      */
     public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getPostconditions() {
       if (postconditions == null) {
@@ -1683,7 +1685,7 @@ public class WholeProgramInferenceJavaParserStorage
      *     expression, declared type of the expression). The keys of this map use the same string
      *     formatting as the {@link org.checkerframework.framework.qual.EnsuresQualifier}
      *     annotation, e.g. "#1" for the first parameter.
-     * @see getPostconditionsForExpression
+     * @see #getPostconditionsForExpression
      */
     public Map<String, Pair<AnnotatedTypeMirror, AnnotatedTypeMirror>> getMutablePostconditions() {
       if (postconditions == null) {
@@ -1711,15 +1713,57 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public AnnotatedTypeMirror getPreconditionsForExpression(
         String expression, AnnotatedTypeMirror declaredType, AnnotatedTypeFactory atf) {
+      return getPreconditionsForExpression(expression, declaredType, atf, true);
+    }
+
+    /**
+     * Returns an AnnotatedTypeMirror containing the preconditions for the given expression. Changes
+     * to the returned AnnotatedTypeMirror are reflected in this CallableDeclarationAnnos.
+     *
+     * @param expression a string representing a Java expression, in the same format as the argument
+     *     to a {@link org.checkerframework.framework.qual.RequiresQualifier} annotation
+     * @param declaredType the declared type of {@code expression}
+     * @param atf the annotated type factory of a given type system, whose type hierarchy will be
+     *     used
+     * @return an {@code AnnotatedTypeMirror} containing the annotations for the inferred
+     *     preconditions for the given expression, or null if there are none
+     */
+    public @Nullable AnnotatedTypeMirror getPreconditionsForExpressionOrNull(
+        String expression, AnnotatedTypeMirror declaredType, AnnotatedTypeFactory atf) {
+      return getPreconditionsForExpression(expression, declaredType, atf, false);
+    }
+
+    /**
+     * Returns an AnnotatedTypeMirror containing the preconditions for the given expression. Changes
+     * to the returned AnnotatedTypeMirror are reflected in this CallableDeclarationAnnos.
+     *
+     * @param expression a string representing a Java expression, in the same format as the argument
+     *     to a {@link org.checkerframework.framework.qual.RequiresQualifier} annotation
+     * @param declaredType the declared type of {@code expression}
+     * @param atf the annotated type factory of a given type system, whose type hierarchy will be
+     *     used
+     * @param create if true, side-effect this to add an entry
+     * @return an {@code AnnotatedTypeMirror} containing the annotations for the inferred
+     *     preconditions for the given expression, or null if there are none and create is false
+     */
+    public @Nullable AnnotatedTypeMirror getPreconditionsForExpression(
+        String expression,
+        AnnotatedTypeMirror declaredType,
+        AnnotatedTypeFactory atf,
+        boolean create) {
       if (preconditions == null) {
+        if (!create) {
+          return null;
+        }
         preconditions = new HashMap<>(1);
       }
 
       if (!preconditions.containsKey(expression)) {
+        if (!create) {
+          return null;
+        }
         AnnotatedTypeMirror preconditionsType =
             AnnotatedTypeMirror.createType(declaredType.getUnderlyingType(), atf, false);
-        // TODO: Why does this side-effect preconditions rather than just returning
-        // preconditionsType?
         preconditions.put(expression, Pair.of(preconditionsType, declaredType));
       }
 
@@ -1740,11 +1784,55 @@ public class WholeProgramInferenceJavaParserStorage
      */
     public AnnotatedTypeMirror getPostconditionsForExpression(
         String expression, AnnotatedTypeMirror declaredType, AnnotatedTypeFactory atf) {
+      getPostconditionsForExpression(expression, declaredType, atf, true);
+    }
+
+    /**
+     * Returns an AnnotatedTypeMirror containing the postconditions for the given expression.
+     * Changes to the returned AnnotatedTypeMirror are reflected in this CallableDeclarationAnnos.
+     *
+     * @param expression a string representing a Java expression, in the same format as the argument
+     *     to a {@link org.checkerframework.framework.qual.EnsuresQualifier} annotation
+     * @param declaredType the declared type of {@code expression}
+     * @param atf the annotated type factory of a given type system, whose type hierarchy will be
+     *     used
+     * @return an {@code AnnotatedTypeMirror} containing the annotations for the inferred
+     *     postconditions for the given expression, or null if there are none
+     */
+    public AnnotatedTypeMirror getPostconditionsForExpressionOrNull(
+        String expression, AnnotatedTypeMirror declaredType, AnnotatedTypeFactory atf) {
+      getPostconditionsForExpression(expression, declaredType, atf, false);
+    }
+
+    /**
+     * Returns an AnnotatedTypeMirror containing the postconditions for the given expression.
+     * Changes to the returned AnnotatedTypeMirror are reflected in this CallableDeclarationAnnos.
+     *
+     * @param expression a string representing a Java expression, in the same format as the argument
+     *     to a {@link org.checkerframework.framework.qual.EnsuresQualifier} annotation
+     * @param declaredType the declared type of {@code expression}
+     * @param atf the annotated type factory of a given type system, whose type hierarchy will be
+     *     used
+     * @param create if true, side-effect this to add an entry
+     * @return an {@code AnnotatedTypeMirror} containing the annotations for the inferred
+     *     postconditions for the given expression, or null if there are none and create is false
+     */
+    public @Nullable AnnotatedTypeMirror getPostconditionsForExpression(
+        String expression,
+        AnnotatedTypeMirror declaredType,
+        AnnotatedTypeFactory atf,
+        boolean create) {
       if (postconditions == null) {
+        if (!create) {
+          return null;
+        }
         postconditions = new HashMap<>(1);
       }
 
       if (!postconditions.containsKey(expression)) {
+        if (!create) {
+          return null;
+        }
         AnnotatedTypeMirror postconditionsType =
             AnnotatedTypeMirror.createType(declaredType.getUnderlyingType(), atf, false);
         postconditions.put(expression, Pair.of(postconditionsType, declaredType));
