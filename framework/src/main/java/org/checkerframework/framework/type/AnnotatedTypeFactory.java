@@ -5595,8 +5595,8 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
    * Side-effects the method or constructor annotations to make any desired changes before writing
    * to an ajava file.
    *
-   * <p>This implementation makes inferred annotations consistent with one another between
-   * superclasses and subclasses.
+   * <p>This implementation makes inferred annotations consistent between superclasses and
+   * subclasses.
    *
    * <p>Overriding implementations should call {@code super.wpiPrepareMethodForWriting()}.
    *
@@ -5623,7 +5623,14 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
     }
     System.out.printf("%s", message);
 
-    // TODO: Formal parameters and return types need to be similarly treated.
+    // TODO: Declaration annotations, formal parameters, and return types need to be similarly
+    // treated.
+
+    // TODO: This implementation strategy is probably wrong for preconditions and postconditions.  I
+    // should iterate over expressions, looking up the preconditions for those expressions
+    // specifically.
+
+    //
     AnnotationMirrorSet precondAnnos = methodAnnos.getMutablePreconditions();
     AnnotationMirrorSet postcondAnnos = methodAnnos.getMutablePostconditions();
     for (WholeProgramInferenceJavaParserStorage.CallableDeclarationAnnos inSupertype :
@@ -5643,6 +5650,16 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
     }
   }
 
+  /** Types of method declaration annotations. */
+  enum DeclAnnoType {
+    /** A precondition. */
+    PRECONDITION,
+    /** A postcondition. */
+    POSTCONDITION,
+    /** Neither a precondition nor a postcondition. */
+    DECLARATION;
+  }
+
   /**
    * Performs side effects to make {@code conditionAnnos} obey behavioral subtyping constraints with
    * {@code otherConditionAnnos}.
@@ -5660,12 +5677,14 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
   public void makeMethodDeclAnnosConsistentWithOtherMethod(
       AnnotationMirrorSet conditionAnnos,
       AnnotationMirrorSet otherConditionAnnos,
-      boolean isPrecondition,
+      DeclAnnoType declAnnotype,
       boolean otherIsSupertype) {
     System.out.printf(
         "mMDACWOM entered: %s%n  %s%n  isPre=%s%n  otherIsSuper=%s%n",
         conditionAnnos, otherConditionAnnos, isPrecondition, otherIsSupertype);
     // Iterate over a copy to avoid ConcurrentModificationException.
+    boolean isPrecondition = declAnnotype == DeclAnnoType.PRECONDITION;
+    boolean isPostcondition = declAnnotype == DeclAnnoType.POSTCONDITION;
     for (AnnotationMirror condAnno : new ArrayList<AnnotationMirror>(conditionAnnos)) {
       for (AnnotationMirror otherCondAnno : otherConditionAnnos) {
         AnnotationMirror newCondAnno;
@@ -5673,14 +5692,17 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
           // other is a supertype & compare preconditions, or
           // other is a subtype & compare postconditions.
           newCondAnno = declLub(condAnno, otherCondAnno);
-        } else {
+        } else if (otherIsSupertype ? isPrecondition : isPostcondition) {
           // other is a supertype & compare postconditions, or
           // other is a subtype & compare preconditions.
           // We probably never want to strengthen pre- or post- conditions.
           // newCondAnno = declGlb(condAnno, otherCondAnno);
           // Here, should we weaken the otherConditionAnnos instead?
           newCondAnno = null;
+        } else {
+          newCondAnno = null;
         }
+
         if (newCondAnno != null && !newCondAnno.equals(condAnno)) {
           System.out.printf("mMDACWOM: changing %s to %s%n", condAnno, newCondAnno);
           conditionAnnos.remove(condAnno);

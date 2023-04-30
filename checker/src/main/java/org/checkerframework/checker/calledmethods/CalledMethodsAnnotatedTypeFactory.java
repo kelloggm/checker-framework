@@ -507,7 +507,7 @@ public class CalledMethodsAnnotatedTypeFactory extends AccumulationAnnotatedType
   }
 
   /**
-   * Compute either the LUB or GLB of two declaration annotations. if the annotations are unrelated
+   * Compute either the LUB or GLB of two declaration annotations. If the annotations are unrelated
    * (not just incomparable, in which case a LUB or GLB can be computed), returns null
    *
    * @param am1 a declaration annotation
