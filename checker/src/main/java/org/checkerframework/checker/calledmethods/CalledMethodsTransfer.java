@@ -87,6 +87,8 @@ public class CalledMethodsTransfer extends AccumulationTransfer {
 
   @Override
   public void accumulate(Node node, TransferResult<CFValue, CFStore> result, String... values) {
+    System.out.println("accumulate in the CMC has been called for " + node);
+    System.out.println("store before accumulate: " + result.getRegularStore());
     super.accumulate(node, result, values);
     if (exceptionalStores == null) {
       return;
@@ -115,6 +117,7 @@ public class CalledMethodsTransfer extends AccumulationTransfer {
       AnnotationMirror newAnno = atypeFactory.createAccumulatorAnnotation(valuesAsList);
       exceptionalStores.forEach((tm, s) -> s.insertValue(target, newAnno));
     }
+    System.out.println("store after accumulate: " + result.getRegularStore());
   }
 
   /**

@@ -327,6 +327,8 @@ public abstract class CFAbstractStore<V extends CFAbstractValue<V>, S extends CF
    * @param a an annotation for the expression
    */
   public void insertValue(JavaExpression expr, AnnotationMirror a) {
+    System.out.println("expr: "  + expr);
+    System.out.println("a: " + a);
     insertValue(expr, analysis.createSingleAnnotationValue(a, expr.getType()));
   }
 
@@ -446,6 +448,7 @@ public abstract class CFAbstractStore<V extends CFAbstractValue<V>, S extends CF
    * @param value the value of the expression
    */
   public final void insertValue(JavaExpression expr, @Nullable V value) {
+    System.out.println("value: " + value);
     insertValue(expr, value, false);
   }
   /**
@@ -542,13 +545,18 @@ public abstract class CFAbstractStore<V extends CFAbstractValue<V>, S extends CF
       BinaryOperator<V> merger,
       boolean permitNondeterministic) {
     if (!shouldInsert(expr, value, permitNondeterministic)) {
+      System.out.println("shouldn't insert");
       return;
     }
+    System.out.println("inserting");
+    System.out.println("expr's type: " + expr.getClass());
 
     if (expr instanceof LocalVariable) {
       LocalVariable localVar = (LocalVariable) expr;
       V oldValue = localVariableValues.get(localVar);
       V newValue = merger.apply(oldValue, value);
+      System.out.println("oldValue: " + oldValue);
+      System.out.println("newValue: " + newValue);
       if (newValue != null) {
         localVariableValues.put(localVar, newValue);
       }
@@ -604,6 +612,7 @@ public abstract class CFAbstractStore<V extends CFAbstractValue<V>, S extends CF
     } else {
       // No other types of expressions need to be stored.
     }
+    System.out.println("store after inserting: " + this);
   }
 
   /**

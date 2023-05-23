@@ -94,6 +94,9 @@ public class AccumulationTransfer extends CFTransfer {
     }
 
     AnnotationMirror newAnno = atypeFactory.createAccumulatorAnnotation(valuesAsList);
+    System.out.println("new anno: " + newAnno);
+    System.out.println("result: " + result);
+    System.out.println("target: " + target);
     insertIntoStores(result, target, newAnno);
 
     Tree tree = node.getTree();

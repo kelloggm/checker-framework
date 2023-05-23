@@ -232,6 +232,10 @@ public abstract class CFAbstractValue<V extends CFAbstractValue<V>> implements A
    * @return the more specific of two values {@code this} and {@code other}
    */
   public V mostSpecific(@Nullable V other, @Nullable V backup) {
+    // I'm fairly confident the problem is in this method.
+    System.out.println("entering mostSpecific");
+    System.out.println("this: " + this);
+    System.out.println("other: " + other);
     if (other == null) {
       @SuppressWarnings("unchecked")
       V v = (V) this;
