@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.flow.CFAnalysis;
+import org.checkerframework.framework.flow.CFStore;
 
 /**
  * The analysis for the Called Methods Checker. The analysis is specialized to ignore certain
@@ -53,4 +54,15 @@ public class CalledMethodsAnalysis extends CFAnalysis {
     return ignoredExceptionTypes.contains(
         ((Type) exceptionType).tsym.getQualifiedName().toString());
   }
+
+  @Override
+  public CalledMethodsStore createEmptyStore(boolean sequentialSemantics) {
+    return new CalledMethodsStore(this, sequentialSemantics);
+  }
+
+  @Override
+  public CalledMethodsStore createCopiedStore(CFStore s) {
+    return new CalledMethodsStore(s);
+  }
+
 }

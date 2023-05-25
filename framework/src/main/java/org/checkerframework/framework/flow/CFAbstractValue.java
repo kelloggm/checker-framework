@@ -265,6 +265,8 @@ public abstract class CFAbstractValue<V extends CFAbstractValue<V>> implements A
       mostSpecifTypeMirror = this.getUnderlyingType();
     }
 
+    System.out.println("mostSpecificTypeMirror: " + mostSpecifTypeMirror);
+
     MostSpecificVisitor ms =
         new MostSpecificVisitor(this.getUnderlyingType(), other.getUnderlyingType(), backup);
     AnnotationMirrorSet mostSpecific =
@@ -275,6 +277,7 @@ public abstract class CFAbstractValue<V extends CFAbstractValue<V>> implements A
             other.getAnnotations(),
             canBeMissingAnnotations(mostSpecifTypeMirror));
     if (ms.error) {
+      System.out.println("ms visitor encountered an error");
       return backup;
     }
     return analysis.createAbstractValue(mostSpecific, mostSpecifTypeMirror);
