@@ -71,6 +71,8 @@ import org.checkerframework.dataflow.util.NodeUtils;
 import org.checkerframework.framework.flow.CFAnalysis;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFValue;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.util.JavaExpressionParseUtil.JavaExpressionParseException;
 import org.checkerframework.framework.util.StringToJavaExpression;
@@ -1652,6 +1654,26 @@ class MustCallConsistencyAnalyzer {
     if (type.getKind() == TypeKind.VOID || type.getKind().isPrimitive()) {
       return false;
     }
+    // unannotated type variable and wildcard returns are treated as not owning.
+    // TODO: justify that doing so is safe
+    if (type.getKind() == TypeKind.WILDCARD || type.getKind() == TypeKind.TYPEVAR) {
+      boolean unannotated = true;
+      // TODO: this doesn't work (tests fail, and neither does calling AnnotatedTypeFactory#methodFromUse
+      // and then getting the type arguments from there. The goal of the following code is to
+      // not assume @NotOwning on method invocations with uses of type variables that are definitely
+      // non-must-call-empty. For example, calling List#get on a List<Socket> must not be treated as
+      // non-owning, I think, for our soundness theorem to hold.
+      for (Tree typearg : methodInvocationTree.getTypeArguments()) {
+        if (!typeFactory.hasEmptyMustCallValue(typearg)) {
+          unannotated = false;
+        }
+      }
+      if (unannotated) {
+        return false;
+      }
+      // if it is annotated, continue with the rest of the check
+    }
+
     TypeElement typeElt = TypesUtils.getTypeElement(type);
     // no need to track if type has no possible @MustCall obligation
     if (typeElt != null
