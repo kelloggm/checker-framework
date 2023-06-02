@@ -181,7 +181,7 @@ allprojects {
     ]
 
     reflectionUtilVersion = '1.0.6'
-    plumeUtilVersion = '1.6.5'
+    plumeUtilVersion = '1.8.1'
   }
 
   ext.isJava11orHigher = JavaVersion.current() >= JavaVersion.VERSION_11
