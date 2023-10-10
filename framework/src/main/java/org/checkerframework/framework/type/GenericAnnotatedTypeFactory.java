@@ -149,7 +149,7 @@ public abstract class GenericAnnotatedTypeFactory<
    * Whether to output verbose, low-level debugging messages. Also see {@code TreeAnnotator.debug}
    * and {@link AnnotatedTypeFactory#debugGat}.
    */
-  private static final boolean debug = false;
+  private static final boolean debug = true;
 
   /** To cache the supported monotonic type qualifiers. */
   private @MonotonicNonNull Set<Class<? extends Annotation>> supportedMonotonicQuals;
@@ -1882,6 +1882,8 @@ public abstract class GenericAnnotatedTypeFactory<
 
     if (iUseFlow) {
       Value inferred = getInferredValueFor(tree);
+      System.out.println("tree: " + tree);
+      System.out.println("inferredValue for: " + inferred);
       if (inferred != null) {
         applyInferredAnnotations(type, inferred);
         log(
@@ -1960,6 +1962,7 @@ public abstract class GenericAnnotatedTypeFactory<
     }
     if (as == null) {
       as = flowResult.getValue(tree);
+      System.out.println("flowResult: " + flowResult.toStringDebug());
     }
     return as;
   }

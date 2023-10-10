@@ -180,7 +180,7 @@ import org.plumelib.util.SystemPlume;
 public class AnnotatedTypeFactory implements AnnotationProvider {
 
   /** Whether to output verbose, low-level debugging messages about {@link #getAnnotatedType}. */
-  private static final boolean debugGat = false;
+  private static final boolean debugGat = true;
 
   /** Whether to print verbose debugging messages about stub files. */
   private final boolean debugStubParser;

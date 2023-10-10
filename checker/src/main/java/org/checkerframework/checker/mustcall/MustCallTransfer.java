@@ -116,7 +116,10 @@ public class MustCallTransfer extends CFTransfer {
   @Override
   public TransferResult<CFValue, CFStore> visitAssignment(
       AssignmentNode n, TransferInput<CFValue, CFStore> in) {
+    System.out.println("visiting an assignment: " + n);
+    System.out.println("in before assignment: " + in);
     TransferResult<CFValue, CFStore> result = super.visitAssignment(n, in);
+    System.out.println("result after assignment: " + result);
     // Remove "close" from the type in the store for resource variables.
     // The Resource Leak Checker relies on this code to avoid checking that
     // resource variables are closed.
@@ -165,8 +168,15 @@ public class MustCallTransfer extends CFTransfer {
 
       if (n.getBlock() instanceof ExceptionBlock) {
         exceptionalStores = makeExceptionalStores(n, result);
-        // Update stores for the exceptional paths to handle cases like:
-        // https://github.com/typetools/checker-framework/issues/6050
+        if (exceptionalStores.keySet().isEmpty()) {
+          System.out.println("no exceptional stores for " + n);
+        } else {
+          System.out.println("exceptional stores for " + n + " : ");
+        }
+        for (TypeMirror type : exceptionalStores.keySet()) {
+          System.out.println("type: " + type);
+          System.out.println("maps to: " + exceptionalStores.get(type));
+        }
         if (result.containsTwoStores()) {
           result =
               new ConditionalTransferResult<>(

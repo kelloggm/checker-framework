@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import javax.lang.model.element.VariableElement;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -215,17 +216,26 @@ public class AnalysisResult<V extends AbstractValue<V>, S extends Store<S>> impl
   public @Nullable V getValue(Tree t) {
     Set<Node> nodes = treeLookup.get(t);
 
+    System.out.println("t: " + t);
+    System.out.println(
+        "nodes: "
+            + (nodes == null
+                ? null
+                : nodes.stream().map(Node::toStringDebug).collect(Collectors.joining())));
+
     if (nodes == null) {
       return null;
     }
     V merged = null;
     for (Node aNode : nodes) {
       V a = getValue(aNode);
+      System.out.println("value for node " + aNode + " : " + a);
       if (merged == null) {
         merged = a;
       } else if (a != null) {
         merged = merged.leastUpperBound(a);
       }
+      System.out.println("merged: " + merged);
     }
     return merged;
   }

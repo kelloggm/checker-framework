@@ -1903,15 +1903,14 @@ class MustCallConsistencyAnalyzer {
           // Which stores from the called-methods and must-call checkers are used in
           // the consistency check varies depending on the context. The rules are:
           // 1. if the current block has no nodes (and therefore the store must come from
-          // a block
-          //    rather than a node):
+          // a block rather than a node):
           //    1a. if there is information about any alias in the resource alias set
           //        in the successor store, use the successor's CM and MC stores, which
           //        contain whatever information is true after this block finishes.
           //    1b. if there is not any information about any alias in the resource alias
           //        set in the successor store, use the current blocks' CM and MC stores,
           //        which contain whatever information is true before this (empty) block.
-          // 2. if the current block has one or more nodes, always use the CM store after
+          // 2. if the current block has one or more nodes, always use the stores after
           //    the last node.
           CFStore mcStore;
           AccumulationStore cmStore;
@@ -1927,10 +1926,10 @@ class MustCallConsistencyAnalyzer {
                     successor); // 1b. (MC)
           } else {
             // In this case, current block has at least one node.
-            // Use the called-methods store immediately after the last node in
-            // currentBlock.
-            Node last = currentBlockNodes.get(currentBlockNodes.size() - 1); // 2. (CM)
+            // Use the store immediately after the last node in currentBlock.
+            Node last = currentBlockNodes.get(currentBlockNodes.size() - 1);
 
+            // 2. (CM)
             if (cmStoreAfter.containsKey(last)) {
               cmStore = cmStoreAfter.get(last);
             } else {
@@ -1938,6 +1937,7 @@ class MustCallConsistencyAnalyzer {
               cmStoreAfter.put(last, cmStore);
             }
 
+            // 2. (MC)
             if (mcStoreAfter.containsKey(last)) {
               mcStore = mcStoreAfter.get(last);
             } else {
@@ -1945,6 +1945,7 @@ class MustCallConsistencyAnalyzer {
               mcStoreAfter.put(last, mcStore);
             }
           }
+
           checkMustCall(obligation, cmStore, mcStore, exitReasonForErrorMessage);
 
         } else {
