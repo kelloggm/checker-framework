@@ -3513,21 +3513,23 @@ public class AnnotatedTypeFactory implements AnnotationProvider {
   }
 
   /**
-   * Returns the canonical annotation for the passed annotation. Returns null if the passed
-   * annotation is not an alias of a canonical one in the framework.
+   * Returns the canonical annotation for the passed annotation. May return its argument.
    *
-   * <p>A canonical annotation is the internal annotation that will be used by the Checker Framework
-   * in the aliased annotation's place.
+   * <p>This method {@code canonicalAnnotation} is called by {@link
+   * AnnotatedTypeMirror#addAnnotation}, so it is called for every annotation added to a type.
    *
-   * @param a the qualifier to check for an alias
-   * @return the canonical annotation, or null if none exists
+   * <p>This implementation checks whether the passed annotation is not an alias of another
+   * annotation in the framework. Subclasses can do additional work.
+   *
+   * @param a the qualifier to canonicalize
+   * @return the canonical annotation, which may be the given annotation
    */
-  public @Nullable AnnotationMirror canonicalAnnotation(AnnotationMirror a) {
+  public AnnotationMirror canonicalAnnotation(AnnotationMirror a) {
     TypeElement elem = (TypeElement) a.getAnnotationType().asElement();
     String qualName = elem.getQualifiedName().toString();
     Alias alias = aliases.get(qualName);
     if (alias == null) {
-      return null;
+      return a;
     }
     if (alias.copyElements) {
       AnnotationBuilder builder = new AnnotationBuilder(processingEnv, alias.canonicalName);
